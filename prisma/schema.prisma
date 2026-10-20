@@ -5,12 +5,51 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
-enum UserRole { CUSTOMER MERCHANT RIDER ADMIN MANAGER DISPATCHER ACCOUNTANT }
-enum KitchenStatus { PENDING APPROVED REJECTED SUSPENDED }
-enum OrderStatus { PLACED MERCHANT_ACCEPTED PREPARING READY_FOR_PICKUP RIDER_ASSIGNED PICKED_UP OUT_FOR_DELIVERY DELIVERED CANCELLED FAILED }
-enum RiderStatus { OFFLINE ONLINE BUSY SUSPENDED }
-enum SettlementStatus { PENDING APPROVED PAID REJECTED }
-enum LedgerAccountType { ASSET LIABILITY REVENUE EXPENSE }
+enum UserRole {
+  CUSTOMER
+  MERCHANT
+  RIDER
+  ADMIN
+  MANAGER
+  DISPATCHER
+  ACCOUNTANT
+}
+enum KitchenStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+enum OrderStatus {
+  PLACED
+  MERCHANT_ACCEPTED
+  PREPARING
+  READY_FOR_PICKUP
+  RIDER_ASSIGNED
+  PICKED_UP
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+  FAILED
+}
+enum RiderStatus {
+  OFFLINE
+  ONLINE
+  BUSY
+  SUSPENDED
+}
+enum SettlementStatus {
+  PENDING
+  APPROVED
+  PAID
+  REJECTED
+}
+enum LedgerAccountType {
+  ASSET
+  LIABILITY
+  REVENUE
+  EXPENSE
+}
 model User {
  id String @id @default(cuid())
  phone String @unique @db.VarChar(20)
