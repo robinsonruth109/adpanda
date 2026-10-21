@@ -1,1 +1,11 @@
-import {kitchens} from '@/lib/demo';export default function Admin(){return <main className="section container"><div className="eyebrow">Administrator · foundation preview</div><h1>Operations overview</h1><p className="muted">No real orders or balances are connected. The figures below are safe empty-state placeholders.</p><div className="dashboard"><div className="panel">Today’s orders<div className="stat">0</div></div><div className="panel">COD outstanding<div className="stat">৳0</div></div><div className="panel">Kitchen records in demo<div className="stat">{kitchens.length}</div></div></div><section className="panel" style={{marginTop:22}}><h2>Kitchen commission configuration (demo)</h2>{kitchens.map(k=><div className="menuitem" key={k.slug}><div><strong>{k.name}</strong><p className="muted">Food subtotal based percentage</p></div><strong>{k.commissionRate}%</strong></div>)}<p className="muted">Production admin edit forms, permissions, commission audit and historical order snapshots are part of the next backend milestone.</p></section></main>}
+import {requireRole} from '@/lib/auth';
+import {db} from '@/lib/db';
+import Link from 'next/link';
+import MerchantReviews from '@/components/merchant-reviews';
+export const dynamic='force-dynamic';
+export default async function Admin(){
+ const user=await requireRole(['ADMIN']);
+ if(!user)return <main className="section container"><h1>Administrator access</h1><p>This dashboard requires an authorized admin account.</p><Link className="btn" href="/login">Sign in</Link></main>;
+ const merchants=await db.merchant.findMany({orderBy:{createdAt:'desc'},include:{kitchens:true,members:{include:{user:{select:{name:true,phone:true}}}}}});
+ return <main className="section container"><div className="eyebrow">Admin control</div><h1>Merchant approvals & commissions</h1><MerchantReviews merchants={merchants.map(m=>({id:m.id,name:m.name,status:m.status,owner:m.members[0]?.user.name||'Unknown',phone:m.members[0]?.user.phone||'',kitchens:m.kitchens.map(k=>({name:k.name,address:k.address,latitude:Number(k.latitude),longitude:Number(k.longitude),commissionRate:k.commissionRate===null?10:Number(k.commissionRate)}))}))}/></main>;
+}
