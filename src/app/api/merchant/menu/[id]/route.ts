@@ -1,1 +1,47 @@
-import {NextResponse} from 'next/server';import {z} from 'zod';import {currentUser} from '@/lib/auth';import {db} from '@/lib/db';const schema=z.object({available:z.boolean()});export async function PATCH(request:Request,{params}:{params:Promise<{id:string}>}){const user=await currentUser();if(!user)return NextResponse.json({error:'Unauthorized'},{status:401});const parsed=schema.safeParse(await request.json().catch(()=>null));if(!parsed.success)return NextResponse.json({error:'Invalid availability'},{status:400});const {id}=await params;const item=await db.menuItem.findFirst({where:{id,category:{kitchen:{merchant:{status:'APPROVED',members:{some:{userId:user.id}}}}}}}});if(!item)return NextResponse.json({error:'Not found or unauthorized'},{status:404});await db.menuItem.update({where:{id},data:{available:parsed.data.available}});return NextResponse.json({ok:true})}
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
+import { currentUser } from '@/lib/auth';
+import { db } from '@/lib/db';
+
+const schema = z.object({ available: z.boolean() });
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const user = await currentUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const parsed = schema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid availability' }, { status: 400 });
+  }
+
+  const { id } = await params;
+  const item = await db.menuItem.findFirst({
+    where: {
+      id,
+      category: {
+        kitchen: {
+          merchant: {
+            status: 'APPROVED',
+            members: { some: { userId: user.id } },
+          },
+        },
+      },
+    },
+  });
+
+  if (!item) {
+    return NextResponse.json({ error: 'Not found or unauthorized' }, { status: 404 });
+  }
+
+  await db.menuItem.update({
+    where: { id },
+    data: { available: parsed.data.available },
+  });
+
+  return NextResponse.json({ ok: true });
+}
