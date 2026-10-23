@@ -55,6 +55,7 @@ model User {
  phone String @unique @db.VarChar(20)
  name String
  passwordHash String?
+ adminSecondPasswordHash String?
  role UserRole @default(CUSTOMER)
  createdAt DateTime @default(now())
  updatedAt DateTime @updatedAt
