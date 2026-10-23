@@ -1,9 +1,10 @@
+import {isTrustedMutation} from '@/lib/request-security';
 import {NextResponse} from 'next/server';
 import {z} from 'zod';
 import {currentUser} from '@/lib/auth';
 import {db} from '@/lib/db';
 const schema=z.object({available:z.boolean()});
-export async function PATCH(request:Request,{params}:{params:Promise<{id:string}>}){
+export async function PATCH(request:Request,{params}:{params:Promise<{id:string}>}){if(!isTrustedMutation(request))return NextResponse.json({error:'Invalid request origin'},{status:403});
  const user=await currentUser();
  if(!user)return NextResponse.json({error:'Unauthorized'},{status:401});
  const parsed=schema.safeParse(await request.json().catch(()=>null));
