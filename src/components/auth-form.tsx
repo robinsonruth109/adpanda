@@ -6,7 +6,7 @@ export default function AuthForm({mode}:{mode:'login'|'register'}){
  const [name,setName]=useState(''),[phone,setPhone]=useState(''),[password,setPassword]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('');
  async function submit(event:React.FormEvent<HTMLFormElement>){
  event.preventDefault();setBusy(true);setError('');
- try{const res=await fetch('/api/auth/'+mode,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(mode==='register'?{name,phone,password}:{phone,password})});const data=await res.json();if(!res.ok)throw Error(data.error||'Could not continue');router.push('/merchant');router.refresh();}catch(e){setError(e instanceof Error?e.message:'Unexpected error')}finally{setBusy(false)}
+ try{const res=await fetch('/api/auth/'+mode,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(mode==='register'?{name,phone,password}:{phone,password})});const data=await res.json();if(!res.ok)throw Error(data.error||'Could not continue');router.push(data.redirectTo || '/merchant');router.refresh();}catch(e){setError(e instanceof Error?e.message:'Unexpected error')}finally{setBusy(false)}
  }
  return <form onSubmit={submit} className="panel" style={{maxWidth:460,margin:'30px auto',display:'grid',gap:14}}>
  <h1>{mode==='login'?'Sign in to AdPanda':'Create your account'}</h1>
