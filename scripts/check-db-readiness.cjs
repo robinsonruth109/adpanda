@@ -15,6 +15,15 @@ async function main() {
     console.log("[AdPanda schema inventory] Tables count:", names.length);
     console.log("[AdPanda schema inventory] Table names:", names.join(", ") || "(empty)");
     console.log("[AdPanda schema inventory] Prisma migration history:", migrationTable ? "present" : "absent");
+    if (process.argv.includes("--require-migrated")) {
+      const expected = ["User", "Session", "Merchant", "MerchantMember", "Kitchen", "MenuCategory", "MenuItem", "Order", "Rider", "LedgerAccount", "_prisma_migrations"];
+      const missing = expected.filter((name) => !names.includes(name));
+      if (missing.length) throw new Error("Migration validation failed: missing tables " + missing.join(", "));
+      const rows = await prisma.$queryRawUnsafe("SELECT migration_name, finished_at, rolled_back_at FROM _prisma_migrations ORDER BY started_at DESC LIMIT 5");
+      if (!rows.some((r) => r.migration_name === "20261022_initial" && r.finished_at && !r.rolled_back_at))
+        throw new Error("Migration validation failed: initial migration not recorded as successful");
+      console.log("[AdPanda schema inventory] VERIFIED: initial migration applied and essential tables present.");
+    }
     if (names.length > 0 && !migrationTable) {
       console.log("[AdPanda schema inventory] CAUTION: existing tables without Prisma history. DO NOT apply initial migration until reconciled.");
     } else if (names.length === 0) {
