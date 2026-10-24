@@ -1,1 +1,34 @@
-import {db} from '@/lib/db';export const dynamic='force-dynamic';export default async function Page(){const [collections,deposits,settlements]=await Promise.all([db.codCollection.aggregate({_sum:{amount:true},_count:true}),db.cashDeposit.aggregate({_sum:{amount:true},_count:true}),db.merchantSettlement.findMany({take:100,orderBy:{createdAt:'desc'},include:{merchant:{select:{name:true}}}})]);const collected=Number(collections._sum.amount||0),deposited=Number(deposits._sum.amount||0);return <section className="admin-workspace"><span className="admin-overline">FINANCIAL OVERVIEW</span><h1>COD & settlements</h1><div className="admin-stat-grid"><div className="admin-stat-card"><span>Rider COD collected</span><strong>৳{collected.toFixed(2)}</strong><small>{collections._count} collections</small></div><div className="admin-stat-card"><span>Cash deposits</span><strong>৳{deposited.toFixed(2)}</strong><small>{deposits._count} deposits</small></div><div className="admin-stat-card"><span>Unreconciled difference</span><strong>৳{(collected-deposited).toFixed(2)}</strong><small>Gross difference, not final liability</small></div><div className="admin-stat-card"><span>Settlements</span><strong>{settlements.length}</strong><small>Latest 100 records</small></div></div><div className="admin-table-scroll"><table className="admin-data-table"><thead><tr><th>Merchant</th><th>Amount</th><th>Status</th><th>Reference</th></tr></thead><tbody>{settlements.map(s=><tr key={s.id}><td>{s.merchant.name}</td><td>৳{Number(s.amount).toFixed(2)}</td><td>{s.status}</td><td>{s.reference||'—'}</td></tr>)}</tbody></table>{settlements.length===0&&<div className="admin-empty">No merchant settlements yet.</div>}</div></section>}
+import {Prisma} from '@prisma/client';
+import {db} from '@/lib/db';
+import {requireRole} from '@/lib/auth';
+import AdminCashReconciliation from '@/components/admin-cash-reconciliation';
+export const dynamic='force-dynamic';
+const zero=()=>new Prisma.Decimal(0);
+export default async function Page(){
+ const admin=await requireRole(['ADMIN']);
+ if(!admin)return <main className="admin-workspace"><h1>Admin access required</h1></main>;
+ const [riders,collectionsByRider,depositsByRider,latestDeposits,latestCollections,settlements,awaitingCod]=await Promise.all([
+  db.rider.findMany({select:{id:true,user:{select:{name:true,phone:true}}},orderBy:{user:{name:'asc'}},take:200}),
+  db.codCollection.groupBy({by:['riderId'],_sum:{amount:true}}),
+  db.cashDeposit.groupBy({by:['riderId'],_sum:{amount:true}}),
+  db.cashDeposit.findMany({take:50,orderBy:{createdAt:'desc'},include:{rider:{select:{user:{select:{name:true}}}}}}),
+  db.codCollection.findMany({take:50,orderBy:{collectedAt:'desc'},include:{order:{select:{code:true}},rider:{select:{user:{select:{name:true}}}}}}),
+  db.merchantSettlement.findMany({take:50,orderBy:{createdAt:'desc'},include:{merchant:{select:{name:true}}}}),
+  db.order.count({where:{status:'DELIVERED',codCollection:{is:null}}})
+ ]);
+ const collected=new Map(collectionsByRider.map(r=>[r.riderId,new Prisma.Decimal(r._sum.amount??0)]));
+ const deposited=new Map(depositsByRider.map(r=>[r.riderId,new Prisma.Decimal(r._sum.amount??0)]));
+ const sum=(map:Map<string,Prisma.Decimal>)=>[...map.values()].reduce((n,v)=>n.add(v),zero()).toFixed(2);
+ return <section className="adp-finance-page"><div className="admin-breadcrumb">Finance / <strong>COD reconciliation</strong></div><span className="admin-overline">ADPANDA FINANCE</span><h1>Cash & COD reconciliation</h1><p className="muted">Trace rider-confirmed collections, record cash physically received by Admin and compare merchant settlements.</p>
+  <AdminCashReconciliation
+   riders={riders.map(r=>{
+    const c=collected.get(r.id)??zero(),d=deposited.get(r.id)??zero();
+    return {id:r.id,name:r.user.name,phone:r.user.phone,collected:c.toFixed(2),deposited:d.toFixed(2),outstanding:c.minus(d).toFixed(2)};
+   })}
+   deposits={latestDeposits.map(d=>({id:d.id,rider:d.rider.user.name,amount:d.amount.toFixed(2),reference:d.reference||'—',createdAt:d.createdAt.toISOString()}))}
+   collections={latestCollections.map(c=>({id:c.id,orderCode:c.order.code,rider:c.rider.user.name,amount:c.amount.toFixed(2),createdAt:c.collectedAt.toISOString()}))}
+   settlements={settlements.map(s=>({id:s.id,merchant:s.merchant.name,amount:s.amount.toFixed(2),status:s.status,reference:s.reference,createdAt:s.createdAt.toISOString()}))}
+   totalCollected={sum(collected)} totalDeposited={sum(deposited)} deliveredAwaitingCod={awaitingCod}
+  />
+ </section>;
+}
