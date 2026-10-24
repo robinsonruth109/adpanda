@@ -339,3 +339,58 @@ body:has(.admin-shell)>.topbar,body:has(.admin-shell)>.footer{display:none}
  .rider-location-controls button{flex:1}
 }
 @media(max-width:390px){.live-kitchen-grid{grid-template-columns:1fr}}
+
+
+/* AdPanda COD & cash reconciliation: responsive private finance workspace */
+.adp-finance-page{min-width:0}.adp-finance-page>h1{color:#1d2035;letter-spacing:-1.1px;font-size:clamp(27px,3vw,38px);margin:9px 0}.adp-finance-page>.muted{font-size:13px;line-height:1.6;margin:0 0 27px}
+.adp-finance-dashboard{display:grid;gap:23px}
+.adp-finance-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
+.adp-finance-stats>div{background:white;border:1px solid #ebebf1;border-radius:17px;padding:20px;min-width:0;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 20px #24243a06}
+.adp-finance-stats>div>small{font-size:12px;color:#7a8090;font-weight:700;line-height:1.45}
+.adp-finance-stats>div>strong{font-size:clamp(19px,2.1vw,30px);color:#23263b;letter-spacing:-1px;overflow-wrap:anywhere}
+.adp-finance-stats>div>span:last-child{font-size:11px;color:#9ca0b0;line-height:1.5}
+.adp-finance-icon{width:39px;height:39px;border-radius:11px;display:grid;place-items:center}
+.adp-finance-icon.pink{background:#fff0f6;color:#e21b70}.adp-finance-icon.green{background:#e8f8ee;color:#158357}.adp-finance-icon.orange{background:#fff4e1;color:#b37913}.adp-finance-icon.blue{background:#eaf0ff;color:#5870d5}
+.adp-finance-columns{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:19px;align-items:start}
+.adp-finance-panel{background:#fff;border:1px solid #e8e9f1;border-radius:17px;padding:24px;min-width:0;box-shadow:0 5px 20px #24243a06}
+.adp-finance-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:13px;color:#e21b70;margin-bottom:21px}
+.adp-finance-panel-heading h2{font-size:21px;color:#25283c;letter-spacing:-.5px;margin:7px 0}
+.adp-finance-panel-heading p{color:#9498a8;font-size:12px;line-height:1.5;margin:0}
+.adp-deposit-form{display:grid;gap:15px}
+.adp-deposit-form>label:not(.adp-deposit-confirm){font-size:12px;color:#3b4257;font-weight:750;display:grid;gap:9px}
+.adp-deposit-form select,.adp-deposit-form input:not([type=checkbox]){border:1px solid #dfe2eb;border-radius:11px;min-height:48px;padding:12px;background:#fbfcfe;color:#282c42;font-size:15px;width:100%;min-width:0}
+.adp-deposit-balance{display:flex;flex-direction:column;gap:5px;padding:13px 15px;background:#fff2f8;border:1px solid #f4cbdc;border-radius:12px}
+.adp-deposit-balance span{font-size:12px;color:#8b4569;font-weight:700}.adp-deposit-balance strong{font-size:23px;color:#d52272}.adp-deposit-balance small{font-size:10px;color:#968395;line-height:1.4}
+.adp-deposit-confirm{display:flex;align-items:flex-start;gap:10px;font-size:12px;line-height:1.6;color:#55586c}
+.adp-deposit-confirm input{height:18px;width:18px;flex:0 0 18px;margin-top:2px;accent-color:#e21b70}
+.adp-deposit-form>.btn{background:#e21b70;width:100%;padding:14px 18px;border-radius:11px;font-weight:800}
+.adp-deposit-form>.btn:disabled{opacity:.55;cursor:not-allowed}
+.adp-finance-feedback{font-size:12px;color:#8d285d;background:#fff1f7;padding:12px;border:1px solid #facfe1;border-radius:10px;line-height:1.5}
+.adp-finance-search{display:flex;align-items:center;gap:9px;background:#fbfcff;border:1px solid #e3e5ed;border-radius:12px;padding:0 13px;margin:0 0 15px;color:#878a9b}
+.adp-finance-search input{height:47px;border:0;outline:0;background:transparent;min-width:0;width:100%;font-size:13px;color:#36394b}
+.adp-finance-rider-list{max-height:480px;overflow:auto;display:grid;gap:11px}
+.adp-finance-rider-row{display:flex;justify-content:space-between;align-items:start;gap:12px;background:#fafbfe;border:1px solid #eeeef4;border-radius:12px;padding:15px}
+.adp-finance-rider-row>div{min-width:0;display:grid;gap:5px}
+.adp-finance-rider-row strong{font-size:13px;color:#26283b;overflow-wrap:anywhere}
+.adp-finance-rider-row small{font-size:11px;color:#888e9b}
+.adp-finance-rider-row span{font-size:10px;color:#9a9eab;line-height:1.45}
+.adp-finance-rider-row>div:last-child{text-align:right;justify-items:end}
+.adp-finance-rider-row>div:last-child strong{font-size:16px;color:#dc2373}
+.adp-finance-rider-row button{margin-top:3px;border-radius:8px;border:1px solid #f7c4d9;background:#fff1f7;color:#d72871;font-size:11px;font-weight:800;padding:7px 12px;cursor:pointer}
+.adp-finance-rider-row button:disabled{opacity:.4;cursor:not-allowed}
+.adp-finance-panel .admin-data-table{min-width:620px}
+.adp-finance-fine-print{display:flex;align-items:flex-start;gap:9px;font-size:12px;line-height:1.6;color:#7e8597;padding:6px 2px 15px}
+.rider-cash-history{background:white;border:1px solid #ececf2;border-radius:17px;padding:22px;margin:21px 0}
+.rider-cash-history h2{font-size:19px;margin:0 0 7px;color:#27283e}
+.rider-cash-history>div:first-child p{font-size:12px;line-height:1.5;color:#9196a7;margin:0 0 16px}
+.rider-cash-history-list{display:grid;gap:9px}
+.rider-cash-history-list>div{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid #eeeeF5;border-radius:11px;padding:12px;background:#fbfcfe}
+.rider-cash-history-list>div>div{display:grid;gap:5px}
+.rider-cash-history-list strong{font-size:14px;color:#147953}
+.rider-cash-history-list small{font-size:11px;color:#878b9d}
+.rider-cash-history-list>div>span{font-size:11px;color:#777f8e;text-align:right;overflow-wrap:anywhere}
+.rider-cash-history-list .rider-cash-no-history{font-size:12px;color:#9094a5;justify-content:center;line-height:1.5}
+.admin-order-tracking-link{margin:10px 0 15px;font-size:12px}.admin-order-tracking-link a{font-weight:750;color:#e21b70}
+@media(max-width:1250px){.adp-finance-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:950px){.adp-finance-columns{grid-template-columns:1fr}.adp-finance-panel{padding:20px}}
+@media(max-width:600px){.adp-finance-stats{gap:10px}.adp-finance-stats>div{padding:14px;min-height:125px}.adp-finance-stats>div>strong{font-size:21px}.adp-finance-stats>div>small{font-size:11px}.adp-finance-panel{padding:15px}.adp-finance-panel-heading h2{font-size:18px}.adp-finance-rider-row{padding:12px}.adp-finance-dashboard{gap:14px}.rider-cash-history{padding:17px}}
