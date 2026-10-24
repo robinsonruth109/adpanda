@@ -11,7 +11,7 @@ export default async function Rider(){
  if(!user||user.role!=='RIDER')return <main className="section container"><div className="eyebrow">AdPanda delivery partners</div><h1>Rider access</h1><p>Sign in with your approved rider account. Administrators register eligible accounts from the Riders dashboard.</p><Link className="btn" href="/login">Rider sign in</Link></main>;
  const rider=await db.rider.findUnique({where:{userId:user.id},include:{
   deliveries:{orderBy:{assignedAt:'desc'},take:50,include:{order:{include:{kitchen:true,address:true,codCollection:true,customer:{select:{name:true,phone:true}}}}}},
-  collections:{select:{amount:true}},deposits:{select:{amount:true}}
+  collections:{select:{amount:true}},deposits:{select:{id:true,amount:true,reference:true,createdAt:true},orderBy:{createdAt:'desc'}}
  }});
  if(!rider)return <main className="section container"><h1>Rider profile not found</h1><p>Contact your administrator to activate a delivery profile.</p></main>;
  const active=rider.deliveries.filter(d=>!finished.includes(d.order.status));
@@ -22,6 +22,9 @@ export default async function Rider(){
   {!rider.approved&&<div className="rider-alert"><ShieldAlert size={20}/><span>Your rider profile has not been approved. Admin must approve you before dispatch.</span></div>}
   <RiderLocationSharing enabled={rider.approved&&rider.status==='BUSY'&&active.length>0}/>
   <div className="rider-metrics"><div><Bike size={23}/><span>Active assignments</span><strong>{active.length}</strong></div><div><Package size={23}/><span>Total assignments</span><strong>{rider.deliveries.length}</strong></div><div><Wallet size={23}/><span>Recorded COD outstanding</span><strong>৳{(collected-deposited).toFixed(2)}</strong></div></div>
+  <section className="rider-cash-history"><div><h2>Cash handover history</h2><p>Only Admin-confirmed cash deposits count toward clearing outstanding COD.</p></div>
+   <div className="rider-cash-history-list">{rider.deposits.slice(0,8).map(d=><div key={d.id}><div><strong>৳{Number(d.amount).toFixed(2)}</strong><small>{d.createdAt.toLocaleString('en-BD',{timeZone:'Asia/Dhaka'})}</small></div><span>{d.reference||'Admin cash deposit'}</span></div>)}{!rider.deposits.length&&<div className="rider-cash-no-history">No Admin-confirmed cash deposits recorded yet.</div>}</div>
+  </section>
   <div className="rider-deliveries-heading"><h2>Assigned deliveries</h2><p>Only assignments associated with your rider account appear here.</p></div>
   <div className="rider-deliveries">{rider.deliveries.map(d=><article className="rider-delivery-card" key={d.id}>
    <div className="rider-delivery-head"><div><span>ORDER</span><h3>{d.order.code}</h3></div><span className={'admin-order-badge '+d.order.status.toLowerCase()}>{d.order.status.replaceAll('_',' ')}</span></div>
