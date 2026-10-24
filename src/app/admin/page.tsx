@@ -5,7 +5,39 @@ import MerchantReviews from '@/components/merchant-reviews';
 export const dynamic='force-dynamic';
 export default async function Admin(){
  const user=await requireRole(['ADMIN']);
- if(!user)return <main className="section container"><h1>Administrator access</h1><p>This dashboard requires an authorized admin account.</p><Link className="btn" href="/login">Sign in</Link></main>;
- const merchants=await db.merchant.findMany({orderBy:{createdAt:'desc'},include:{kitchens:true,members:{include:{user:{select:{name:true,phone:true}}}}}});
- return <main className="section container"><div className="eyebrow">Admin control</div><h1>Merchant approvals & commissions</h1><MerchantReviews merchants={merchants.map(m=>({id:m.id,name:m.name,status:m.status,owner:m.members[0]?.user.name||'Unknown',phone:m.members[0]?.user.phone||'',kitchens:m.kitchens.map(k=>({name:k.name,address:k.address,latitude:Number(k.latitude),longitude:Number(k.longitude),commissionRate:k.commissionRate===null?10:Number(k.commissionRate)}))}))}/></main>;
+ if(!user)return <main className="section container"><h1>Administrator access</h1><p>Please sign in using your authorized admin account.</p><Link className="btn" href="/login">Sign in</Link></main>;
+ const [merchants,orders,users,kitchens]=await Promise.all([
+  db.merchant.findMany({orderBy:{createdAt:'desc'},include:{kitchens:true,members:{include:{user:{select:{name:true,phone:true}}}}}}),
+  db.order.count(),db.user.count(),db.kitchen.count()
+ ]);
+ const pending=merchants.filter(m=>m.status==='PENDING').length;
+ const approved=merchants.filter(m=>m.status==='APPROVED').length;
+ return <main className="admin-shell">
+ <aside className="admin-sidebar">
+   <div className="admin-sidebar-brand"><span className="admin-brand-icon">🐼</span><div><strong>AdPanda</strong><small>CONTROL CENTER</small></div></div>
+   <p className="admin-menu-label">WORKSPACE</p>
+   <a href="#overview" className="admin-sidebar-link active">◫ <span>Overview</span></a>
+   <a href="#merchants" className="admin-sidebar-link">▣ <span>Merchant approvals</span>{pending>0&&<span className="admin-count">{pending}</span>}</a>
+   <Link href="/merchant" className="admin-sidebar-link">♨ <span>Merchant panel</span></Link>
+   <Link href="/" className="admin-sidebar-link">⌂ <span>Customer storefront</span></Link>
+   <p className="admin-menu-label">COMING NEXT</p>
+   <span className="admin-sidebar-link inactive">▤ <span>Order management</span></span>
+   <span className="admin-sidebar-link inactive">♧ <span>Riders & dispatch</span></span>
+   <span className="admin-sidebar-link inactive">◴ <span>Finance & settlements</span></span>
+   <div className="admin-sidebar-bottom">AdPanda • Alamdanga<br/><small>Administrator workspace</small></div>
+ </aside>
+ <div className="admin-content">
+   <div className="admin-top" id="overview"><div><div className="admin-breadcrumb">Workspace / <strong>Overview</strong></div><h1>Good to see you, {user.name?.split(' ')[0]||'Admin'} <span>👋</span></h1><p>Manage your kitchens, partners and platform activity in one place.</p></div><Link href="/" className="admin-outline-btn">View storefront ↗</Link></div>
+   <div className="admin-stat-grid">
+    <div className="admin-stat-card"><span className="admin-stat-icon pink">▣</span><span>Total merchants</span><strong>{merchants.length}</strong><small>Registered partners</small></div>
+    <div className="admin-stat-card"><span className="admin-stat-icon amber">◷</span><span>Pending approval</span><strong>{pending}</strong><small>Requires your review</small></div>
+    <div className="admin-stat-card"><span className="admin-stat-icon green">✓</span><span>Active partners</span><strong>{approved}</strong><small>Approved merchants</small></div>
+    <div className="admin-stat-card"><span className="admin-stat-icon blue">▤</span><span>Total orders</span><strong>{orders}</strong><small>{kitchens} kitchens · {users} users</small></div>
+   </div>
+   <section id="merchants" className="admin-workspace">
+    <div className="admin-section-heading"><div><span className="admin-overline">PARTNER OPERATIONS</span><h2>Merchant approvals</h2><p>Review kitchen details, verify locations and set your commission.</p></div><span className="admin-pending-pill">{pending} pending</span></div>
+    <MerchantReviews merchants={merchants.map(m=>({id:m.id,name:m.name,status:m.status,owner:m.members[0]?.user.name||'Unknown',phone:m.members[0]?.user.phone||'',kitchens:m.kitchens.map(k=>({name:k.name,address:k.address,latitude:Number(k.latitude),longitude:Number(k.longitude),commissionRate:k.commissionRate===null?10:Number(k.commissionRate)}))}))}/>
+   </section>
+ </div>
+ </main>;
 }
