@@ -1,1 +1,13 @@
-import {db} from '@/lib/db';export const dynamic='force-dynamic';export default async function Page(){const riders=await db.rider.findMany({include:{user:{select:{name:true,phone:true}},_count:{select:{deliveries:true}}},take:200});return <section className="admin-workspace"><span className="admin-overline">DELIVERY OPERATIONS</span><h1>Riders</h1><p className="muted">Rider approval, availability and delivery workload. Dispatch controls are not enabled yet.</p><div className="admin-table-scroll"><table className="admin-data-table"><thead><tr><th>Name</th><th>Phone</th><th>Status</th><th>Approved</th><th>Assignments</th></tr></thead><tbody>{riders.map(r=><tr key={r.id}><td><strong>{r.user.name}</strong></td><td>{r.user.phone}</td><td>{r.status}</td><td>{r.approved?'Yes':'No'}</td><td>{r._count.deliveries}</td></tr>)}</tbody></table>{riders.length===0&&<div className="admin-empty">No riders registered yet.</div>}</div></section>}
+import {db} from '@/lib/db';
+import AdminRiderManager from '@/components/admin-rider-manager';
+export const dynamic='force-dynamic';
+export default async function Page(){
+ const riders=await db.rider.findMany({include:{user:{select:{name:true,phone:true}},_count:{select:{deliveries:true}}},orderBy:{user:{name:'asc'}},take:200});
+ return <section className="admin-riders-page">
+  <div className="admin-breadcrumb">Operations / <strong>Riders & dispatch</strong></div>
+  <span className="admin-overline">DELIVERY OPERATIONS</span>
+  <h1>Rider management</h1>
+  <p className="muted">Register delivery partners, approve identities and control manual dispatch availability.</p>
+  <AdminRiderManager initialRiders={riders.map(r=>({id:r.id,name:r.user.name,phone:r.user.phone,status:r.status,approved:r.approved,assignments:r._count.deliveries}))}/>
+ </section>;
+}
