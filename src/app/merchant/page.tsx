@@ -6,7 +6,7 @@ import MenuManager from '@/components/menu-manager';
 export const dynamic='force-dynamic';
 export default async function Merchant(){
  const user=await currentUser();
- if(!user)return <main className="section container"><h1>Become an AdPanda merchant</h1><p>Open your cloud kitchen in Alamdanga. Sign in first to apply.</p><div className="links"><Link className="btn" href="/register">Register</Link><Link className="btn secondary" href="/login">Sign in</Link></div></main>;
+ if(!user)return <main className="section container"><h1>Become an AdPanda merchant</h1><p>Open your cloud kitchen in Alamdanga. Sign in first to apply.</p><div className="links"><Link className="btn" href="/merchant/signup">Become a merchant</Link><Link className="btn secondary" href="/merchant/login">Merchant sign in</Link></div></main>;
  const merchants=await db.merchant.findMany({
   where:{members:{some:{userId:user.id}}},
   include:{kitchens:{include:{categories:{include:{items:true}}}}}
