@@ -2,13 +2,15 @@ import Link from 'next/link';
 import {currentUser} from '@/lib/auth';
 import {db} from '@/lib/db';
 import {Bike,MapPin,Phone,Wallet,Package,Navigation,ShieldAlert} from 'lucide-react';
+import RiderLocationSharing from '@/components/rider-location-sharing';
+import RiderCodConfirmation from '@/components/rider-cod-confirmation';
 export const dynamic='force-dynamic';
 const finished=['DELIVERED','CANCELLED','FAILED'];
 export default async function Rider(){
  const user=await currentUser();
  if(!user||user.role!=='RIDER')return <main className="section container"><div className="eyebrow">AdPanda delivery partners</div><h1>Rider access</h1><p>Sign in with your approved rider account. Administrators register eligible accounts from the Riders dashboard.</p><Link className="btn" href="/login">Rider sign in</Link></main>;
  const rider=await db.rider.findUnique({where:{userId:user.id},include:{
-  deliveries:{orderBy:{assignedAt:'desc'},take:50,include:{order:{include:{kitchen:true,address:true,customer:{select:{name:true,phone:true}}}}}},
+  deliveries:{orderBy:{assignedAt:'desc'},take:50,include:{order:{include:{kitchen:true,address:true,codCollection:true,customer:{select:{name:true,phone:true}}}}}},
   collections:{select:{amount:true}},deposits:{select:{amount:true}}
  }});
  if(!rider)return <main className="section container"><h1>Rider profile not found</h1><p>Contact your administrator to activate a delivery profile.</p></main>;
@@ -18,6 +20,7 @@ export default async function Rider(){
  return <main className="rider-portal">
   <div className="rider-portal-header"><div><span className="admin-overline">ADPANDA DELIVERY</span><h1>Hello, {user.name}</h1><p>Keep your pickup and delivery information handy.</p></div><span className={'admin-order-badge '+rider.status.toLowerCase()}>{rider.status}</span></div>
   {!rider.approved&&<div className="rider-alert"><ShieldAlert size={20}/><span>Your rider profile has not been approved. Admin must approve you before dispatch.</span></div>}
+  <RiderLocationSharing enabled={rider.approved&&rider.status==='BUSY'&&active.length>0}/>
   <div className="rider-metrics"><div><Bike size={23}/><span>Active assignments</span><strong>{active.length}</strong></div><div><Package size={23}/><span>Total assignments</span><strong>{rider.deliveries.length}</strong></div><div><Wallet size={23}/><span>Recorded COD outstanding</span><strong>৳{(collected-deposited).toFixed(2)}</strong></div></div>
   <div className="rider-deliveries-heading"><h2>Assigned deliveries</h2><p>Only assignments associated with your rider account appear here.</p></div>
   <div className="rider-deliveries">{rider.deliveries.map(d=><article className="rider-delivery-card" key={d.id}>
@@ -25,8 +28,9 @@ export default async function Rider(){
    <div className="rider-delivery-stop"><div className="rider-delivery-dot pickup"/><div><small>PICKUP FROM</small><strong>{d.order.kitchen.name}</strong><p>{d.order.kitchen.address}</p><a target="_blank" rel="noopener noreferrer" href={'https://www.google.com/maps?q='+String(d.order.kitchen.latitude)+','+String(d.order.kitchen.longitude)}><Navigation size={16}/> Navigate to kitchen</a></div></div>
    <div className="rider-delivery-stop"><div className="rider-delivery-dot destination"/><div><small>DELIVER TO</small><strong>{d.order.customer.name}</strong><p>{d.order.address.details}{d.order.address.landmark?' · '+d.order.address.landmark:''}</p><div className="rider-delivery-links"><a href={'tel:'+d.order.customer.phone}><Phone size={16}/> Call customer</a><a target="_blank" rel="noopener noreferrer" href={'https://www.google.com/maps?q='+String(d.order.address.latitude)+','+String(d.order.address.longitude)}><MapPin size={16}/> Navigate</a></div></div></div>
    <div className="rider-delivery-total"><span>Collect COD on delivery</span><strong>৳{Number(d.order.codTotal).toFixed(2)}</strong></div>
+   {d.order.status==='DELIVERED'&&<RiderCodConfirmation orderId={d.order.id} amount={Number(d.order.codTotal)} recorded={Boolean(d.order.codCollection)}/>}
   </article>)}</div>
   {rider.deliveries.length===0&&<div className="admin-empty"><Bike size={37}/><h3>No assignments yet</h3><p>Admin will assign orders once your rider profile is approved and available.</p></div>}
-  <p className="muted" style={{fontSize:12,marginTop:22}}>This page shows dispatch information. Live GPS sharing, rider-side delivery confirmation and cash reconciliation actions require separate activation and verification.</p>
+  <p className="muted" style={{fontSize:12,marginTop:22}}>Live GPS requires your explicit permission and an active browser page. COD receipt confirmation does not mean the cash has been deposited or reconciled with Admin.</p>
  </main>;
 }
