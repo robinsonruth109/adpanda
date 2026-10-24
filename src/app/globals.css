@@ -51,3 +51,69 @@ body:has(.admin-shell)>.topbar,body:has(.admin-shell)>.footer{display:none}
 @media(max-width:760px){.admin-sidebar{height:auto;min-height:0;position:static}.admin-toolbar{padding:12px 18px;height:auto}.admin-toolbar-search,.admin-toolbar-user{display:none}.merchant-kpi-grid{gap:10px}.merchant-kpi{padding:16px;min-height:112px}.merchant-kpi strong{font-size:26px}.merchant-searchbar{flex-direction:column}.merchant-searchbar select{width:100%}.admin-content{padding:22px 16px}}
 
 .location-zoom-controls{position:absolute;right:12px;top:12px;display:flex;flex-direction:column;gap:8px;z-index:6}.location-zoom-controls button{display:grid;place-items:center;width:43px;height:43px;border:1px solid #e4e4ec;border-radius:12px;background:white;color:#e21b70;font-size:25px;font-weight:700;box-shadow:0 3px 12px #0002;cursor:pointer}.location-zoom-controls button:disabled{opacity:.35;cursor:not-allowed}.location-zoom-controls button:focus-visible{outline:3px solid #e21b70;outline-offset:2px}
+
+
+/* AdPanda mobile admin: dedicated bottom tabs instead of squeezed desktop sidebar */
+.admin-mobile-navigation{display:none}
+@media(max-width:900px){
+ body:has(.admin-shell){overflow-x:hidden}
+ .admin-shell{display:block!important;grid-template-columns:none!important;width:100%;min-width:0;min-height:100dvh}
+ .admin-shell .admin-sidebar{display:none!important}
+ .admin-shell .admin-main{width:100%;min-width:0;max-width:100%}
+ .admin-shell .admin-toolbar{height:66px;min-height:66px;position:sticky;top:0;z-index:20;padding:10px 17px;gap:12px;background:#fff}
+ .admin-shell .admin-toolbar-title{min-width:0;gap:9px}
+ .admin-shell .admin-toolbar-title>svg{display:none}
+ .admin-shell .admin-toolbar-title strong{font-size:14px;white-space:nowrap}
+ .admin-shell .admin-toolbar-title small{font-size:10px}
+ .admin-shell .admin-toolbar-right{gap:14px;flex-shrink:0}
+ .admin-shell .admin-toolbar-search,.admin-shell .admin-toolbar-user{display:none}
+ .admin-shell .admin-avatar{width:35px;height:35px;font-size:13px}
+ .admin-shell .admin-notice{display:flex;align-items:center;justify-content:center}
+ .admin-shell .admin-content{width:100%;max-width:100%;min-width:0;padding:23px 16px calc(112px + env(safe-area-inset-bottom,0px));margin:0}
+ .admin-shell .admin-workspace{padding:18px;border-radius:16px;min-width:0}
+ .admin-shell .admin-section-heading{gap:8px;flex-wrap:wrap}
+ .admin-shell .admin-section-heading h1,.admin-shell .admin-section-heading h2{line-height:1.18;overflow-wrap:break-word}
+ .admin-shell .admin-page-heading h1{line-height:1.18}
+ .admin-shell .admin-stat-grid,.admin-shell .merchant-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .admin-shell .admin-stat-card,.admin-shell .merchant-kpi{padding:16px;min-height:112px;min-width:0;border-radius:14px}
+ .admin-shell .admin-stat-card strong,.admin-shell .merchant-kpi strong{font-size:28px}
+ .admin-shell .merchant-kpi span{line-height:1.45;overflow-wrap:anywhere}
+ .admin-shell .admin-merchant-card{padding:18px;min-width:0;overflow-wrap:anywhere}
+ .admin-shell .admin-merchant-card .flex{align-items:flex-start;flex-wrap:wrap}
+ .admin-shell .admin-merchant-card .admin-merchant-meta{overflow-wrap:anywhere;line-height:1.6}
+ .admin-shell .admin-review-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .admin-shell .admin-review-actions .btn{min-width:0;width:100%;white-space:normal;text-align:center;padding:12px 8px}
+ .admin-shell .admin-review-actions .btn:first-child{grid-column:1/-1}
+ .admin-shell .admin-merchant-card label input[type=number]{margin:10px 0 0!important;max-width:170px}
+ .admin-shell .merchant-searchbar{padding:14px;flex-direction:column;gap:10px}
+ .admin-shell .merchant-searchbar input,.admin-shell .merchant-searchbar select{width:100%;max-width:100%;min-width:0;font-size:16px}
+ .admin-shell .location-picker{max-width:100%;min-width:0;padding:12px}
+ .admin-shell .location-picker-map{width:100%;max-width:100%;height:auto;aspect-ratio:1}
+ .admin-shell .location-picker-row{max-width:100%}
+ .admin-mobile-navigation{display:block}
+ .admin-mobile-bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:210;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));min-height:calc(70px + env(safe-area-inset-bottom,0px));padding:6px max(7px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(7px,env(safe-area-inset-right,0px));background:#fff;border-top:1px solid #e8e8ef;box-shadow:0 -5px 22px rgba(28,30,58,.09)}
+ .admin-mobile-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;min-width:0;min-height:55px;padding:5px 2px;color:#777c90;border:0;border-radius:11px;background:transparent;font-size:10px;font-weight:650;line-height:1.1;text-decoration:none}
+ .admin-mobile-tab.active{color:#e21b70;background:#fff0f6}
+ .admin-mobile-tab-icon{position:relative;display:flex;align-items:center;justify-content:center;height:24px}
+ .admin-mobile-tab-badge{position:absolute;right:-10px;top:-7px;min-width:17px;height:17px;display:grid;place-items:center;border-radius:20px;background:#e21b70;color:#fff;font-size:10px;font-weight:700;border:2px solid #fff}
+ .admin-mobile-tab:focus-visible,.admin-mobile-menu-link:focus-visible{outline:2px solid #e21b70;outline-offset:-2px}
+ .admin-mobile-menu-layer{position:fixed;inset:0;z-index:205;display:block}
+ .admin-mobile-scrim{position:absolute;inset:0;width:100%;background:rgba(22,24,44,.40);border:0;border-radius:0}
+ .admin-mobile-more-sheet{position:absolute;bottom:calc(70px + env(safe-area-inset-bottom,0px));left:0;right:0;max-height:min(75dvh,570px);overflow-y:auto;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -12px 35px #0e14333a;padding:18px 18px 22px}
+ .admin-mobile-more-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #f0f0f3;padding-bottom:15px}
+ .admin-mobile-more-heading>div{display:grid;gap:5px}
+ .admin-mobile-more-heading span{font-size:11px;color:#e21b70;font-weight:800;letter-spacing:1.2px}
+ .admin-mobile-more-heading strong{font-size:18px;color:#20233a}
+ .admin-mobile-more-heading button{border:0;background:#f5f5f8;border-radius:10px;height:39px;width:39px;display:grid;place-items:center;color:#53586a}
+ .admin-mobile-menu-links{display:grid;gap:3px;padding:12px 0}
+ .admin-mobile-menu-link{display:flex;align-items:center;gap:14px;padding:14px 12px;border-radius:11px;color:#3e435a;font-size:14px;font-weight:650}
+ .admin-mobile-menu-link span{flex:1}
+ .admin-mobile-menu-link.active{color:#e21b70;background:#fff0f6}
+ .admin-mobile-menu-logout{padding:4px 2px;border-top:1px solid #f0f0f3}
+}
+@media(max-width:365px){
+ .admin-shell .admin-content{padding-left:12px;padding-right:12px}
+ .admin-shell .admin-merchant-card{padding:14px}
+ .admin-shell .admin-stat-card,.admin-shell .merchant-kpi{padding:12px}
+ .admin-mobile-tab{font-size:9px}
+}
