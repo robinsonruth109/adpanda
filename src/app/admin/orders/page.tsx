@@ -6,7 +6,7 @@ export default async function Page(){
   db.order.findMany({orderBy:{placedAt:'desc'},take:100,include:{
    customer:{select:{name:true,phone:true}},
    kitchen:{select:{name:true}},
-   address:{select:{details:true,landmark:true}},
+   address:{select:{details:true,landmark:true}},codCollection:true,
    delivery:{include:{rider:{include:{user:{select:{name:true}}}}}}
   }}),
   db.rider.findMany({where:{approved:true,status:'ONLINE'},include:{user:{select:{name:true,phone:true}}},orderBy:{user:{name:'asc'}}})
@@ -19,7 +19,7 @@ export default async function Page(){
   <AdminOrderManager initialOrders={orders.map(o=>({
    id:o.id,code:o.code,status:o.status,customer:o.customer.name,phone:o.customer.phone,kitchen:o.kitchen.name,
    address:[o.address.details,o.address.landmark].filter(Boolean).join(' · '),
-   codTotal:Number(o.codTotal),placedAt:o.placedAt.toISOString(),riderId:o.delivery?.riderId||null,
+   codTotal:Number(o.codTotal),codCollected:Boolean(o.codCollection),placedAt:o.placedAt.toISOString(),riderId:o.delivery?.riderId||null,
    riderName:o.delivery?.rider.user.name||null
   }))} availableRiders={riders.map(r=>({id:r.id,name:r.user.name,phone:r.user.phone}))}/>
  </section>;
