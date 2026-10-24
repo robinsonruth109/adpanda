@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import LogoutButton from '@/components/logout-button';
 import AdminNav from '@/components/admin-nav';
+import AdminMobileNav from '@/components/admin-mobile-nav';
 import {Bell,Search,PanelLeft} from 'lucide-react';
 import {requireRole} from '@/lib/auth';
 import {db} from '@/lib/db';
@@ -19,5 +20,6 @@ export default async function AdminLayout({children}:{children:ReactNode}){
   <header className="admin-toolbar"><div className="admin-toolbar-title"><PanelLeft size={21}/><div><strong>AdPanda Control Center</strong><small>Secure administration workspace</small></div></div><div className="admin-toolbar-right"><div className="admin-toolbar-search"><Search size={17}/><span>Manage kitchens, partners & orders</span></div><span className="admin-notice" title={pending+' pending merchant applications'}><Bell size={19}/>{pending>0&&<b>{pending}</b>}</span><div className="admin-avatar">{admin.name?.slice(0,1).toUpperCase()||'A'}</div><div className="admin-toolbar-user"><strong>{admin.name}</strong><small>Super Admin</small></div></div></header>
   <div className="admin-content">{children}</div>
  </div>
+ <AdminMobileNav pending={pending}/>
  </div>;
 }
