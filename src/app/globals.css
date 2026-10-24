@@ -394,3 +394,31 @@ body:has(.admin-shell)>.topbar,body:has(.admin-shell)>.footer{display:none}
 @media(max-width:1250px){.adp-finance-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:950px){.adp-finance-columns{grid-template-columns:1fr}.adp-finance-panel{padding:20px}}
 @media(max-width:600px){.adp-finance-stats{gap:10px}.adp-finance-stats>div{padding:14px;min-height:125px}.adp-finance-stats>div>strong{font-size:21px}.adp-finance-stats>div>small{font-size:11px}.adp-finance-panel{padding:15px}.adp-finance-panel-heading h2{font-size:18px}.adp-finance-rider-row{padding:12px}.adp-finance-dashboard{gap:14px}.rider-cash-history{padding:17px}}
+
+
+.adp-merchant-earnings-page,.adp-admin-settlement-page{padding-bottom:70px;min-width:0}
+.adp-merchant-earnings-page h1,.adp-admin-settlement-page h1{font-size:clamp(28px,3vw,39px);letter-spacing:-1px;margin:10px 0}
+.adp-merchant-quick-links{margin:18px 0 25px}.adp-merchant-quick-links .btn{background:#e21b70}
+.adp-merchant-pay,.adp-admin-payout-card{background:#fff;border:1px solid #ececf2;border-radius:18px;padding:25px;margin:23px 0;box-shadow:0 5px 20px #22223b09}
+.adp-pay-title h2{font-size:22px;margin:0 0 8px}.adp-pay-title p,.adp-pay-hint{font-size:12px;line-height:1.6;color:#89899b}
+.adp-pay-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:22px 0}
+.adp-merchant-pay .adp-pay-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+.adp-pay-stats>div{padding:17px;border:1px solid #eeeef3;background:#fff8fb;border-radius:13px;display:grid;gap:9px;min-width:0}
+.adp-pay-stats span{font-size:12px;color:#8a8d9b;font-weight:700}.adp-pay-stats strong{color:#22243a;font-size:clamp(19px,2vw,27px);overflow-wrap:anywhere}
+.adp-pay-columns{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.adp-pay-form,.adp-pay-history{padding:19px;border:1px solid #e9e9f0;border-radius:15px;min-width:0;display:grid;gap:13px;align-content:start}
+.adp-pay-form label,.adp-admin-payout-actions label{display:grid;gap:7px;font-weight:700;font-size:12px}
+.adp-pay-form input,.adp-pay-form select,.adp-admin-payout-actions input,.adp-admin-payout-actions textarea{width:100%;min-width:0;background:#fff;border:1px solid #dfe1eb;border-radius:10px;padding:12px;color:#202336;font-size:15px}
+.adp-pay-form .btn,.adp-admin-payout-actions .btn{background:#e21b70;color:white;border-radius:10px;padding:13px}
+.adp-pay-form .btn:disabled,.adp-admin-payout-actions .btn:disabled{opacity:.55}
+.adp-pay-history>div{border:1px solid #eeeef3;border-radius:11px;padding:12px;display:flex;flex-wrap:wrap;gap:8px}
+.adp-pay-history small{font-size:11px;color:#898d9b}
+.adp-settlement-status{border-radius:20px;padding:7px 10px;font-size:10px;font-weight:800;color:#9b731c;background:#fff3dc}
+.adp-settlement-status.approved{background:#eaf0ff;color:#5265c0}.adp-settlement-status.paid{background:#e5faee;color:#13865c}.adp-settlement-status.rejected{background:#fff0f3;color:#c22c49}
+.adp-settlement-message{padding:13px;border:1px solid #fac4da;color:#9a235f;background:#fff2f7;border-radius:10px}
+.adp-admin-payout-list{display:grid;gap:13px}.adp-admin-payout-head{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #efeff3;padding-bottom:14px}
+.adp-admin-payout-head h3{font-size:19px;margin:8px 0}.adp-admin-payout-head strong{color:#e21b70;font-size:23px}.adp-admin-payout-head small,.adp-admin-payout-details{font-size:12px;color:#858a9a}
+.adp-admin-payout-details{display:flex;flex-wrap:wrap;gap:12px;padding:16px 0;overflow-wrap:anywhere}.adp-admin-payout-actions{border-top:1px solid #eeeef3;padding-top:15px;display:grid;gap:12px}
+.adp-admin-payout-actions>div{display:flex;flex-wrap:wrap;gap:10px}.adp-admin-payout-actions .secondary{background:#f5f5f8;color:#af3659}
+@media(max-width:950px){.adp-pay-columns{grid-template-columns:1fr}.adp-pay-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.adp-merchant-pay,.adp-admin-payout-card{padding:15px}.adp-merchant-pay .adp-pay-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.adp-pay-stats>div{padding:13px}.adp-pay-stats strong{font-size:20px}.adp-pay-form,.adp-pay-history{padding:14px}.adp-admin-payout-actions .btn{flex:1}}
