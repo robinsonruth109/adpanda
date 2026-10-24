@@ -1,9 +1,11 @@
 'use client';
 import {useState} from 'react';
+import {useRouter} from 'next/navigation';
 export default function MerchantApplication(){
+ const router=useRouter();
  const [kitchenName,setKitchenName]=useState(''),[address,setAddress]=useState(''),[latitude,setLatitude]=useState(''),[longitude,setLongitude]=useState(''),[message,setMessage]=useState(''),[busy,setBusy]=useState(false);
  function locate(){if(!navigator.geolocation){setMessage('Location not supported by this browser');return;}navigator.geolocation.getCurrentPosition(p=>{setLatitude(String(p.coords.latitude));setLongitude(String(p.coords.longitude));setMessage('Location detected. Verify it matches your fixed kitchen location before submitting.');},()=>setMessage('Location permission denied. Enter coordinates manually.'),{enableHighAccuracy:true,timeout:12000});}
- async function submit(e:React.FormEvent<HTMLFormElement>){e.preventDefault();setBusy(true);setMessage('');try{const response=await fetch('/api/merchant/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kitchenName,address,latitude:Number(latitude),longitude:Number(longitude)})});const payload=await response.json();if(!response.ok)throw Error(payload.error||'Could not apply');setMessage('Application submitted. Status: PENDING. Our admin will review your fixed location.');}catch(e){setMessage(e instanceof Error?e.message:'Submission failed')}finally{setBusy(false)}}
+ async function submit(e:React.FormEvent<HTMLFormElement>){e.preventDefault();setBusy(true);setMessage('');try{const response=await fetch('/api/merchant/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kitchenName,address,latitude:Number(latitude),longitude:Number(longitude)})});const payload=await response.json();if(!response.ok)throw Error(payload.error||'Could not apply');setMessage('Application submitted. Status: PENDING. Our admin will review your fixed location.');router.refresh();}catch(e){setMessage(e instanceof Error?e.message:'Submission failed')}finally{setBusy(false)}}
  return <form onSubmit={submit} className="panel" style={{display:'grid',gap:14,maxWidth:650}}>
  <h2>Register your cloud kitchen</h2><p className="muted">Applications require admin approval. Kitchen coordinates become fixed after verification.</p>
  <label>Kitchen name<input required minLength={3} maxLength={120} value={kitchenName} onChange={e=>setKitchenName(e.target.value)} style={{display:'block',width:'100%',padding:12,marginTop:8}}/></label>
