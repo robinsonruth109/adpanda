@@ -3,7 +3,7 @@ import {useEffect,useMemo,useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {Bike,CheckCircle2,Clock3,MapPin,Search,ShoppingBag,Truck,Utensils,Phone,RefreshCw} from 'lucide-react';
 
-export type AdminOrder={id:string;code:string;status:string;customer:string;phone:string;kitchen:string;address:string;codTotal:number;placedAt:string;riderId:string|null;riderName:string|null};
+export type AdminOrder={id:string;code:string;status:string;customer:string;phone:string;kitchen:string;address:string;codTotal:number;codCollected:boolean;placedAt:string;riderId:string|null;riderName:string|null};
 export type AvailableRider={id:string;name:string;phone:string};
 const choices:Record<string,{label:string;status:string;danger?:boolean}[]>={
  PLACED:[{label:'Accept order',status:'MERCHANT_ACCEPTED'},{label:'Cancel order',status:'CANCELLED',danger:true}],
@@ -59,6 +59,7 @@ export default function AdminOrderManager({initialOrders,availableRiders}:{initi
     <div><span>COD total</span><strong className="admin-order-price">৳{order.codTotal.toLocaleString('en-BD',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong><small>Cash on delivery</small></div>
    </div>
    {order.status==='READY_FOR_PICKUP'&&!order.riderId&&<div className="admin-dispatch-controls"><label htmlFor={'rider-'+order.id}>Assign an approved, online rider</label><div><select id={'rider-'+order.id} value={selected[order.id]||''} onChange={e=>setSelected(prev=>({...prev,[order.id]:e.target.value}))}><option value="">Select available rider</option>{availableRiders.map(r=><option key={r.id} value={r.id}>{r.name} · {r.phone}</option>)}</select><button disabled={busy===order.id||!selected[order.id]} onClick={()=>mutate(order,'dispatch')}>Assign rider</button></div></div>}
+   <p className="admin-order-tracking-link"><a href={'/orders/'+order.id}>View order details & live rider tracking ↗</a></p>
    {choices[order.status]?.length>0&&<div className="admin-order-actions">{choices[order.status].map(action=><button key={action.status} type="button" disabled={busy===order.id} className={action.danger?'danger':''} onClick={()=>mutate(order,'status',action.status)}>{busy===order.id?'Updating…':action.label}</button>)}</div>}
   </article>)}</div>
   {visible.length===0&&<div className="admin-empty"><ShoppingBag size={38}/><h3>{orders.length?'No matching orders':'No orders yet'}</h3><p>{orders.length?'Adjust your search or status filter.':'Orders will appear here once customers place them.'}</p></div>}
