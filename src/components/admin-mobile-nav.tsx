@@ -3,7 +3,7 @@
 import {useEffect,useState} from 'react';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
-import {LayoutDashboard,ClipboardCheck,Store,ShoppingBag,Menu,X,Bike,Users,Wallet,ShieldCheck,ChevronRight,Settings} from 'lucide-react';
+import {LayoutDashboard,ClipboardCheck,Store,ShoppingBag,Menu,X,Bike,Users,Wallet,ShieldCheck,ChevronRight,Settings,HandCoins} from 'lucide-react';
 import LogoutButton from '@/components/logout-button';
 
 type NavItem={href:string;label:string;icon:typeof LayoutDashboard};
@@ -17,6 +17,7 @@ const extra:NavItem[]=[
  {href:'/admin/riders',label:'Riders & dispatch',icon:Bike},
  {href:'/admin/customers',label:'Customers',icon:Users},
  {href:'/admin/finance',label:'COD & settlements',icon:Wallet},
+ {href:'/admin/settlements',label:'Merchant payouts',icon:HandCoins},
  {href:'/admin/audit',label:'Audit logs',icon:ShieldCheck},
  {href:'/admin/settings',label:'Delivery settings',icon:Settings},
 ];
