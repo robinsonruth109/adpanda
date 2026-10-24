@@ -1,11 +1,17 @@
 'use client';
 import {useMemo,useRef,useState} from 'react';
+import GoogleKitchenMap from './google-kitchen-map';
 type Props={latitude:string;longitude:string;onChange:(lat:string,lng:string)=>void};
 const TILE=256, SIZE=512;
 function clampLat(v:number){return Math.max(-85,Math.min(85,v))}
 function world(lat:number,lng:number,zoom:number){const sin=Math.sin(clampLat(lat)*Math.PI/180);const scale=TILE*2**zoom;return {x:(lng+180)/360*scale,y:(0.5-Math.log((1+sin)/(1-sin))/(4*Math.PI))*scale}}
 function geo(x:number,y:number,zoom:number){const scale=TILE*2**zoom;return {lat:180/Math.PI*Math.atan(Math.sinh(Math.PI*(1-2*y/scale))),lng:x/scale*360-180}}
-export default function KitchenMapPicker({latitude,longitude,onChange}:Props){
+export default function KitchenMapPicker(props:Props){
+ const key=process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+ if(key)return <GoogleKitchenMap {...props} apiKey={key}/>;
+ return <BasicKitchenMapPicker {...props}/>;
+}
+function BasicKitchenMapPicker({latitude,longitude,onChange}:Props){
  const [zoom,setZoom]=useState(18);
  const [locating,setLocating]=useState(false);
  const [center,setCenter]=useState<{lat:number;lng:number}>({lat:23.7602612,lng:88.948616});
