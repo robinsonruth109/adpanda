@@ -1,1 +1,26 @@
-import {db} from '@/lib/db';export const dynamic='force-dynamic';export default async function Page(){const orders=await db.order.findMany({orderBy:{placedAt:'desc'},take:100,include:{customer:{select:{name:true,phone:true}},kitchen:{select:{name:true}},delivery:{include:{rider:{include:{user:{select:{name:true}}}}}}}});return <section className="admin-workspace"><span className="admin-overline">ORDER OPERATIONS</span><h1>Orders</h1><p className="muted">Latest 100 orders. Read-only view; order mutations will be added with validated status transitions.</p><div className="admin-table-scroll"><table className="admin-data-table"><thead><tr><th>Order</th><th>Customer</th><th>Kitchen</th><th>Status</th><th>COD total</th><th>Rider</th><th>Placed at</th></tr></thead><tbody>{orders.map(o=><tr key={o.id}><td><strong>{o.code}</strong></td><td>{o.customer.name}<small>{o.customer.phone}</small></td><td>{o.kitchen.name}</td><td>{o.status.replaceAll('_',' ')}</td><td>৳{Number(o.codTotal).toFixed(2)}</td><td>{o.delivery?.rider.user.name||'Unassigned'}</td><td>{o.placedAt.toLocaleString('en-BD',{timeZone:'Asia/Dhaka'})}</td></tr>)}</tbody></table>{orders.length===0&&<div className="admin-empty">No orders placed yet.</div>}</div></section>}
+import {db} from '@/lib/db';
+import AdminOrderManager from '@/components/admin-order-manager';
+export const dynamic='force-dynamic';
+export default async function Page(){
+ const [orders,riders]=await Promise.all([
+  db.order.findMany({orderBy:{placedAt:'desc'},take:100,include:{
+   customer:{select:{name:true,phone:true}},
+   kitchen:{select:{name:true}},
+   address:{select:{details:true,landmark:true}},
+   delivery:{include:{rider:{include:{user:{select:{name:true}}}}}}
+  }}),
+  db.rider.findMany({where:{approved:true,status:'ONLINE'},include:{user:{select:{name:true,phone:true}}},orderBy:{user:{name:'asc'}}})
+ ]);
+ return <section className="admin-orders-page">
+  <div className="admin-breadcrumb">Operations / <strong>Orders & dispatch</strong></div>
+  <span className="admin-overline">ORDER OPERATIONS</span>
+  <h1>Order management</h1>
+  <p className="muted">Review orders, advance order statuses and manually assign delivery riders.</p>
+  <AdminOrderManager initialOrders={orders.map(o=>({
+   id:o.id,code:o.code,status:o.status,customer:o.customer.name,phone:o.customer.phone,kitchen:o.kitchen.name,
+   address:[o.address.details,o.address.landmark].filter(Boolean).join(' · '),
+   codTotal:Number(o.codTotal),placedAt:o.placedAt.toISOString(),riderId:o.delivery?.riderId||null,
+   riderName:o.delivery?.rider.user.name||null
+  }))} availableRiders={riders.map(r=>({id:r.id,name:r.user.name,phone:r.user.phone}))}/>
+ </section>;
+}
