@@ -22,7 +22,7 @@ export default async function Admin(){
    </div>
    <section id="merchants" className="admin-workspace">
     <div className="admin-section-heading"><div><span className="admin-overline">PARTNER OPERATIONS</span><h2>Merchant approvals</h2><p>Review kitchen details, verify locations and set your commission.</p></div><span className="admin-pending-pill">{pending} pending</span></div>
-    <MerchantReviews merchants={merchants.map(m=>({id:m.id,name:m.name,status:m.status,owner:m.members[0]?.user.name||'Unknown',phone:m.members[0]?.user.phone||'',kitchens:m.kitchens.map(k=>({name:k.name,address:k.address,latitude:Number(k.latitude),longitude:Number(k.longitude),commissionRate:k.commissionRate===null?10:Number(k.commissionRate)}))}))}/>
+    <MerchantReviews merchants={merchants.map(m=>({id:m.id,name:m.name,status:m.status,owner:m.members[0]?.user.name||'Unknown',phone:m.members[0]?.user.phone||'',kitchens:m.kitchens.map(k=>({id:k.id,name:k.name,address:k.address,latitude:Number(k.latitude),longitude:Number(k.longitude),commissionRate:k.commissionRate===null?10:Number(k.commissionRate)}))}))}/>
    </section>
  </>;
 }
