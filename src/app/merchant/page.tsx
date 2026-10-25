@@ -4,6 +4,7 @@ import Link from 'next/link';
 import {Store,ShoppingBag,Clock3,CheckCheck,Wallet,ArrowUpRight,UtensilsCrossed,Bell,MapPin,Truck} from 'lucide-react';
 import MerchantApplication from '@/components/merchant-application';
 import KitchenAvailability from '@/components/kitchen-availability';
+import {kitchenAvailability} from '@/lib/kitchen-hours';
 export const dynamic='force-dynamic';
 function dhakaStart(){
  const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Dhaka',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
@@ -46,7 +47,7 @@ export default async function MerchantDashboard(){
    </aside>
   </div>
   <section className="merchant-dashboard-surface merchant-dashboard-kitchens"><div className="merchant-surface-heading"><div><span className="merchant-kicker">KITCHEN CONTROLS</span><h2>My kitchens</h2></div><Link href="/merchant/settings">Store settings →</Link></div>
-   {merchants.flatMap(m=>m.kitchens.map(k=><div className="merchant-dashboard-kitchen" key={k.id}><div className="merchant-kitchen-overview"><span className="merchant-dashboard-order-symbol"><Store size={23}/></span><div><strong>{k.name}</strong><small><MapPin size={14}/>{k.address}</small><span className={'merchant-status-chip '+m.status.toLowerCase()}>{m.status}</span></div></div><div className="merchant-kitchen-details"><span>Platform commission: <strong>{k.commissionRate===null?'Not set':k.commissionRate.toString()+'%'}</strong></span><span>Menu items: <strong>{k.categories.reduce((n,c)=>n+c._count.items,0)}</strong></span></div>{m.status==='APPROVED'?<KitchenAvailability id={k.id} initial={k.acceptingOrders}/>:<p className="merchant-small-note">Kitchen must be approved before accepting orders.</p>}</div>))}
+   {merchants.flatMap(m=>m.kitchens.map(k=><div className="merchant-dashboard-kitchen" key={k.id}><div className="merchant-kitchen-overview"><span className="merchant-dashboard-order-symbol"><Store size={23}/></span><div><strong>{k.name}</strong><small><MapPin size={14}/>{k.address}</small><span className={'merchant-status-chip '+m.status.toLowerCase()}>{m.status}</span></div></div><div className="merchant-kitchen-details"><span>Platform commission: <strong>{k.commissionRate===null?'Not set':k.commissionRate.toString()+'%'}</strong></span><span>Menu items: <strong>{k.categories.reduce((n,c)=>n+c._count.items,0)}</strong></span></div>{m.status==='APPROVED'?<KitchenAvailability id={k.id} initial={kitchenAvailability({...k,merchant:{status:m.status}}).open} mode={k.availabilityMode}/>:<p className="merchant-small-note">Kitchen must be approved before accepting orders.</p>}</div>))}
   </section>
  </div>;
 }
