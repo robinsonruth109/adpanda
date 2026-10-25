@@ -2,10 +2,10 @@
 import {useEffect,useMemo,useState} from 'react';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
-import {MapPin,ShoppingBag,Plus,Minus,CheckCircle2} from 'lucide-react';
+import {MapPin,ShoppingBag,Plus,Minus,CheckCircle2,UtensilsCrossed} from 'lucide-react';
 import KitchenMapPicker from './kitchen-map-picker';
 
-type Food={id:string;name:string;description:string|null;price:number;available:boolean;category:string};
+type Food={id:string;name:string;description:string|null;price:number;available:boolean;category:string;hasImage:boolean;imageVersion:number};
 type Props={kitchenId:string;kitchenName:string;items:Food[];acceptingOrders:boolean;customerSignedIn:boolean;deliveryFee:number|null;radiusKm:number|null};
 export default function CustomerOrderFlow({kitchenId,kitchenName,items,acceptingOrders,customerSignedIn,deliveryFee,radiusKm}:Props){
  const router=useRouter();
@@ -34,7 +34,7 @@ export default function CustomerOrderFlow({kitchenId,kitchenName,items,accepting
   }catch(e){setError(e instanceof Error?e.message:'Could not place order')}finally{setBusy(false)}
  }
  return <div className="customer-order-flow"><section className="customer-menu"><div className="customer-menu-heading"><h2>Explore the menu</h2><p>Freshly prepared by {kitchenName}</p></div>
-  {items.map(food=><article className={'customer-food-row'+(!food.available?' sold-out':'')} key={food.id}><div><span className="customer-food-category">{food.category}</span><h3>{food.name}</h3><p>{food.description||'Made fresh to order'}</p><strong>৳{food.price.toFixed(2)}</strong></div><div className="customer-food-actions">{cart[food.id]>0?<div className="customer-quantity"><button aria-label={'Remove '+food.name} onClick={()=>change(food.id,-1)} type="button"><Minus size={17}/></button><span>{cart[food.id]}</span><button aria-label={'Add '+food.name} onClick={()=>change(food.id,1)} disabled={!food.available} type="button"><Plus size={17}/></button></div>:<button type="button" disabled={!food.available||!acceptingOrders} onClick={()=>change(food.id,1)} className="customer-add-btn">{food.available?'+ Add':'Sold out'}</button>}</div></article>)}
+  {items.map(food=><article className={'customer-food-row'+(!food.available?' sold-out':'')} key={food.id}><div className="customer-food-photo">{food.hasImage?<img src={'/api/media/menu/'+encodeURIComponent(food.id)+'?v='+food.imageVersion} alt={food.name} loading="lazy"/>:<UtensilsCrossed size={28}/>}</div><div className="customer-food-details"><span className="customer-food-category">{food.category}</span><h3>{food.name}</h3><p>{food.description||'Made fresh to order'}</p><strong>৳{food.price.toFixed(2)}</strong></div><div className="customer-food-actions">{cart[food.id]>0?<div className="customer-quantity"><button aria-label={'Remove '+food.name} onClick={()=>change(food.id,-1)} type="button"><Minus size={17}/></button><span>{cart[food.id]}</span><button aria-label={'Add '+food.name} onClick={()=>change(food.id,1)} disabled={!food.available} type="button"><Plus size={17}/></button></div>:<button type="button" disabled={!food.available||!acceptingOrders} onClick={()=>change(food.id,1)} className="customer-add-btn">{food.available?'+ Add':'Sold out'}</button>}</div></article>)}
   {!items.length&&<div className="admin-empty">This kitchen has not published any food items yet.</div>}
  </section><aside className="customer-cart"><div className="customer-cart-head"><ShoppingBag size={23}/><div><h2>Your bag</h2><small>{count} items</small></div></div>
   {lines.map(food=><div className="customer-cart-line" key={food.id}><div><strong>{food.name}</strong><small>৳{food.price.toFixed(2)} × {cart[food.id]}</small></div><div className="customer-quantity"><button aria-label={'Remove '+food.name} type="button" onClick={()=>change(food.id,-1)}>−</button><span>{cart[food.id]}</span><button aria-label={'Add '+food.name} type="button" onClick={()=>change(food.id,1)} disabled={!food.available}>+</button></div></div>)}
