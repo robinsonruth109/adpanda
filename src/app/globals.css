@@ -620,3 +620,40 @@ body:has(.merchant-shell){background:#f7f8fc}
  .merchant-topbar-end .merchant-store-pill{display:none}
 }
 @media(max-width:380px){.merchant-menu-overview>div{padding:11px}.merchant-menu-overview strong{font-size:21px}.merchant-page-content{padding-left:12px;padding-right:12px}.merchant-dashboard-kpi{padding:12px}.merchant-mobile-tab small{font-size:9px}}
+
+
+/* Merchant food images: private Railway bucket, signed-in editing */
+.merchant-image-control{width:112px;flex:0 0 112px;display:flex;flex-direction:column;align-items:stretch;gap:9px;min-width:0}
+.merchant-image-control .merchant-food-photo{display:flex;align-items:center;justify-content:center;width:112px;height:112px;flex:0 0 112px;background:#fff0f7;color:#e21b70;border:1px solid #f9ddeb;border-radius:12px;overflow:hidden}
+.merchant-food-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.merchant-image-actions{display:grid;gap:5px}
+.merchant-image-pick,.merchant-image-actions button{display:inline-flex;align-items:center;justify-content:center;gap:5px;border:1px solid #f4c9dc;background:#fff1f7;color:#d51f6b;font-size:10px;font-weight:750;border-radius:8px;padding:8px 6px;line-height:1.3;cursor:pointer}
+.merchant-image-pick input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.merchant-image-pick{position:relative}
+.merchant-image-pick:focus-within{outline:2px solid #e21b70;outline-offset:2px}
+.merchant-image-actions button.danger{background:#fff6f6;color:#ba3855;border-color:#f6dce2}
+.merchant-image-actions button:disabled{opacity:.5;cursor:not-allowed}
+.merchant-image-feedback{font-size:10px;line-height:1.5;color:#117c57;margin:0;overflow-wrap:anywhere}
+.merchant-image-feedback.error{color:#b83249}
+.merchant-new-food-image{display:flex;gap:17px;align-items:center;background:#fdf9fc;border:1px dashed #f2c5da;border-radius:14px;padding:18px;margin:17px 0}
+.merchant-new-food-image-preview{display:grid;place-items:center;flex:0 0 118px;width:118px;height:105px;overflow:hidden;background:#ffedf5;color:#e21b70;border-radius:12px}
+.merchant-new-food-image-preview img{width:100%;height:100%;object-fit:cover}
+.merchant-new-food-image>div:last-child{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0}
+.merchant-new-food-image strong{font-size:14px;color:#27283c}
+.merchant-new-food-image small{font-size:11px;line-height:1.5;color:#83889a}
+.merchant-new-food-image .merchant-image-pick{padding:10px 15px;font-size:12px}
+.merchant-image-remove-pending{border:0;background:transparent;color:#a44e6f;font-size:11px;cursor:pointer;text-decoration:underline;padding:2px}
+.customer-food-row .customer-food-photo{width:96px;height:96px;flex:0 0 96px;border:1px solid #f1e6ed;border-radius:14px;background:#fff0f7;display:grid;place-items:center;overflow:hidden;color:#e21b70}
+.customer-food-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.customer-food-details{min-width:0;flex:1}
+@media(max-width:650px){
+ .merchant-image-control{width:84px;flex-basis:84px}
+ .merchant-image-control .merchant-food-photo{width:84px;height:84px;flex-basis:84px}
+ .merchant-image-actions button,.merchant-image-pick{font-size:9px;padding:8px 3px}
+ .merchant-image-actions svg{width:12px;height:12px}
+ .merchant-new-food-image{padding:12px;gap:11px}
+ .merchant-new-food-image-preview{width:94px;height:94px;flex-basis:94px}
+ .customer-food-row{flex-wrap:wrap;align-items:flex-start}
+ .customer-food-row .customer-food-photo{height:86px;width:86px;flex-basis:86px}
+ .customer-food-actions{margin-left:auto}
+}
