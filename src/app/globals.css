@@ -992,3 +992,59 @@ body:has(.admin-shell)>.adp-customer-footer,body:has(.merchant-shell)>.adp-custo
 }
 
 .admin-brand-icon img,.merchant-brand-icon img{width:100%;height:100%;object-fit:contain;border-radius:9px}.admin-sidebar-brand strong,.merchant-brand strong{overflow-wrap:anywhere;line-height:1.2}.adp-customer-default-logo{overflow-wrap:anywhere}
+
+
+/* Guest COD Checkout — Bangla & English, mobile-first delivery drop-off address */
+.customer-guest-note{margin:11px 0 0;color:#149268;font-weight:800;font-size:12px;display:flex;justify-content:center;align-items:center;gap:6px}
+.customer-guest-checkout{width:min(760px,calc(100vw - 22px));max-width:760px;max-height:calc(100dvh - 36px);overflow-y:auto;overflow-x:hidden;padding:0!important;background:#fff;border-radius:22px!important;box-shadow:0 22px 80px #1b10284d}
+.customer-guest-checkout-header{position:sticky;top:0;background:#fff;padding:24px 27px 20px;display:flex;align-items:flex-start;justify-content:space-between;gap:15px;border-bottom:1px solid #f0eaf0;z-index:8}
+.customer-guest-checkout-header>div>span{color:#e21b70;font-size:10px;letter-spacing:1.7px;font-weight:900}
+.customer-guest-checkout-header h2{margin:10px 0 8px;font-size:25px;letter-spacing:-.6px;color:#22243b}
+.customer-guest-checkout-header p{font-size:12px;color:#808497;margin:0;line-height:1.7}
+.customer-guest-checkout .customer-checkout-close{position:static;flex:0 0 34px;width:34px;height:34px;background:#fff0f7;border:0;border-radius:50%;color:#d91a6c;font-size:25px;display:grid;place-items:center;line-height:1}
+.customer-guest-checkout>form{display:grid;gap:0}
+.customer-guest-checkout-section{padding:23px 27px;border-bottom:1px solid #f0edf3}
+.customer-guest-section-heading{display:flex;align-items:flex-start;gap:12px;margin-bottom:18px}
+.customer-guest-section-heading>span{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:12px;background:#fff0f7;color:#e21b70}
+.customer-guest-section-heading h3{font-size:16px;color:#29263c;margin:0 0 4px}
+.customer-guest-section-heading p{font-size:12px;color:#9294a3;margin:0;line-height:1.5}
+.customer-guest-input-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.customer-guest-checkout .customer-form-field{display:grid;gap:8px;font-size:12px;font-weight:800;color:#47475b;margin:0 0 14px}
+.customer-guest-checkout .customer-form-field>span b{color:#e21b70}
+.customer-guest-checkout .customer-form-field input,.customer-guest-checkout .customer-form-field textarea,.customer-guest-checkout .customer-form-field select{box-sizing:border-box;width:100%;min-width:0;min-height:45px;border:1px solid #dedfea;background:#fff;border-radius:10px;color:#28283d;padding:12px 13px;font-size:14px;outline:0;font-weight:500}
+.customer-guest-checkout .customer-form-field textarea{min-height:96px;resize:vertical}
+.customer-guest-checkout .customer-form-field input:focus,.customer-guest-checkout .customer-form-field textarea:focus,.customer-guest-checkout .customer-form-field select:focus{border-color:#e21b70;box-shadow:0 0 0 3px #e21b7019}
+.customer-guest-checkout .location-picker{width:100%;max-width:100%;padding:13px;border:1px solid #f0dce7;background:#fff9fc;border-radius:13px}
+.customer-guest-checkout .location-picker h3{font-size:14px;color:#2b293d}
+.customer-guest-checkout .location-picker p{font-size:12px}
+.customer-guest-checkout .location-picker-map{max-width:100%;width:100%;height:min(400px,55vw);aspect-ratio:16/10;max-height:430px;min-height:260px;touch-action:none}
+.customer-guest-checkout .location-picker-row{max-width:100%;width:100%}
+.customer-guest-checkout .location-picker-row input{min-height:40px}
+.customer-guest-checkout .customer-pin-confirm{display:flex;align-items:flex-start;gap:11px;background:#eef9f4;border:1px solid #c8e9d9;padding:14px 15px;margin-top:12px;border-radius:10px;color:#167452;font-size:12px;font-weight:750;line-height:1.65;cursor:pointer}
+.customer-guest-checkout .customer-pin-confirm input{accent-color:#149261;width:18px;height:18px;flex:0 0 18px;margin-top:1px}
+.customer-guest-checkout-bottom{position:sticky;bottom:0;background:#fff;z-index:8;border-top:1px solid #eee8f0;box-shadow:0 -8px 28px #38203808;padding:18px 27px 22px}
+.customer-guest-total{background:#faf8fb;border:1px solid #eee8f0;padding:13px 15px;border-radius:12px;margin-bottom:12px}
+.customer-guest-total>span{font-size:11px;color:#84899a}
+.customer-guest-total>div{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:5px}
+.customer-guest-total strong{font-size:14px;color:#2e2b41}
+.customer-guest-total b{font-size:21px;color:#e21b70}
+.customer-guest-checkout-bottom .customer-checkout-btn{width:100%;background:#e21b70;color:#fff;min-height:48px;border-radius:10px;font-size:14px}
+.customer-guest-checkout-footnote{margin:12px 0 0;display:flex;align-items:center;justify-content:center;gap:6px;color:#918e9e;font-size:11px}
+.customer-guest-success-note{background:#effbf6;border:1px solid #c9f1da;border-radius:12px;padding:16px;margin-top:16px;font-size:13px;color:#147851}
+.customer-guest-success-note p{font-size:12px;line-height:1.7;margin:6px 0 0}
+@media(max-width:640px){
+ .customer-guest-checkout{width:100%;max-width:none;min-height:0;max-height:100dvh;border-radius:17px 17px 0 0!important;margin-top:auto}
+ .customer-checkout-overlay{align-items:flex-end;justify-content:center;padding:0!important}
+ .customer-guest-checkout-header{padding:20px 17px 16px}
+ .customer-guest-checkout-header h2{font-size:22px}
+ .customer-guest-checkout-section{padding:19px 15px}
+ .customer-guest-section-heading{gap:10px}
+ .customer-guest-section-heading h3{font-size:14px}
+ .customer-guest-input-grid{grid-template-columns:1fr;gap:0}
+ .customer-guest-checkout .customer-form-field input,.customer-guest-checkout .customer-form-field textarea{font-size:16px}
+ .customer-guest-checkout .location-picker{padding:10px}
+ .customer-guest-checkout .location-picker-map{height:320px;min-height:250px;aspect-ratio:auto}
+ .customer-guest-checkout-bottom{padding:13px 15px calc(17px + env(safe-area-inset-bottom,0px))}
+ .customer-guest-total b{font-size:19px}
+ .customer-guest-checkout-footnote{font-size:10px;text-align:center}
+}
