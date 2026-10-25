@@ -102,6 +102,11 @@ model Kitchen {
  commissionRate Decimal? @db.Decimal(5,2)
  active Boolean @default(false)
  acceptingOrders Boolean @default(false)
+ availabilityMode String @default("MANUAL") @db.VarChar(16)
+ weeklyHours Json?
+ bannerKey String? @db.VarChar(300)
+ bannerMimeType String? @db.VarChar(32)
+ bannerVersion Int @default(0)
  approvedAt DateTime?
  merchant Merchant @relation(fields:[merchantId],references:[id])
  zone ServiceZone? @relation(fields:[zoneId],references:[id])
