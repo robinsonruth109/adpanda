@@ -30,7 +30,7 @@ export default async function MerchantMenuPage(){
   categories:k.categories.map(cat=>({id:cat.id,name:cat.name,active:cat.active})),
   items:k.categories.flatMap(cat=>cat.items.map(item=>({
    id:item.id,name:item.name,description:item.description||'',
-   price:Number(item.price),available:item.available,categoryId:cat.id
+   price:Number(item.price),available:item.available,categoryId:cat.id,hasImage:Boolean(item.imageKey),imageVersion:item.imageVersion
   })))
  })));
  return <section className="merchant-workspace-page">
