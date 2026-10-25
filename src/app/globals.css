@@ -1048,3 +1048,5 @@ body:has(.admin-shell)>.adp-customer-footer,body:has(.merchant-shell)>.adp-custo
  .customer-guest-total b{font-size:19px}
  .customer-guest-checkout-footnote{font-size:10px;text-align:center}
 }
+
+.customer-guest-track-link{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:14px}.customer-guest-track-link>button{border:0;border-radius:10px;background:#e21b70;color:white;font-weight:850;font-size:12px;padding:12px 15px;display:inline-flex;gap:8px;align-items:center}.customer-guest-track-link>small{color:#238258;font-size:11px;line-height:1.5}
