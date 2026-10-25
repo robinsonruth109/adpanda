@@ -20,7 +20,7 @@ export function validHours(value:unknown):DayHours|null{
  return result.success?result.data:null;
 }
 function minutes(value:string){const [hours,mins]=value.split(':').map(Number);return hours*60+mins;}
-function isOpenFromDay(d:DayHours,nowMinutes:number,previousDay:boolean){
+function isOpenFromDay(d:DayHours[number],nowMinutes:number,previousDay:boolean){
  if(d.closed)return false;
  const start=minutes(d.open),end=minutes(d.close);
  if(start<end)return !previousDay&&nowMinutes>=start&&nowMinutes<end;
