@@ -10,7 +10,7 @@ type NavItem={href:string;label:string;icon:typeof LayoutDashboard};
 const tabs:NavItem[]=[
  {href:'/admin',label:'Home',icon:LayoutDashboard},
  {href:'/admin/merchants',label:'Merchants',icon:ClipboardCheck},
- {href:'/admin/kitchens',label:'Kitchens',icon:Store},
+ {href:'/admin/kitchens',label:'Stores',icon:Store},
  {href:'/admin/orders',label:'Orders',icon:ShoppingBag},
 ];
 const extra:NavItem[]=[
