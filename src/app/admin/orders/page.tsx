@@ -17,7 +17,7 @@ export default async function Page(){
   <h1>Order management</h1>
   <p className="muted">Review orders, advance order statuses and manually assign delivery riders.</p>
   <AdminOrderManager initialOrders={orders.map(o=>({
-   id:o.id,code:o.code,status:o.status,customer:o.customer.name,phone:o.customer.phone,kitchen:o.kitchen.name,
+   id:o.id,code:o.code,status:o.status,customer:o.recipientName||o.customer?.name||'Guest customer',phone:o.recipientPhone||o.customer?.phone||'',kitchen:o.kitchen.name,
    address:[o.address.details,o.address.landmark].filter(Boolean).join(' · '),
    codTotal:Number(o.codTotal),codCollected:Boolean(o.codCollection),placedAt:o.placedAt.toISOString(),riderId:o.delivery?.riderId||null,
    riderName:o.delivery?.rider.user.name||null
