@@ -14,6 +14,11 @@ enum UserRole {
   DISPATCHER
   ACCOUNTANT
 }
+enum StoreType {
+ FOOD
+ GROCERY
+ STATIONERY
+}
 enum KitchenStatus {
   PENDING
   APPROVED
@@ -91,6 +96,7 @@ model ServiceZone {
 }
 model Kitchen {
  id String @id @default(cuid())
+ storeType StoreType @default(FOOD)
  merchantId String
  zoneId String?
  name String
@@ -113,6 +119,7 @@ model Kitchen {
  categories MenuCategory[]
  orders Order[]
  @@index([merchantId,active])
+ @@index([storeType,active])
 }
 model MenuCategory {
  id String @id @default(cuid())
@@ -125,6 +132,8 @@ model MenuCategory {
 }
 model MenuItem {
  id String @id @default(cuid())
+ unitLabel String @default("piece") @db.VarChar(32)
+ stockQty Int?
  categoryId String
  name String
  description String? @db.Text
