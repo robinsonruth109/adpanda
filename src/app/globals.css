@@ -990,3 +990,5 @@ body:has(.admin-shell)>.adp-customer-footer,body:has(.merchant-shell)>.adp-custo
  .adp-home-section-heading h2{font-size:23px}
  .adp-home-category-row>a{min-width:125px;padding:15px}
 }
+
+.admin-brand-icon img,.merchant-brand-icon img{width:100%;height:100%;object-fit:contain;border-radius:9px}.admin-sidebar-brand strong,.merchant-brand strong{overflow-wrap:anywhere;line-height:1.2}.adp-customer-default-logo{overflow-wrap:anywhere}
