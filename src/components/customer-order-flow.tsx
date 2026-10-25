@@ -3,10 +3,11 @@ import {useEffect,useMemo,useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {MapPin,ShoppingBag,Plus,Minus,CheckCircle2,UtensilsCrossed,Phone,UserRound,House,ShieldCheck,ArrowLeft,Navigation} from 'lucide-react';
 import KitchenMapPicker from './kitchen-map-picker';
+import {storeTypeContent,type MarketplaceType} from '@/lib/store-types';
 
-type Food={id:string;name:string;description:string|null;price:number;available:boolean;category:string;hasImage:boolean;imageVersion:number};
-type Props={kitchenId:string;kitchenName:string;items:Food[];acceptingOrders:boolean;deliveryFee:number|null;radiusKm:number|null};
-export default function CustomerOrderFlow({kitchenId,kitchenName,items,acceptingOrders,deliveryFee,radiusKm}:Props){
+type Food={id:string;name:string;description:string|null;price:number;available:boolean;category:string;hasImage:boolean;imageVersion:number;unitLabel:string;stockQty:number|null};
+type Props={storeType:MarketplaceType;kitchenId:string;kitchenName:string;items:Food[];acceptingOrders:boolean;deliveryFee:number|null;radiusKm:number|null};
+export default function CustomerOrderFlow({storeType,kitchenId,kitchenName,items,acceptingOrders,deliveryFee,radiusKm}:Props){
  const router=useRouter();
  const [cart,setCart]=useState<Record<string,number>>({}),[checkout,setCheckout]=useState(false),[requestId,setRequestId]=useState('');
  const [latitude,setLatitude]=useState(''),[longitude,setLongitude]=useState(''),[pinConfirmed,setPinConfirmed]=useState(false);
@@ -14,12 +15,13 @@ export default function CustomerOrderFlow({kitchenId,kitchenName,items,accepting
  const [recipientName,setRecipientName]=useState(''),[recipientPhone,setRecipientPhone]=useState(''),[guestAccess,setGuestAccess]=useState('');
  const [busy,setBusy]=useState(false),[error,setError]=useState('');
  useEffect(()=>{setRequestId(crypto.randomUUID());setGuestAccess(Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join(''))},[]);
+ const kind=storeTypeContent[storeType];
  const lines=items.filter(i=>(cart[i.id]||0)>0);
  const subtotal=useMemo(()=>lines.reduce((sum,item)=>sum+item.price*(cart[item.id]||0),0),[lines,cart]);
  const fee=deliveryFee??0,configured=deliveryFee!==null&&radiusKm!==null;
  const canOrder=acceptingOrders&&configured;
  const count=lines.reduce((s,i)=>s+(cart[i.id]||0),0);
- function change(id:string,delta:number){setError('');setCart(v=>({...v,[id]:Math.max(0,Math.min(20,(v[id]||0)+delta))}))}
+ function change(id:string,delta:number){setError('');const product=items.find(i=>i.id===id);const limit=product?.stockQty===null||product?.stockQty===undefined?20:Math.max(0,Math.min(20,product.stockQty));setCart(v=>({...v,[id]:Math.max(0,Math.min(limit,(v[id]||0)+delta))}))}
  async function place(e:React.FormEvent<HTMLFormElement>){
   e.preventDefault();if(busy)return;
   if(!pinConfirmed||!latitude||!longitude){setError('📍 ডেলিভারি লোকেশন pin করে Confirm করুন।');return}
@@ -36,16 +38,16 @@ export default function CustomerOrderFlow({kitchenId,kitchenName,items,accepting
    router.refresh();
   }catch(e){setError(e instanceof Error?e.message:'Could not place order')}finally{setBusy(false)}
  }
- return <div className="customer-order-flow"><section className="customer-menu"><div className="customer-menu-heading"><h2>Explore the menu</h2><p>Freshly prepared by {kitchenName}</p></div>
-  {items.map(food=><article className={'customer-food-row'+(!food.available?' sold-out':'')} key={food.id}><div className="customer-food-photo">{food.hasImage?<img src={'/api/media/menu/'+encodeURIComponent(food.id)+'?v='+food.imageVersion} alt={food.name} loading="lazy"/>:<UtensilsCrossed size={28}/>}</div><div className="customer-food-details"><span className="customer-food-category">{food.category}</span><h3>{food.name}</h3><p>{food.description||'Made fresh to order'}</p><strong>৳{food.price.toFixed(2)}</strong></div><div className="customer-food-actions">{cart[food.id]>0?<div className="customer-quantity"><button aria-label={'Remove '+food.name} onClick={()=>change(food.id,-1)} type="button"><Minus size={17}/></button><span>{cart[food.id]}</span><button aria-label={'Add '+food.name} onClick={()=>change(food.id,1)} disabled={!food.available} type="button"><Plus size={17}/></button></div>:<button type="button" disabled={!food.available||!acceptingOrders} onClick={()=>change(food.id,1)} className="customer-add-btn">{food.available?'+ Add':'Sold out'}</button>}</div></article>)}
-  {!items.length&&<div className="admin-empty">This kitchen has not published any food items yet.</div>}
+ return <div className="customer-order-flow"><section className="customer-menu"><div className="customer-menu-heading"><h2>{storeType==='FOOD'?'Explore the menu':'Browse products'}</h2><p>{storeType==='FOOD'?'Freshly prepared by '+kitchenName:'Shop products from '+kitchenName+' · '+kind.bn}</p></div>
+  {items.map(food=><article className={'customer-food-row'+(!food.available?' sold-out':'')} key={food.id}><div className="customer-food-photo">{food.hasImage?<img src={'/api/media/menu/'+encodeURIComponent(food.id)+'?v='+food.imageVersion} alt={food.name} loading="lazy"/>:<UtensilsCrossed size={28}/>}</div><div className="customer-food-details"><span className="customer-food-category">{food.category}</span><h3>{food.name}</h3><p>{food.description||(storeType==='FOOD'?'Made fresh to order':'Everyday essentials')}</p><strong>৳{food.price.toFixed(2)} <small>/ {food.unitLabel}</small></strong></div><div className="customer-food-actions">{cart[food.id]>0?<div className="customer-quantity"><button aria-label={'Remove '+food.name} onClick={()=>change(food.id,-1)} type="button"><Minus size={17}/></button><span>{cart[food.id]}</span><button aria-label={'Add '+food.name} onClick={()=>change(food.id,1)} disabled={!food.available||(food.stockQty!==null&&cart[food.id]>=food.stockQty)} type="button"><Plus size={17}/></button></div>:<button type="button" disabled={!food.available||!acceptingOrders} onClick={()=>change(food.id,1)} className="customer-add-btn">{food.available?'+ Add':'Sold out'}</button>}</div></article>)}
+  {!items.length&&<div className="admin-empty">This store has not published any products yet.</div>}
  </section><aside className="customer-cart"><div className="customer-cart-head"><ShoppingBag size={23}/><div><h2>Your bag</h2><small>{count} items</small></div></div>
-  {lines.map(food=><div className="customer-cart-line" key={food.id}><div><strong>{food.name}</strong><small>৳{food.price.toFixed(2)} × {cart[food.id]}</small></div><div className="customer-quantity"><button aria-label={'Remove '+food.name} type="button" onClick={()=>change(food.id,-1)}>−</button><span>{cart[food.id]}</span><button aria-label={'Add '+food.name} type="button" onClick={()=>change(food.id,1)} disabled={!food.available}>+</button></div></div>)}
-  {count===0&&<p className="muted">Your bag is empty. Add food to start.</p>}
-  <div className="customer-cart-totals"><p><span>Food subtotal</span><strong>৳{subtotal.toFixed(2)}</strong></p><p><span>Delivery fee</span><strong>{configured?'৳'+fee.toFixed(2):'Not configured'}</strong></p><p className="customer-cart-grand"><span>COD total</span><strong>{configured?'৳'+(subtotal+fee).toFixed(2):'—'}</strong></p></div>
-  <button className="btn customer-checkout-btn" type="button" disabled={!canOrder||count===0} onClick={()=>{setError('');setCheckout(true)}}>{!acceptingOrders?'Kitchen বন্ধ আছে':!configured?'Delivery setup pending':'চেকআউট করুন · Cash on Delivery'}</button>
+  {lines.map(food=><div className="customer-cart-line" key={food.id}><div><strong>{food.name}</strong><small>{food.unitLabel} · ৳{food.price.toFixed(2)} × {cart[food.id]}</small></div><div className="customer-quantity"><button aria-label={'Remove '+food.name} type="button" onClick={()=>change(food.id,-1)}>−</button><span>{cart[food.id]}</span><button aria-label={'Add '+food.name} type="button" onClick={()=>change(food.id,1)} disabled={!food.available||(food.stockQty!==null&&cart[food.id]>=food.stockQty)}>+</button></div></div>)}
+  {count===0&&<p className="muted">Your bag is empty. Add products to start.</p>}
+  <div className="customer-cart-totals"><p><span>{storeType==='FOOD'?'Food subtotal':'Products subtotal'}</span><strong>৳{subtotal.toFixed(2)}</strong></p><p><span>Delivery fee</span><strong>{configured?'৳'+fee.toFixed(2):'Not configured'}</strong></p><p className="customer-cart-grand"><span>COD total</span><strong>{configured?'৳'+(subtotal+fee).toFixed(2):'—'}</strong></p></div>
+  <button className="btn customer-checkout-btn" type="button" disabled={!canOrder||count===0} onClick={()=>{setError('');setCheckout(true)}}>{!acceptingOrders?'দোকান বন্ধ আছে':!configured?'Delivery setup pending':'চেকআউট করুন · Cash on Delivery'}</button>
   <p className="customer-guest-note"><ShieldCheck size={14}/> Login ছাড়াই অর্ডার করুন — COD Only</p>
-  {configured&&<p className="muted" style={{fontSize:11}}>Delivery available within {radiusKm} km straight-line distance of the kitchen, subject to confirmed entrance pin.</p>}
+  {configured&&<p className="muted" style={{fontSize:11}}>Delivery available within {radiusKm} km straight-line distance of the shop, subject to confirmed entrance pin.</p>}
  </aside>
 
  {checkout&&<div className="customer-checkout-overlay" role="presentation"><div className="customer-checkout-card customer-guest-checkout" role="dialog" aria-modal="true" aria-label="Guest checkout and delivery address">
