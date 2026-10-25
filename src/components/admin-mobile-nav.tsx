@@ -3,7 +3,7 @@
 import {useEffect,useState} from 'react';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
-import {LayoutDashboard,ClipboardCheck,Store,ShoppingBag,Menu,X,Bike,Users,Wallet,ShieldCheck,ChevronRight,Settings,HandCoins} from 'lucide-react';
+import {LayoutDashboard,ClipboardCheck,Store,ShoppingBag,Menu,X,Bike,Users,Wallet,ShieldCheck,ChevronRight,Settings,HandCoins,Palette} from 'lucide-react';
 import LogoutButton from '@/components/logout-button';
 
 type NavItem={href:string;label:string;icon:typeof LayoutDashboard};
@@ -20,6 +20,7 @@ const extra:NavItem[]=[
  {href:'/admin/settlements',label:'Merchant payouts',icon:HandCoins},
  {href:'/admin/audit',label:'Audit logs',icon:ShieldCheck},
  {href:'/admin/settings',label:'Delivery settings',icon:Settings},
+ {href:'/admin/branding',label:'Branding & content',icon:Palette},
 ];
 export default function AdminMobileNav({pending=0}:{pending?:number}){
  const pathname=usePathname();
