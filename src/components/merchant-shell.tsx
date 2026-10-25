@@ -8,7 +8,7 @@ type Item={href:string;title:string;icon:typeof LayoutDashboard};
 const navigation:Item[]=[
  {href:'/merchant',title:'Dashboard',icon:LayoutDashboard},
  {href:'/merchant/orders',title:'Orders',icon:ShoppingBag},
- {href:'/merchant/menu',title:'Menu',icon:BookOpen},
+ {href:'/merchant/menu',title:'Products',icon:BookOpen},
  {href:'/merchant/earnings',title:'Earnings',icon:Wallet},
  {href:'/merchant/settings',title:'Store settings',icon:Settings},
 ];
@@ -26,14 +26,14 @@ export default function MerchantShell({children,brandName,brandLogoId,name,kitch
  return <div className="merchant-shell">
   <aside className="merchant-sidebar" aria-label="Merchant sidebar">
    <Link href="/merchant" className="merchant-brand"><span className="merchant-brand-icon">{brandLogoId?<img src={"/api/media/branding/"+brandLogoId} alt={brandName+" logo"}/>: "🐼"}</span><div><strong>{brandName}</strong><small>MERCHANT HUB</small></div></Link>
-   <div className="merchant-shop-identity"><span>YOUR KITCHEN</span><strong>{kitchenName}</strong><small className={approved?(acceptingOrders?'is-open':'is-closed'):'is-pending'}>{!approved?'Pending approval':acceptingOrders?'● Accepting orders':'● Currently closed'}</small></div>
+   <div className="merchant-shop-identity"><span>YOUR SHOP</span><strong>{kitchenName}</strong><small className={approved?(acceptingOrders?'is-open':'is-closed'):'is-pending'}>{!approved?'Pending approval':acceptingOrders?'● Accepting orders':'● Currently closed'}</small></div>
    <nav className="merchant-sidebar-links"><p>WORKSPACE</p>{nav()}</nav>
    <div className="merchant-sidebar-bottom"><div className="merchant-sidebar-account"><div className="merchant-account-avatar">{name.slice(0,1).toUpperCase()}</div><div><strong>{name}</strong><small>Merchant account</small></div></div><LogoutButton/></div>
   </aside>
   <div className="merchant-main">
    <header className="merchant-topbar">
     <div className="merchant-topbar-start"><button type="button" className="merchant-mobile-menu-button" aria-label="Open merchant navigation" onClick={()=>setDrawer(true)}><Menu size={22}/></button><div><small>Merchant workspace</small><strong>{current}</strong></div></div>
-    <div className="merchant-topbar-end"><span className={'merchant-store-pill'+(approved&&acceptingOrders?' open':'')}>{!approved?'Approval pending':acceptingOrders?'Open for orders':'Kitchen closed'}</span><Link href="/merchant/orders?status=PLACED" className="merchant-topbar-bell" aria-label={newOrders?newOrders+' new orders':'See orders'}><Bell size={20}/>{newOrders>0&&<b>{newOrders>99?'99+':newOrders}</b>}</Link><span className="merchant-topbar-avatar" title={name}>{name.slice(0,1).toUpperCase()}</span></div>
+    <div className="merchant-topbar-end"><span className={'merchant-store-pill'+(approved&&acceptingOrders?' open':'')}>{!approved?'Approval pending':acceptingOrders?'Open for orders':'Shop closed'}</span><Link href="/merchant/orders?status=PLACED" className="merchant-topbar-bell" aria-label={newOrders?newOrders+' new orders':'See orders'}><Bell size={20}/>{newOrders>0&&<b>{newOrders>99?'99+':newOrders}</b>}</Link><span className="merchant-topbar-avatar" title={name}>{name.slice(0,1).toUpperCase()}</span></div>
    </header>
    <div className="merchant-page-content">{children}</div>
   </div>
