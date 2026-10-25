@@ -2,8 +2,9 @@
 import {useMemo,useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {BookOpen,Search,Plus,UtensilsCrossed,SquarePen,Check,Undo2} from 'lucide-react';
+import {MenuImageUpload,NewFoodImagePicker} from '@/components/menu-image-upload';
 type Category={id:string;name:string;active:boolean};
-type Item={id:string;name:string;description:string;price:number;available:boolean;categoryId:string};
+type Item={id:string;name:string;description:string;price:number;available:boolean;categoryId:string;hasImage:boolean;imageVersion:number};
 export default function MerchantMenuWorkspace({kitchens}:{kitchens:{id:string;name:string;approved:boolean;categories:Category[];items:Item[]}[]}){
  const router=useRouter();
  const [kitchenId,setKitchenId]=useState(kitchens[0]?.id||'');
@@ -12,6 +13,7 @@ export default function MerchantMenuWorkspace({kitchens}:{kitchens:{id:string;na
  const [categoryId,setCategoryId]=useState('ALL');
  const [search,setSearch]=useState('');
  const [newCategory,setNewCategory]=useState(''),[newName,setNewName]=useState(''),[newDescription,setNewDescription]=useState(''),[newPrice,setNewPrice]=useState(''),[chosenCat,setChosenCat]=useState('');
+ const [newImageFile,setNewImageFile]=useState<File|null>(null);
  const [editing,setEditing]=useState<string|null>(null),[draft,setDraft]=useState({name:'',description:'',price:''});
  const [busy,setBusy]=useState(false),[notice,setNotice]=useState('');
  const kitchen=kitchens.find(k=>k.id===kitchenId);
@@ -25,7 +27,20 @@ export default function MerchantMenuWorkspace({kitchens}:{kitchens:{id:string;na
  }
  async function addFood(e:React.FormEvent<HTMLFormElement>){
   e.preventDefault();if(busy||!kitchen||!selectedCat)return;setBusy(true);setNotice('');
-  try{const price=Number(newPrice);if(!Number.isFinite(price)||price<=0)throw Error('Enter a valid price');const r=await fetch('/api/merchant/menu',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kitchenId,categoryName:selectedCat.name,name:newName.trim(),description:newDescription.trim(),price})});const d=await r.json();if(!r.ok)throw Error(d.error||'Unable to save food');setItems(v=>({...v,[kitchenId]:[...foods,{id:d.itemId,name:newName.trim(),description:newDescription.trim(),price,available:true,categoryId:selectedCat.id}]}));setNewName('');setNewDescription('');setNewPrice('');setNotice('Food item added successfully.');router.refresh()}catch(e){setNotice(e instanceof Error?e.message:'Could not add item')}finally{setBusy(false)}
+  try{const price=Number(newPrice);if(!Number.isFinite(price)||price<=0)throw Error('Enter a valid price');const r=await fetch('/api/merchant/menu',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kitchenId,categoryName:selectedCat.name,name:newName.trim(),description:newDescription.trim(),price})});const d=await r.json();if(!r.ok)throw Error(d.error||'Unable to save food');setItems(v=>({...v,[kitchenId]:[...foods,{id:d.itemId,name:newName.trim(),description:newDescription.trim(),price,available:true,categoryId:selectedCat.id,hasImage:false,imageVersion:0}]}));
+   let imageError='';
+   if(newImageFile){
+    try{
+     const form=new FormData();form.append('image',newImageFile);
+     const upload=await fetch('/api/merchant/menu/'+encodeURIComponent(d.itemId)+'/image',{method:'POST',body:form,credentials:'same-origin'});
+     const photo=await upload.json();
+     if(!upload.ok)throw Error(photo.error||'Image upload failed');
+     setItems(v=>({...v,[kitchenId]:(v[kitchenId]||[]).map(i=>i.id===d.itemId?{...i,hasImage:true,imageVersion:photo.imageVersion}:i)}));
+    }catch(uploadError){imageError=uploadError instanceof Error?uploadError.message:'Image upload failed'}
+   }
+   setNewName('');setNewDescription('');setNewPrice('');setNewImageFile(null);
+   setNotice(imageError?'Food saved, but image upload failed: '+imageError+'. You can retry from the item card.':'Food item and image saved successfully.');
+   router.refresh()}catch(e){setNotice(e instanceof Error?e.message:'Could not add item')}finally{setBusy(false)}
  }
  async function modify(food:Item,changes:{available?:boolean;name?:string;description?:string;price?:number}){
   if(busy)return;setBusy(true);setNotice('');
@@ -41,14 +56,14 @@ export default function MerchantMenuWorkspace({kitchens}:{kitchens:{id:string;na
     <form className="merchant-new-category" onSubmit={addCategory}><label htmlFor="merchant-category-name">New category</label><input id="merchant-category-name" required minLength={2} maxLength={80} value={newCategory} onChange={e=>setNewCategory(e.target.value)} placeholder="e.g. Momo, Rice, Drinks"/><button type="submit" disabled={busy}><Plus size={17}/> Create category</button></form>
    </aside>
    <div className="merchant-menu-main"><div className="merchant-menu-search"><Search size={19}/><input aria-label="Search food menu" placeholder="Search food name or description" value={search} onChange={e=>setSearch(e.target.value)}/></div>
-    <div className="merchant-food-list">{shown.map(food=><article className="merchant-food-card" key={food.id}><div className="merchant-food-icon"><UtensilsCrossed size={26}/></div><div className="merchant-food-info"><div className="merchant-food-title"><h3>{food.name}</h3><span className={'merchant-status-chip '+(food.available?'open':'closed')}>{food.available?'Available':'Sold out'}</span></div><p>{food.description||'No description yet'}</p><strong>৳{food.price.toFixed(2)}</strong><div className="merchant-food-card-actions"><button type="button" disabled={busy} onClick={()=>{setEditing(food.id);setDraft({name:food.name,description:food.description,price:String(food.price)})}}><SquarePen size={16}/> Edit</button><button type="button" disabled={busy} onClick={()=>modify(food,{available:!food.available})}>{food.available?'Mark sold out':'Make available'}</button></div>
+    <div className="merchant-food-list">{shown.map(food=><article className="merchant-food-card" key={food.id}><MenuImageUpload itemId={food.id} hasImage={food.hasImage} imageVersion={food.imageVersion} onChanged={(hasImage,imageVersion)=>setItems(v=>({...v,[kitchenId]:(v[kitchenId]||foods).map(i=>i.id===food.id?{...i,hasImage,imageVersion}:i)}))}/><div className="merchant-food-info"><div className="merchant-food-title"><h3>{food.name}</h3><span className={'merchant-status-chip '+(food.available?'open':'closed')}>{food.available?'Available':'Sold out'}</span></div><p>{food.description||'No description yet'}</p><strong>৳{food.price.toFixed(2)}</strong><div className="merchant-food-card-actions"><button type="button" disabled={busy} onClick={()=>{setEditing(food.id);setDraft({name:food.name,description:food.description,price:String(food.price)})}}><SquarePen size={16}/> Edit</button><button type="button" disabled={busy} onClick={()=>modify(food,{available:!food.available})}>{food.available?'Mark sold out':'Make available'}</button></div>
      {editing===food.id&&<form className="merchant-item-edit" onSubmit={e=>{e.preventDefault();modify(food,{name:draft.name.trim(),description:draft.description.trim(),price:Number(draft.price)})}}><label>Food name<input minLength={2} maxLength={150} required value={draft.name} onChange={e=>setDraft(v=>({...v,name:e.target.value}))}/></label><label>Description<textarea maxLength={2000} value={draft.description} onChange={e=>setDraft(v=>({...v,description:e.target.value}))}/></label><label>Price (৳)<input type="number" required min=".01" step=".01" value={draft.price} onChange={e=>setDraft(v=>({...v,price:e.target.value}))}/></label><div><button type="submit" disabled={busy}>Save changes</button><button type="button" onClick={()=>setEditing(null)}><Undo2 size={15}/> Cancel</button></div></form>}
     </div></article>)}</div>
     {!shown.length&&<div className="merchant-empty-state"><UtensilsCrossed size={36}/><h3>No food items found</h3><p>Add a food item or change the selected category.</p></div>}
    </div>
   </div>
   <section className="merchant-add-item-card" id="add-item"><div className="merchant-menu-panel-heading"><div><span className="merchant-kicker">EXPAND YOUR MENU</span><h2>Add new food item</h2></div><Plus size={24}/></div>
-   {cats.length===0?<p>Create a category first to add your first item.</p>:<form onSubmit={addFood}><div className="merchant-menu-form-grid"><label>Category<select value={selectedCat?.id||''} onChange={e=>setChosenCat(e.target.value)} required>{cats.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label><label>Food name<input placeholder="e.g. Chicken Momo (6 pcs)" minLength={2} maxLength={150} required value={newName} onChange={e=>setNewName(e.target.value)}/></label><label>Price (৳)<input type="number" min=".01" step=".01" required placeholder="0.00" value={newPrice} onChange={e=>setNewPrice(e.target.value)}/></label><label className="merchant-menu-full">Description<textarea rows={3} placeholder="Describe ingredients, quantity and serving" maxLength={2000} value={newDescription} onChange={e=>setNewDescription(e.target.value)}/></label></div><button className="merchant-primary-button" disabled={busy}><Plus size={17}/> Add food item</button></form>}
+   {cats.length===0?<p>Create a category first to add your first item.</p>:<form onSubmit={addFood}><NewFoodImagePicker file={newImageFile} onChange={setNewImageFile}/><div className="merchant-menu-form-grid"><label>Category<select value={selectedCat?.id||''} onChange={e=>setChosenCat(e.target.value)} required>{cats.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label><label>Food name<input placeholder="e.g. Chicken Momo (6 pcs)" minLength={2} maxLength={150} required value={newName} onChange={e=>setNewName(e.target.value)}/></label><label>Price (৳)<input type="number" min=".01" step=".01" required placeholder="0.00" value={newPrice} onChange={e=>setNewPrice(e.target.value)}/></label><label className="merchant-menu-full">Description<textarea rows={3} placeholder="Describe ingredients, quantity and serving" maxLength={2000} value={newDescription} onChange={e=>setNewDescription(e.target.value)}/></label></div><button className="merchant-primary-button" disabled={busy}><Plus size={17}/> Add food item</button></form>}
   </section>
   </>}
  </div>;
