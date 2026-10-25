@@ -24,7 +24,7 @@ export default function CustomerOrderFlow({kitchenId,kitchenName,items,accepting
   e.preventDefault();if(busy)return;
   if(!pinConfirmed||!latitude||!longitude){setError('📍 ডেলিভারি লোকেশন pin করে Confirm করুন।');return}
   if(!recipientName.trim()||recipientName.trim().length<2){setError('আপনার পূর্ণ নাম লিখুন।');return}
-  if(!/^01[3-9]\\d{8}$/.test(recipientPhone)){setError('সঠিক ১১ ডিজিটের বাংলাদেশি মোবাইল নম্বর দিন।');return}
+  if(!/^01[3-9]\d{8}$/.test(recipientPhone)){setError('সঠিক ১১ ডিজিটের বাংলাদেশি মোবাইল নম্বর দিন।');return}
   if(details.trim().length<8){setError('বাসা / রাস্তা / এলাকার বিস্তারিত ঠিকানা লিখুন।');return}
   if(!requestId||!guestAccess){setError('পৃষ্ঠা Refresh করে আবার চেষ্টা করুন।');return}
   setBusy(true);setError('');
@@ -65,7 +65,7 @@ export default function CustomerOrderFlow({kitchenId,kitchenName,items,accepting
   </div>
   <div className="customer-guest-checkout-bottom"><div className="customer-guest-total"><span>খাবার ৳{subtotal.toFixed(2)} + ডেলিভারি ৳{fee.toFixed(2)}</span><div><strong>মোট Cash on Delivery</strong><b>৳{(subtotal+fee).toFixed(2)}</b></div></div>
    {error&&<p role="alert" className="customer-order-error">{error}</p>}
-   <button type="submit" className="btn customer-checkout-btn" disabled={busy||!pinConfirmed||!recipientName.trim()||!/^01[3-9]\\d{8}$/.test(recipientPhone)||details.trim().length<8}>{busy?'অর্ডার নেওয়া হচ্ছে…':'অর্ডার কনফার্ম করুন · COD'}</button>
+   <button type="submit" className="btn customer-checkout-btn" disabled={busy||!pinConfirmed||!recipientName.trim()||!/^01[3-9]\d{8}$/.test(recipientPhone)||details.trim().length<8}>{busy?'অর্ডার নেওয়া হচ্ছে…':'অর্ডার কনফার্ম করুন · COD'}</button>
    <p className="customer-guest-checkout-footnote"><ShieldCheck size={14}/> কোনো অগ্রিম Payment নেই। Rider-এর হাতে Cash পরিশোধ করুন।</p>
   </div>
  </form></div></div>}
