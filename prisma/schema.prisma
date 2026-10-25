@@ -318,3 +318,18 @@ model Session {
  @@index([userId])
  @@index([expiresAt])
 }
+
+model BrandAsset {
+ id String @id @default(cuid())
+ kind String @db.VarChar(16)
+ objectKey String @db.VarChar(300)
+ mimeType String @db.VarChar(32)
+ title String? @db.VarChar(140)
+ subtitle String? @db.VarChar(300)
+ ctaLabel String? @db.VarChar(50)
+ href String? @db.VarChar(200)
+ sortOrder Int @default(0)
+ active Boolean @default(true)
+ createdAt DateTime @default(now())
+ @@index([kind,active,sortOrder])
+}
