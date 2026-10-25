@@ -138,21 +138,24 @@ model MenuItem {
 }
 model Address {
  id String @id @default(cuid())
- userId String
+ userId String?
  zoneId String?
  label String?
  details String
  landmark String?
  latitude Decimal @db.Decimal(10,7)
  longitude Decimal @db.Decimal(10,7)
- user User @relation(fields:[userId],references:[id])
+ user User? @relation(fields:[userId],references:[id])
  zone ServiceZone? @relation(fields:[zoneId],references:[id])
  orders Order[]
 }
 model Order {
  id String @id @default(cuid())
  code String @unique
- customerId String
+ customerId String?
+ recipientName String? @db.VarChar(100)
+ recipientPhone String? @db.VarChar(20)
+ guestTokenHash String? @unique @db.Char(64)
  kitchenId String
  addressId String
  status OrderStatus @default(PLACED)
@@ -165,7 +168,7 @@ model Order {
  merchantPayable Decimal @db.Decimal(12,2)
  placedAt DateTime @default(now())
  updatedAt DateTime @updatedAt
- customer User @relation("CustomerOrders",fields:[customerId],references:[id])
+ customer User? @relation("CustomerOrders",fields:[customerId],references:[id])
  kitchen Kitchen @relation(fields:[kitchenId],references:[id])
  address Address @relation(fields:[addressId],references:[id])
  items OrderItem[]
