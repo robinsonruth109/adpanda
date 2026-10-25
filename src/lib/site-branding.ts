@@ -22,16 +22,16 @@ export type Branding=z.infer<typeof brandSchema>;
 export const defaultBranding:Branding={
  brandName:'AdPanda',
  homeEyebrow:'FRESH FROM YOUR NEIGHBOURHOOD',
- headline:'Hungry? Good food is just a few taps away.',
- description:'Find your favourite local kitchens, explore fresh food, and get it delivered to your door in Alamdanga.',
- heroButton:'Explore restaurants',
+ headline:'Food, groceries & essentials. Delivered to your door.',
+ description:'Order meals, everyday groceries, stationery and school supplies from trusted local shops in Alamdanga.',
+ heroButton:'Explore local shops',
  heroLink:'/kitchens',
- kitchensTitle:'Kitchens near you',
- foodTitle:'What are you craving?',
- foodDescription:'Freshly prepared favourites from our local kitchen partners.',
- merchantHeadline:'Have a kitchen? Grow with AdPanda.',
- merchantDescription:'Showcase your menu, reach more customers and manage your orders in one place.',
- footerDescription:'Food you love, from kitchens in your neighbourhood. Order online and pay cash on delivery.',
+ kitchensTitle:'Local shops near you',
+ foodTitle:'Products you will love',
+ foodDescription:'Browse food, groceries, stationery and essentials from verified local shops.',
+ merchantHeadline:'Own a restaurant, grocery or stationery shop?',
+ merchantDescription:'Bring your local shop online. Sell food, groceries or stationery with simple COD delivery.',
+ footerDescription:'Food, groceries, stationery and everyday essentials from your neighbourhood. Pay cash on delivery.',
  footerNote:'Serving Alamdanga · Cash on delivery'
 };
 export async function getBranding():Promise<Branding>{
