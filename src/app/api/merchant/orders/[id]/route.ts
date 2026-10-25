@@ -3,6 +3,7 @@ import {z} from 'zod';
 import {db} from '@/lib/db';
 import {currentUser} from '@/lib/auth';
 import {isTrustedMutation} from '@/lib/request-security';
+import {releaseCancelledOrderStock} from '@/lib/order-inventory';
 import type {OrderStatus} from '@prisma/client';
 
 const transitions:Partial<Record<OrderStatus,OrderStatus[]>>={
@@ -26,6 +27,7 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
    if(!transitions[order.status]?.includes(next))return {error:'Cannot change this order from '+order.status+' to '+next,code:409};
    const updated=await tx.order.updateMany({where:{id,status:order.status},data:{status:next}});
    if(updated.count!==1)return {error:'Order updated by someone else. Refresh.',code:409};
+   if(next==='CANCELLED')await releaseCancelledOrderStock(tx,id);
    await tx.orderEvent.create({data:{orderId:id,fromStatus:order.status,toStatus:next,actorId:user.id,note:next==='CANCELLED'?'Kitchen declined before acceptance':'Kitchen workflow update'}});
    await tx.auditLog.create({data:{actorId:user.id,action:'MERCHANT_ORDER_STATUS',entityType:'Order',entityId:id,metadata:{from:order.status,to:next,merchantId:order.kitchen.merchantId}}});
    return {ok:true,status:next};
