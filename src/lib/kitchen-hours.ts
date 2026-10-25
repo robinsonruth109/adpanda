@@ -13,7 +13,7 @@ export const hoursSchema=z.array(z.object({
  for(const d of hours)if(!d.closed&&d.open===d.close)ctx.addIssue({code:'custom',message:dayNames[d.day]+' opening and closing times must differ'});
 });
 export type DayHours=z.infer<typeof hoursSchema>;
-export const defaultKitchenHours:DayHours=dayNames.map((_,day)=>({day,closed:day===5,open:'10:00',close:'22:00'}));
+export const defaultKitchenHours:DayHours=dayNames.map((_,day)=>({day,closed:false,open:'10:00',close:'22:00'}));
 export type AvailabilityRecord={acceptingOrders:boolean;availabilityMode:string;weeklyHours:unknown;active?:boolean;merchant?:{status:string}};
 export function validHours(value:unknown):DayHours|null{
  const result=hoursSchema.safeParse(value);
