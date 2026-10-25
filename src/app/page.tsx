@@ -11,7 +11,7 @@ export default async function Home(){
   getBranding(),getPublicBrandAssets(),
   db.kitchen.findMany({where:{active:true,merchant:{status:'APPROVED'}},orderBy:{name:'asc'},take:12}),
   db.menuItem.findMany({
-   where:{available:true,category:{active:true,kitchen:{active:true,merchant:{status:'APPROVED'}}}},
+   where:{available:true,OR:[{stockQty:null},{stockQty:{gt:0}}],category:{active:true,kitchen:{active:true,merchant:{status:'APPROVED'}}}},
    include:{category:{select:{name:true,kitchen:{select:{id:true,name:true,slug:true,storeType:true,active:true,acceptingOrders:true,availabilityMode:true,weeklyHours:true}}}}},
    orderBy:{name:'asc'},take:18
   })
@@ -28,7 +28,7 @@ export default async function Home(){
     <div className="adp-home-vertical-grid">{storeTypes.map(t=><Link key={t} href={'/kitchens?type='+t} className={'adp-home-vertical '+t.toLowerCase()}>
      <span className="adp-home-vertical-emoji">{storeTypeContent[t].emoji}</span><div><small>{storeTypeContent[t].bn}</small><h3>{storeTypeContent[t].name}</h3><p>{storeTypeContent[t].tagline}</p><span>Explore shops <ArrowRight size={16}/></span></div></Link>)}</div>
    </section>
-   {uniqueCategories.length>0&&<section className="adp-home-categories"><div className="adp-home-section-heading"><div><span className="adp-home-overline">WHAT SOUNDS GOOD?</span><h2>Explore your cravings</h2></div></div><div className="adp-home-category-row">{uniqueCategories.map((cat,index)=><Link href={'/kitchens?q='+encodeURIComponent(cat)} key={cat}><span>{['🥟','🍗','🍔','🍛','🍜','🍕','🥘','🥗'][index]}</span><strong>{cat}</strong><ArrowRight size={16}/></Link>)}</div></section>}
+   {uniqueCategories.length>0&&<section className="adp-home-categories"><div className="adp-home-section-heading"><div><span className="adp-home-overline">WHAT SOUNDS GOOD?</span><h2>Browse popular categories</h2></div></div><div className="adp-home-category-row">{uniqueCategories.map((cat,index)=><Link href={'/kitchens?q='+encodeURIComponent(cat)} key={cat}><span>{['🥟','🍗','🍔','🍛','🍜','🍕','🥘','🥗'][index]}</span><strong>{cat}</strong><ArrowRight size={16}/></Link>)}</div></section>}
    <section className="adp-home-kitchen-section"><div className="adp-home-section-heading"><div><span className="adp-home-overline">YOUR NEIGHBOURHOOD, YOUR FOOD</span><h2>{branding.kitchensTitle}</h2><p>Verified restaurants, grocery shops and stationery stores near you.</p></div><Link href="/kitchens" className="adp-home-see-all">See all kitchens <ArrowRight size={18}/></Link></div>
     {kitchens.length>0?<div className="adp-home-kitchen-grid">{kitchens.map(k=>{
      const status=kitchenAvailability({...k,merchant:{status:'APPROVED'}});
