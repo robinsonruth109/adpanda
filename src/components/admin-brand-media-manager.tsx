@@ -67,7 +67,7 @@ export default function BrandMediaManager({initial}:{initial:Asset[]}){
       <label>Title<input value={draft(a).title||''} onChange={e=>change(a,{title:e.target.value})}/></label>
       <label>Subtitle<input value={draft(a).subtitle||''} onChange={e=>change(a,{subtitle:e.target.value})}/></label>
       <div className="brand-asset-edit-cols"><label>Button<input value={draft(a).ctaLabel||''} onChange={e=>change(a,{ctaLabel:e.target.value})}/></label><label>Link<input value={draft(a).href||'/kitchens'} onChange={e=>change(a,{href:e.target.value})}/></label></div>
-      <div className="brand-asset-actions"><button type="button" onClick={()=>save(a,{active:!draft(a).active})} disabled={busy}>{draft(a).active?<EyeOff size={15}/>:<Eye size={15}/>} {draft(a).active?'Hide':'Show'}</button>
+      <label>Display order (smaller appears first)<input type="number" min="0" max="999" step="1" value={draft(a).sortOrder} onChange={e=>change(a,{sortOrder:Math.max(0,Math.min(999,Number(e.target.value)||0))})}/></label><div className="brand-asset-actions"><button type="button" onClick={()=>save(a,{active:!draft(a).active})} disabled={busy}>{draft(a).active?<EyeOff size={15}/>:<Eye size={15}/>} {draft(a).active?'Hide':'Show'}</button>
       <button type="button" disabled={busy} onClick={()=>save(a,{sortOrder:Math.max(0,draft(a).sortOrder-1)})}><MoveUp size={15}/></button>
       <button type="button" disabled={busy} onClick={()=>save(a,{sortOrder:draft(a).sortOrder+1})}><MoveDown size={15}/></button>
       <button type="button" className="brand-save-mini" disabled={busy} onClick={()=>save(a)}><Save size={15}/> Save</button></div>
