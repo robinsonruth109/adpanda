@@ -4,6 +4,7 @@ import {currentUser} from '@/lib/auth';
 import {deliveryPolicy} from '@/lib/delivery-policy';
 import CustomerOrderFlow from '@/components/customer-order-flow';
 import {Store,MapPin} from 'lucide-react';
+import {kitchenAvailability} from '@/lib/kitchen-hours';
 export const dynamic='force-dynamic';
 export default async function KitchenPage({params}:{params:Promise<{slug:string}>}){
  const {slug}=await params;
@@ -12,10 +13,11 @@ export default async function KitchenPage({params}:{params:Promise<{slug:string}
   deliveryPolicy(),currentUser()
  ]);
  if(!kitchen||!kitchen.active||kitchen.merchant.status!=='APPROVED')notFound();
+ const availability=kitchenAvailability(kitchen);
  const items=kitchen.categories.flatMap(c=>c.items.map(item=>({id:item.id,name:item.name,description:item.description,price:Number(item.price),available:item.available,category:c.name,hasImage:Boolean(item.imageKey),imageVersion:item.imageVersion})));
  return <main className="live-kitchen-page container">
-  <div className="live-kitchen-banner"><Store size={49}/><span className={kitchen.acceptingOrders?'live-open-pill':'live-closed-pill'}>{kitchen.acceptingOrders?'Open for orders':'Currently closed'}</span></div>
-  <div className="live-kitchen-header"><h1>{kitchen.name}</h1><p><MapPin size={17}/>{kitchen.address}</p><p className="muted">{kitchen.description||'Local food prepared fresh'} · Cash on delivery only</p></div>
-  <CustomerOrderFlow kitchenId={kitchen.id} kitchenName={kitchen.name} items={items} acceptingOrders={kitchen.acceptingOrders} customerSignedIn={user?.role==='CUSTOMER'} deliveryFee={policy?Number(policy.fee):null} radiusKm={policy?.radius??null}/>
+  <div className="live-kitchen-banner">{kitchen.bannerKey?<img className="kitchen-banner-photo" src={"/api/media/kitchens/"+kitchen.id+"/banner?v="+kitchen.bannerVersion} alt={kitchen.name+" cover photo"}/>:<Store size={49}/>}<span className={availability.open?'live-open-pill':'live-closed-pill'}>{availability.open?'Open for orders':'Currently closed'}</span></div>
+  <div className="live-kitchen-header"><h1>{kitchen.name}</h1><p><MapPin size={17}/>{kitchen.address}</p><p className="muted">{kitchen.description||'Local food prepared fresh'} · Cash on delivery only</p><p className="muted">{availability.reason} · Hours use Bangladesh time (Asia/Dhaka)</p></div>
+  <CustomerOrderFlow kitchenId={kitchen.id} kitchenName={kitchen.name} items={items} acceptingOrders={availability.open} customerSignedIn={user?.role==='CUSTOMER'} deliveryFee={policy?Number(policy.fee):null} radiusKm={policy?.radius??null}/>
  </main>;
 }
