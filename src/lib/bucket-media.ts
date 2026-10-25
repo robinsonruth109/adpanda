@@ -32,6 +32,9 @@ export function menuMediaKey(itemId:string,extension:ImageFormat['ext']){
 export function kitchenBannerMediaKey(kitchenId:string,extension:ImageFormat['ext']){
  return 'media/kitchen-banners/'+kitchenId+'/'+randomUUID()+'.'+extension;
 }
+export function brandingMediaKey(kind:string,extension:ImageFormat['ext']){
+ return 'media/branding/'+kind.toLowerCase()+'/'+randomUUID()+'.'+extension;
+}
 export async function uploadBucketMedia(key:string,body:Buffer,mime:ImageFormat['mime']){
  const {client,name}=config();
  await client.send(new PutObjectCommand({Bucket:name,Key:key,Body:body,ContentType:mime,CacheControl:'private, max-age=0'}));
