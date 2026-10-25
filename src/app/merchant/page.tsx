@@ -15,7 +15,7 @@ export default async function MerchantDashboard(){
  const user=await currentUser();
  if(!user)return <main className="section container"><h1>Become an AdPanda merchant</h1><p>Open your cloud kitchen in Alamdanga. Sign in to apply.</p><div className="links"><Link href="/merchant/signup" className="btn">Become a merchant</Link><Link href="/merchant/login" className="btn secondary">Merchant sign in</Link></div></main>;
  const merchants=await db.merchant.findMany({where:{members:{some:{userId:user.id}}},include:{kitchens:{include:{categories:{include:{_count:{select:{items:true}}}}}}}});
- if(!merchants.length)return <main className="section container"><div className="eyebrow">Merchant onboarding</div><h1>Welcome, {user.name}</h1><p>Register your first kitchen for Admin approval.</p><MerchantApplication/></main>;
+ if(!merchants.length)return <main className="section container"><div className="eyebrow">Merchant onboarding</div><h1>Welcome, {user.name}</h1><p>Register your food kitchen, grocery shop or stationery shop for Admin approval.</p><MerchantApplication/></main>;
  const ids=merchants.flatMap(m=>m.kitchens.map(k=>k.id)),today=dhakaStart();
  const [todayOrders,activeOrders,totalOrders,deliveredToday,recent,completed,allItems]=await Promise.all([
   db.order.count({where:{kitchenId:{in:ids},placedAt:{gte:today}}}),
