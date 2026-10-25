@@ -6,6 +6,7 @@ import {db} from '@/lib/db';
 import {requireRole} from '@/lib/auth';
 import {isTrustedMutation} from '@/lib/request-security';
 import {deliveryPolicy,distanceKm,money} from '@/lib/delivery-policy';
+import {kitchenAvailability} from '@/lib/kitchen-hours';
 
 const input=z.object({
  requestId:z.string().uuid(),
@@ -36,7 +37,7 @@ export async function POST(request:Request){
  try{
   const order=await db.$transaction(async tx=>{
    const kitchen=await tx.kitchen.findUnique({where:{id:payload.kitchenId},include:{merchant:{select:{status:true}}}});
-   if(!kitchen||!kitchen.active||!kitchen.acceptingOrders||kitchen.merchant.status!=='APPROVED')throw Error('Kitchen is not accepting orders');
+   if(!kitchen||!kitchen.active||kitchen.merchant.status!=='APPROVED'||!kitchenAvailability(kitchen).open)throw Error('Kitchen is not accepting orders');
    if(kitchen.commissionRate===null)throw Error('Kitchen commission is not configured');
    if(distanceKm(Number(kitchen.latitude),Number(kitchen.longitude),payload.address.latitude,payload.address.longitude)>policy.radius)throw Error('Delivery location is outside this kitchen service radius');
    const ids=payload.items.map(i=>i.menuItemId);
