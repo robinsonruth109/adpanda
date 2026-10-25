@@ -125,6 +125,9 @@ model MenuItem {
  description String? @db.Text
  price Decimal @db.Decimal(12,2)
  available Boolean @default(true)
+ imageKey String? @db.VarChar(300)
+ imageMimeType String? @db.VarChar(32)
+ imageVersion Int @default(0)
  category MenuCategory @relation(fields:[categoryId],references:[id])
  orderItems OrderItem[]
 }
