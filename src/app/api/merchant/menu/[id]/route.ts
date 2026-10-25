@@ -8,7 +8,9 @@ const schema=z.object({
  available:z.boolean().optional(),
  name:z.string().trim().min(2).max(150).optional(),
  description:z.string().trim().max(2000).optional(),
- price:z.number().finite().positive().max(100000).optional()
+ price:z.number().finite().positive().max(100000).optional(),
+ unitLabel:z.string().trim().min(1).max(32).optional(),
+ stockQty:z.number().int().min(0).max(1000000).nullable().optional()
 }).refine(data=>Object.keys(data).length>0);
 export async function PATCH(request:Request,{params}:{params:Promise<{id:string}>}){
  if(!isTrustedMutation(request))return NextResponse.json({error:'Invalid origin'},{status:403});
