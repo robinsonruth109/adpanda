@@ -657,3 +657,68 @@ body:has(.merchant-shell){background:#f7f8fc}
  .customer-food-row .customer-food-photo{height:86px;width:86px;flex-basis:86px}
  .customer-food-actions{margin-left:auto}
 }
+
+
+/* Kitchen Banner + Business Hours — AdPanda Merchant Hub */
+.merchant-banner-manager{display:grid;gap:13px;max-width:1050px}
+.merchant-banner-preview{width:100%;height:clamp(170px,23vw,330px);background:linear-gradient(120deg,#fbe6f0,#fff5f9);border:1px dashed #f0bacf;display:grid;place-items:center;color:#e21b70;border-radius:16px;overflow:hidden}
+.merchant-banner-preview img{width:100%;height:100%;object-fit:cover;display:block}
+.merchant-banner-preview>div{display:grid;place-items:center;gap:12px;font-size:13px;font-weight:800}
+.merchant-banner-manager>p{margin:0;font-size:12px;color:#86899d}
+.merchant-banner-buttons{display:flex;gap:11px;flex-wrap:wrap;align-items:center}
+.merchant-banner-buttons label{position:relative;cursor:pointer}
+.merchant-banner-buttons label:focus-within{outline:2px solid #e21b70;outline-offset:3px}
+.merchant-banner-buttons input[type=file]{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.merchant-banner-remove{display:flex;align-items:center;justify-content:center;gap:7px;color:#be315f;font-size:12px;font-weight:800;border:1px solid #f6c8d9;background:#fff2f7;border-radius:11px;padding:13px 16px}
+.merchant-hours-manager{border:1px solid #e7e7ef;border-radius:16px;overflow:hidden;background:#fff}
+.merchant-hours-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:21px;background:#faf9fc;border-bottom:1px solid #eeeeF3}
+.merchant-hours-summary>div{display:grid;gap:6px}
+.merchant-hours-summary strong{font-size:16px;color:#30374a}
+.merchant-hours-summary small{font-size:12px;color:#8c91a1}
+.merchant-hours-summary>span{border-radius:20px;background:#ffedf1;color:#b53d55;font-size:11px;font-weight:850;padding:8px 12px}
+.merchant-hours-summary>span.is-open{background:#e5f9ed;color:#117c51}
+.merchant-hours-control{display:flex;flex-wrap:wrap;gap:10px;padding:18px;border-bottom:1px solid #ededf3}
+.merchant-hours-control button{display:inline-flex;gap:8px;align-items:center;justify-content:center;padding:12px 15px;border:1px solid #ebe7ef;border-radius:10px;background:#f8f8fa;color:#4d5468;font-size:12px;font-weight:850}
+.merchant-hours-control button.merchant-hours-open{background:#e6f8ef;color:#0c8759;border-color:#bee8d3}
+.merchant-hours-control button.merchant-hours-close{background:#fff1f5;color:#c23765;border-color:#f5cfdd}
+.merchant-hours-control button.merchant-hours-auto.active{background:#e21b70;border-color:#e21b70;color:#fff}
+.merchant-hours-control button:disabled{opacity:.5;cursor:not-allowed}
+.merchant-hours-table-head{padding:19px 19px 5px}
+.merchant-hours-table-head>div{display:flex;align-items:center;gap:9px;color:#e21b70}
+.merchant-hours-table-head strong{color:#262940;font-size:17px}
+.merchant-hours-table-head p{font-size:12px;color:#9297a5;margin:9px 0}
+.merchant-hours-days{display:grid;gap:0;padding:8px 20px}
+.merchant-hours-day{display:grid;grid-template-columns:120px 105px minmax(0,1fr);gap:14px;align-items:center;border-bottom:1px solid #f0f0f5;padding:14px 0}
+.merchant-hours-day:last-child{border:0}
+.merchant-hours-day>strong{font-size:13px;color:#303448}
+.merchant-hours-day-off{display:flex;align-items:center;gap:7px;font-size:12px;color:#6e758a;font-weight:700;white-space:nowrap}
+.merchant-hours-day-off input{height:17px;width:17px;accent-color:#e21b70}
+.merchant-hours-day>div{display:flex;gap:10px;align-items:center;justify-content:flex-end}
+.merchant-hours-day>div>span{font-size:11px;color:#969aab}
+.merchant-hours-day>div label{font-size:11px;color:#72798a;font-weight:750;display:flex;align-items:center;gap:9px}
+.merchant-hours-day input[type=time]{border:1px solid #dfe2eb;padding:10px;border-radius:9px;background:#fff;font-size:14px;color:#30364a;min-width:0}
+.merchant-hours-day.day-off{background:#fffafd}
+.merchant-hours-day.day-off input[type=time]{opacity:.45}
+.merchant-hours-save{padding:16px 20px 20px;border-top:1px solid #edeef4}
+.merchant-hours-save p{font-size:11px;color:#9197a6;line-height:1.7;margin:13px 0 0}
+.merchant-hours-manager>.merchant-inline-alert{margin:0 20px 20px}
+.kitchen-banner-photo,.kitchen-directory-cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.live-kitchen-banner,.live-kitchen-art{overflow:hidden}
+.live-kitchen-banner>.live-open-pill,.live-kitchen-banner>.live-closed-pill{z-index:2}
+.live-kitchen-art>span{z-index:2}
+@media(max-width:850px){
+ .merchant-hours-day{grid-template-columns:110px 90px minmax(0,1fr);gap:9px}
+ .merchant-hours-day>div{gap:7px}
+ .merchant-hours-day>div label{gap:5px}
+}
+@media(max-width:690px){
+ .merchant-hours-day{grid-template-columns:1fr auto;gap:8px;padding:13px 0}
+ .merchant-hours-day>div{grid-column:1/-1;justify-content:flex-start;flex-wrap:wrap}
+ .merchant-hours-day>div label{flex:1;justify-content:space-between}
+ .merchant-hours-day input[type=time]{width:100%;min-width:0;max-width:175px}
+ .merchant-hours-control button{flex:1 1 135px}
+ .merchant-hours-days{padding:8px 14px}
+ .merchant-hours-table-head{padding:16px 14px 5px}
+ .merchant-hours-save{padding:16px 14px}
+ .merchant-banner-preview{height:180px}
+}
