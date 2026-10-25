@@ -62,8 +62,21 @@ export async function POST(request:Request){
     const product=indexed.get(i.menuItemId);
     if(!product)throw Error('Unavailable food item');
     const unitPrice=money(new Prisma.Decimal(product.price));
-    return {menuItemId:product.id,itemName:product.name,unitPrice,quantity:i.quantity,lineTotal:money(unitPrice.mul(i.quantity))};
+    return {menuItemId:product.id,itemName:product.name+(product.unitLabel==='piece'?'':' · '+product.unitLabel),unitPrice,quantity:i.quantity,lineTotal:money(unitPrice.mul(i.quantity))};
    });
+   // Atomically reserve managed stock inside the same database transaction as the COD order.
+   // Products with NULL stockQty are untracked (existing food items stay backward compatible).
+   for(const i of payload.items){
+    const product=indexed.get(i.menuItemId);
+    if(!product)throw Error('Unavailable food item');
+    if(product.stockQty!==null){
+     const reserved=await tx.menuItem.updateMany({
+      where:{id:product.id,available:true,stockQty:{gte:i.quantity}},
+      data:{stockQty:{decrement:i.quantity}}
+     });
+     if(reserved.count!==1)throw Error('Product stock is insufficient. Please reduce quantity.');
+    }
+   }
    const subtotal=money(lines.reduce((sum,i)=>sum.add(i.lineTotal),new Prisma.Decimal(0)));
    if(subtotal.lte(0)||subtotal.gt(100000))throw Error('Invalid order subtotal');
    const commissionRate=new Prisma.Decimal(kitchen.commissionRate);
@@ -96,7 +109,7 @@ export async function POST(request:Request){
     return NextResponse.json({ok:true,orderId:existing.id,code,guestAccess:customer?null:payload.guestAccess});
   }
   const message=error instanceof Error?error.message:'Order could not be placed';
-  const safe=['Kitchen is not accepting orders','Kitchen commission is not configured','Delivery location is outside this kitchen service radius','One or more food items are not available','Unavailable food item','Invalid order subtotal'];
+  const safe=['Kitchen is not accepting orders','Kitchen commission is not configured','Delivery location is outside this kitchen service radius','One or more food items are not available','Unavailable food item','Invalid order subtotal','Product stock is insufficient. Please reduce quantity.'];
   if(safe.includes(message))return NextResponse.json({error:message},{status:409});
   console.error('Customer order creation failed',error);
   return NextResponse.json({error:'অর্ডারটি নেওয়া যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।'},{status:500});
