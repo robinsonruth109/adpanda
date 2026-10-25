@@ -3,6 +3,7 @@ import {z} from 'zod';
 import {db} from '@/lib/db';
 import {requireRole} from '@/lib/auth';
 import {isTrustedMutation} from '@/lib/request-security';
+import {releaseCancelledOrderStock} from '@/lib/order-inventory';
 import type {OrderStatus} from '@prisma/client';
 
 const schema=z.object({status:z.enum(['MERCHANT_ACCEPTED','PREPARING','READY_FOR_PICKUP','PICKED_UP','OUT_FOR_DELIVERY','DELIVERED','CANCELLED','FAILED']),note:z.string().trim().max(500).optional()});
@@ -30,6 +31,7 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
    if(['PICKED_UP','OUT_FOR_DELIVERY','DELIVERED','FAILED'].includes(status)&&!order.delivery)return {error:'Assign a rider first',code:409};
    const updated=await tx.order.updateMany({where:{id,status:order.status},data:{status}});
    if(updated.count!==1)return {error:'Order changed, refresh and try again',code:409};
+   if(status==='CANCELLED')await releaseCancelledOrderStock(tx,id);
    if(order.delivery){
     if(status==='PICKED_UP')await tx.deliveryAssignment.update({where:{orderId:id},data:{pickedUpAt:new Date()}});
     if(status==='DELIVERED')await tx.deliveryAssignment.update({where:{orderId:id},data:{deliveredAt:new Date()}});
