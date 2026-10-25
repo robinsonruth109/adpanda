@@ -22,7 +22,7 @@ const extra:NavItem[]=[
  {href:'/admin/settings',label:'Delivery settings',icon:Settings},
  {href:'/admin/branding',label:'Branding & content',icon:Palette},
 ];
-export default function AdminMobileNav({pending=0}:{pending?:number}){
+export default function AdminMobileNav({pending=0,brandName='AdPanda'}:{pending?:number;brandName?:string}){
  const pathname=usePathname();
  const [more,setMore]=useState(false);
  useEffect(()=>{setMore(false)},[pathname]);
@@ -37,7 +37,7 @@ export default function AdminMobileNav({pending=0}:{pending?:number}){
   {more&&<div className="admin-mobile-menu-layer">
    <button className="admin-mobile-scrim" aria-label="Close admin menu" type="button" onClick={()=>setMore(false)}/>
    <section className="admin-mobile-more-sheet" role="dialog" aria-modal="true" aria-label="More admin pages">
-    <div className="admin-mobile-more-heading"><div><span>AdPanda</span><strong>More admin tools</strong></div><button type="button" aria-label="Close menu" onClick={()=>setMore(false)}><X size={21}/></button></div>
+    <div className="admin-mobile-more-heading"><div><span>{brandName}</span><strong>More admin tools</strong></div><button type="button" aria-label="Close menu" onClick={()=>setMore(false)}><X size={21}/></button></div>
     <div className="admin-mobile-menu-links">
      {extra.map(item=><Link href={item.href} key={item.href} className={'admin-mobile-menu-link'+(pathname===item.href?' active':'')} onClick={()=>setMore(false)}><item.icon size={20}/><span>{item.label}</span><ChevronRight size={17}/></Link>)}
     </div>
