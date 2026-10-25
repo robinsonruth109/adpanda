@@ -20,5 +20,5 @@ export default function MerchantApplication(){
  <div className="flex"><label>Latitude<input required type="number" step="any" min="-90" max="90" value={latitude} onChange={e=>{setLatitude(e.target.value);setConfirmed(false)}} style={{width:'100%',padding:12}}/></label><label>Longitude<input required type="number" step="any" min="-180" max="180" value={longitude} onChange={e=>{setLongitude(e.target.value);setConfirmed(false)}} style={{width:'100%',padding:12}}/></label></div>
  <KitchenMapPicker latitude={latitude} longitude={longitude} onChange={(a,b)=>{setLatitude(a);setLongitude(b);setConfirmed(false)}}/>
  <label style={{display:"flex",alignItems:"center",gap:10}}><input type="checkbox" required checked={confirmed} onChange={e=>setConfirmed(e.target.checked)}/>এই Pin দোকানের আসল প্রবেশপথে বসানো হয়েছে / Confirm shop entrance</label>
- {message&&<p role="status">{message}</p>}<button disabled={busy} className="btn">{busy?'Submitting...':'{'Submit '+kind.singular+' for approval'}'}</button></form>
+ {message&&<p role="status">{message}</p>}<button disabled={busy} className="btn">{busy?'Submitting...':'Submit '+kind.singular+' for approval'}</button></form>
 }
