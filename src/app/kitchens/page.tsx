@@ -5,7 +5,7 @@ import {Store,MapPin,ArrowRight} from 'lucide-react';
 export const dynamic='force-dynamic';
 export default async function Kitchens({searchParams}:{searchParams:Promise<{address?:string;q?:string}>}){
  const {address,q:query}=await searchParams;
- const q=(query||'').trim().slice(0,80);
+ const q=(typeof query==='string'?query:'').trim().slice(0,80);
  const kitchens=await db.kitchen.findMany({where:{active:true,merchant:{status:'APPROVED'},...(q?{OR:[{name:{contains:q}},{categories:{some:{active:true,OR:[{name:{contains:q}},{items:{some:{available:true,name:{contains:q}}}}]}}}]}:{})},include:{categories:{where:{active:true},include:{_count:{select:{items:true}}}}},orderBy:{name:'asc'}});
  return <main className="section container live-kitchen-directory">
   <div className="eyebrow">ADPANDA · LOCAL FOOD</div><h1>{q?'Results for “'+q+'”':'Explore local kitchens'}</h1>
