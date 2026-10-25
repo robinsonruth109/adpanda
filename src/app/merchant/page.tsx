@@ -38,7 +38,7 @@ export default async function MerchantDashboard(){
   </div>
   <div className="merchant-dashboard-columns">
    <section className="merchant-dashboard-surface"><div className="merchant-surface-heading"><div><span className="merchant-kicker">ORDER ACTIVITY</span><h2>Recent orders</h2></div><Link href="/merchant/orders">View all →</Link></div>
-    {recent.map(o=><Link href="/merchant/orders" className="merchant-dashboard-order" key={o.id}><span className="merchant-dashboard-order-symbol"><ShoppingBag size={18}/></span><div><strong>{o.code}</strong><small>{o.customer.name} · {o.kitchen.name}</small></div><span className={'merchant-status-chip '+o.status.toLowerCase()}>{o.status.replaceAll('_',' ')}</span><strong>৳{Number(o.codTotal).toFixed(2)}</strong></Link>)}
+    {recent.map(o=><Link href="/merchant/orders" className="merchant-dashboard-order" key={o.id}><span className="merchant-dashboard-order-symbol"><ShoppingBag size={18}/></span><div><strong>{o.code}</strong><small>{o.recipientName||o.customer?.name||'Guest customer'} · {o.kitchen.name}</small></div><span className={'merchant-status-chip '+o.status.toLowerCase()}>{o.status.replaceAll('_',' ')}</span><strong>৳{Number(o.codTotal).toFixed(2)}</strong></Link>)}
     {!recent.length&&<div className="merchant-empty-state"><ShoppingBag size={30}/><h3>No orders yet</h3><p>New customer orders will appear here.</p></div>}
    </section>
    <aside className="merchant-dashboard-side">
