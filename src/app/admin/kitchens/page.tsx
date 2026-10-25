@@ -1,1 +1,19 @@
-import {db} from '@/lib/db';export const dynamic='force-dynamic';export default async function Page(){const kitchens=await db.kitchen.findMany({include:{merchant:true,categories:{include:{_count:{select:{items:true}}}}},orderBy:{name:'asc'},take:200});return <section className="admin-workspace"><span className="admin-overline">CATALOG</span><h1>Kitchens</h1><p className="muted">Approved status, operating state and menu inventory from the live database.</p><div className="admin-table-scroll"><table className="admin-data-table"><thead><tr><th>Kitchen</th><th>Merchant</th><th>Approval</th><th>Open for orders</th><th>Food items</th><th>Commission</th></tr></thead><tbody>{kitchens.map(k=><tr key={k.id}><td><strong>{k.name}</strong><small>{k.address}</small></td><td>{k.merchant.name}</td><td>{k.merchant.status}</td><td>{k.acceptingOrders?'Yes':'No'}</td><td>{k.categories.reduce((n,c)=>n+c._count.items,0)}</td><td>{k.commissionRate===null?'Default':String(k.commissionRate)+'%'}</td></tr>)}</tbody></table>{kitchens.length===0&&<div className="admin-empty">No kitchens registered yet.</div>}</div></section>}
+import {db} from '@/lib/db';
+import {storeTypeContent} from '@/lib/store-types';
+export const dynamic='force-dynamic';
+export default async function Page(){
+ const shops=await db.kitchen.findMany({include:{merchant:true,categories:{include:{_count:{select:{items:true}}}}},orderBy:[{storeType:'asc'},{name:'asc'}],take:300});
+ return <section className="admin-workspace">
+  <span className="admin-overline">MARKETPLACE CATALOG</span>
+  <h1>Stores & shops</h1><p className="muted">Food kitchens, grocery markets এবং stationery shops-এর live inventory, status, location ও commission।</p>
+  <div className="adp-admin-store-summary">{(['FOOD','GROCERY','STATIONERY'] as const).map(type=><div key={type}><span>{storeTypeContent[type].emoji} {storeTypeContent[type].name}</span><strong>{shops.filter(s=>s.storeType===type).length}</strong></div>)}</div>
+  <div className="admin-table-scroll"><table className="admin-data-table"><thead><tr><th>Store</th><th>Shop type</th><th>Merchant</th><th>Approval</th><th>Open for orders</th><th>Products</th><th>Commission</th></tr></thead><tbody>{shops.map(s=><tr key={s.id}>
+   <td><strong>{s.name}</strong><small>{s.address}</small></td>
+   <td><span className="adp-admin-type-chip">{storeTypeContent[s.storeType].emoji} {storeTypeContent[s.storeType].name}</span></td>
+   <td>{s.merchant.name}</td><td>{s.merchant.status}</td><td>{s.acceptingOrders?'Yes':'No'}</td>
+   <td>{s.categories.reduce((n,c)=>n+c._count.items,0)}</td>
+   <td>{s.commissionRate===null?'Not set':String(s.commissionRate)+'%'}</td>
+  </tr>)}</tbody></table>
+  {shops.length===0&&<div className="admin-empty">No approved or pending stores yet.</div>}</div>
+ </section>;
+}
