@@ -1050,3 +1050,43 @@ body:has(.admin-shell)>.adp-customer-footer,body:has(.merchant-shell)>.adp-custo
 }
 
 .customer-guest-track-link{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:14px}.customer-guest-track-link>button{border:0;border-radius:10px;background:#e21b70;color:white;font-weight:850;font-size:12px;padding:12px 15px;display:inline-flex;gap:8px;align-items:center}.customer-guest-track-link>small{color:#238258;font-size:11px;line-height:1.5}
+
+
+/* AdPanda multi-vertical marketplace: Food, Groceries and Stationery */
+.adp-home-verticals{margin:10px 0 64px}
+.adp-home-vertical-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.adp-home-vertical{display:flex;gap:15px;align-items:center;min-height:162px;padding:27px 22px;border-radius:18px;background:linear-gradient(125deg,#fff1f7,#ffe5ed);border:1px solid #f9dae7;color:#30283b;box-shadow:0 7px 20px #1907190b;transition:transform .15s ease,box-shadow .15s ease}
+.adp-home-vertical:hover{transform:translateY(-3px);box-shadow:0 11px 32px #19071915}
+.adp-home-vertical.grocery{background:linear-gradient(125deg,#e9f8ed,#f5fff2);border-color:#d9eddc}
+.adp-home-vertical.stationery{background:linear-gradient(125deg,#eef2ff,#f5f4ff);border-color:#dfe3f5}
+.adp-home-vertical-emoji{width:72px;height:72px;flex:0 0 72px;display:grid;place-items:center;border-radius:18px;background:#ffffffb9;font-size:40px}
+.adp-home-vertical>div{min-width:0}
+.adp-home-vertical>div>small{display:block;font-size:10px;font-weight:850;color:#e21b70;margin-bottom:4px}
+.adp-home-vertical.grocery>div>small{color:#18874d}
+.adp-home-vertical.stationery>div>small{color:#5246ae}
+.adp-home-vertical h3{font-size:19px;letter-spacing:-.3px;line-height:1.2;margin:0 0 8px}
+.adp-home-vertical p{font-size:11px;line-height:1.5;color:#767184;margin:0 0 9px}
+.adp-home-vertical>div>span{font-size:11px;font-weight:900;display:inline-flex;align-items:center;gap:5px;color:#e21b70}
+.adp-home-vertical.grocery>div>span{color:#16894f}
+.adp-home-vertical.stationery>div>span{color:#6355b5}
+.adp-store-type-tabs{display:flex;gap:11px;overflow-x:auto;padding:4px 0 20px;margin:22px 0 15px;scrollbar-width:thin}
+.adp-store-type-tabs a{white-space:nowrap;display:inline-flex;align-items:center;gap:8px;padding:13px 18px;border:1px solid #e5e1ed;border-radius:999px;background:#fff;color:#686374;font-size:13px;font-weight:800}
+.adp-store-type-tabs a.active,.adp-store-type-tabs a:hover{background:#e21b70;color:#fff;border-color:#e21b70}
+.adp-directory-fallback-icon{font-size:80px}
+.adp-directory-vertical-pill{position:absolute;top:13px;left:13px;border-radius:22px;background:#fff;box-shadow:0 4px 14px #0002;padding:7px 12px;font-size:11px;font-weight:900;color:#e21b70}
+.adp-store-detail-type{display:inline-block;padding:7px 13px;border-radius:99px;background:#fff0f7;color:#ce1966;font-size:12px;font-weight:850;margin:12px 0 7px}
+.adp-admin-store-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:23px 0}
+.adp-admin-store-summary>div{display:grid;gap:10px;border:1px solid #e6e5eb;border-radius:14px;padding:18px;background:#fff}
+.adp-admin-store-summary span{font-size:12px;font-weight:800;color:#6c6b79}
+.adp-admin-store-summary strong{font-size:25px;color:#222337}
+.adp-admin-store-type{display:inline-block;font-weight:850;color:#ba236e;font-size:13px}
+.adp-admin-type-chip{font-size:12px;font-weight:850;color:#5a496a;background:#f7f2fb;border-radius:7px;padding:7px 10px;display:inline-block;white-space:nowrap}
+.merchant-store-type-picker{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.merchant-store-type-picker button{display:grid;justify-items:center;gap:6px;border:1px solid #dfdce8;border-radius:13px;padding:16px 9px;background:#fff;color:#302738;cursor:pointer;text-align:center}
+.merchant-store-type-picker button>span{font-size:30px}
+.merchant-store-type-picker button>strong{font-size:12px;line-height:1.3}
+.merchant-store-type-picker button>small{font-size:11px;color:#77758b}
+.merchant-store-type-picker button.selected{border:2px solid #e21b70;background:#fff1f8;box-shadow:0 0 0 3px #e21b700d}
+@media(max-width:1050px){.adp-home-vertical{padding:20px 16px;gap:10px}.adp-home-vertical-emoji{flex-basis:52px;width:52px;height:52px;font-size:29px}.adp-home-vertical h3{font-size:16px}}
+@media(max-width:760px){.adp-home-vertical-grid{gap:12px}.adp-home-vertical{flex-direction:column;align-items:flex-start;min-height:0;padding:17px;gap:11px}.adp-home-vertical-emoji{flex-basis:auto}.adp-home-verticals{margin-bottom:42px}}
+@media(max-width:580px){.adp-home-vertical-grid{grid-template-columns:1fr;gap:11px}.adp-home-vertical{flex-direction:row;align-items:center;min-height:104px;padding:17px}.adp-home-vertical-emoji{width:60px;height:60px;font-size:35px;flex:0 0 60px}.adp-home-vertical h3{font-size:17px;margin-bottom:3px}.adp-home-vertical p{margin-bottom:6px}.adp-admin-store-summary{grid-template-columns:1fr 1fr}.merchant-store-type-picker{grid-template-columns:1fr}.merchant-store-type-picker button{display:flex;align-items:center;justify-content:flex-start;padding:12px 15px;gap:13px}.merchant-store-type-picker button>span{font-size:24px}}
