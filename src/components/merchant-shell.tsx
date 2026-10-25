@@ -14,7 +14,7 @@ const navigation:Item[]=[
 ];
 const tabs=navigation.slice(0,4);
 const titleFor=(path:string)=>navigation.find(n=>path===n.href)?.title||'Merchant portal';
-export default function MerchantShell({children,name,kitchenName,approved,acceptingOrders,newOrders}:{children:React.ReactNode;name:string;kitchenName:string;approved:boolean;acceptingOrders:boolean;newOrders:number}){
+export default function MerchantShell({children,brandName,brandLogoId,name,kitchenName,approved,acceptingOrders,newOrders}:{children:React.ReactNode;brandName:string;brandLogoId?:string;name:string;kitchenName:string;approved:boolean;acceptingOrders:boolean;newOrders:number}){
  const path=usePathname();
  const [drawer,setDrawer]=useState(false);
  const isAuth=path==='/merchant/login'||path==='/merchant/signup';
@@ -25,7 +25,7 @@ export default function MerchantShell({children,name,kitchenName,approved,accept
  const nav=(close?:()=>void)=>navigation.map(item=><Link key={item.href} href={item.href} aria-current={path===item.href?'page':undefined} onClick={close} className={'merchant-nav-link'+(path===item.href?' active':'')}><item.icon size={19} strokeWidth={path===item.href?2.4:1.8}/><span>{item.title}</span>{item.href==='/merchant/orders'&&newOrders>0&&<b className="merchant-nav-count">{newOrders}</b>}</Link>);
  return <div className="merchant-shell">
   <aside className="merchant-sidebar" aria-label="Merchant sidebar">
-   <Link href="/merchant" className="merchant-brand"><span className="merchant-brand-icon">🐼</span><div><strong>ad<span>panda</span></strong><small>MERCHANT HUB</small></div></Link>
+   <Link href="/merchant" className="merchant-brand"><span className="merchant-brand-icon">{brandLogoId?<img src={"/api/media/branding/"+brandLogoId} alt={brandName+" logo"}/>: "🐼"}</span><div><strong>{brandName}</strong><small>MERCHANT HUB</small></div></Link>
    <div className="merchant-shop-identity"><span>YOUR KITCHEN</span><strong>{kitchenName}</strong><small className={approved?(acceptingOrders?'is-open':'is-closed'):'is-pending'}>{!approved?'Pending approval':acceptingOrders?'● Accepting orders':'● Currently closed'}</small></div>
    <nav className="merchant-sidebar-links"><p>WORKSPACE</p>{nav()}</nav>
    <div className="merchant-sidebar-bottom"><div className="merchant-sidebar-account"><div className="merchant-account-avatar">{name.slice(0,1).toUpperCase()}</div><div><strong>{name}</strong><small>Merchant account</small></div></div><LogoutButton/></div>
