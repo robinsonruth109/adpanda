@@ -1,5 +1,22 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
+import type {Metadata} from 'next';
 import './globals.css';
-export const metadata: Metadata={title:'AdPanda | Food delivery in Alamdanga',description:'Discover local cloud kitchens and order food with cash on delivery in Alamdanga.'};
-export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="en"><body><header className="topbar"><div className="container nav"><Link href="/" className="logo">ad<span>panda</span> 🐼</Link><nav className="links"><Link href="/">Explore food</Link><Link href="/orders">My orders</Link><Link href="/merchant/login">Merchant portal</Link><Link href="/rider">Rider portal</Link></nav></div></header>{children}<footer className="footer"><div className="container">© AdPanda · Built for Alamdanga · COD marketplace preview</div></footer></body></html>}
+import {getBranding,getPublicBrandAssets} from '@/lib/site-branding';
+import {currentUser} from '@/lib/auth';
+import SiteNavigation from '@/components/site-navigation';
+import SiteFooter from '@/components/site-footer';
+export const dynamic='force-dynamic';
+export async function generateMetadata():Promise<Metadata>{
+ const brand=await getBranding();
+ const logo=(await getPublicBrandAssets()).find(a=>a.kind==='LOGO');
+ return {title:brand.brandName+' | Food delivery in Alamdanga',description:brand.description,icons:logo?{icon:'/api/media/branding/'+logo.id}:undefined};
+}
+export default async function RootLayout({children}:{children:React.ReactNode}){
+ const [brand,assets,user]=await Promise.all([getBranding(),getPublicBrandAssets(),currentUser()]);
+ const logoId=assets.find(a=>a.kind==='LOGO')?.id;
+ const accountHref=!user?'/login':user.role==='ADMIN'?'/admin':user.role==='RIDER'?'/rider':user.role==='MERCHANT'?'/merchant':'/orders';
+ return <html lang="en"><body>
+  <SiteNavigation brandName={brand.brandName} logoId={logoId} accountName={user?.name?.split(' ')[0]} accountHref={accountHref}/>
+  {children}
+  <SiteFooter brandName={brand.brandName} logoId={logoId} description={brand.footerDescription} note={brand.footerNote}/>
+ </body></html>;
+}
