@@ -9,14 +9,28 @@ const schema=z.object({
  name:z.string().trim().min(2).max(150).optional(),
  description:z.string().trim().max(2000).optional(),
  price:z.number().finite().positive().max(100000).optional()
-}).refine(d=>Object.keys(d).length>0);
+}).refine(data=>Object.keys(data).length>0);
 export async function PATCH(request:Request,{params}:{params:Promise<{id:string}>}){
  if(!isTrustedMutation(request))return NextResponse.json({error:'Invalid origin'},{status:403});
- const user=await currentUser();if(!user)return NextResponse.json({error:'Unauthorized'},{status:401});
+ const user=await currentUser();
+ if(!user)return NextResponse.json({error:'Unauthorized'},{status:401});
  const parsed=schema.safeParse(await request.json().catch(()=>null));
  if(!parsed.success)return NextResponse.json({error:'Invalid item changes'},{status:400});
  const {id}=await params;
- const item=await db.menuItem.findFirst({where:{id,category:{kitchen:{merchant:{status:'APPROVED',members:{some:{userId:user.id}}}}}}},select:{id:true}});
+ const item=await db.menuItem.findFirst({
+  where:{
+   id,
+   category:{
+    kitchen:{
+     merchant:{
+      status:'APPROVED',
+      members:{some:{userId:user.id}}
+     }
+    }
+   }
+  },
+  select:{id:true}
+ });
  if(!item)return NextResponse.json({error:'Not found or unauthorized'},{status:404});
  await db.$transaction(async tx=>{
   await tx.menuItem.update({where:{id},data:parsed.data});
