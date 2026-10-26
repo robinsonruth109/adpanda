@@ -6,6 +6,7 @@ import {requireRole} from '@/lib/auth';
 
 const payload=z.object({
  action:z.enum(['APPROVE','REJECT','SUSPEND','SAVE_COMMISSION']),
+ kitchenId:z.string().min(1).max(191).optional(),
  commissionRate:z.number().finite().min(0).max(100)
 }).strict();
 
@@ -16,7 +17,7 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
  const parsed=payload.safeParse(await request.json().catch(()=>null));
  if(!parsed.success)return NextResponse.json({error:'Valid action and commission rate required (0–100%)'},{status:400});
  const {id}=await params;
- const {action,commissionRate}=parsed.data;
+ const {action,commissionRate,kitchenId}=parsed.data;
  try{
   const result=await db.$transaction(async tx=>{
    const current=await tx.merchant.findUnique({where:{id}});
@@ -31,7 +32,9 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
    // Never reset opening hours, active state, approvedAt or order acceptance
    // when simply saving a commission on an already-approved shop.
    if(action==='SAVE_COMMISSION'){
-    await tx.kitchen.updateMany({where:{merchantId:id},data:{commissionRate}});
+    if(!kitchenId)return {error:'Select a store before saving its commission.',code:400};
+    const updated=await tx.kitchen.updateMany({where:{id:kitchenId,merchantId:id},data:{commissionRate}});
+    if(updated.count!==1)return {error:'Store not found for merchant',code:404};
    }else{
     const status=action==='APPROVE'?'APPROVED':action==='REJECT'?'REJECTED':'SUSPENDED';
     const transitioned=await tx.merchant.updateMany({where:{id,status:current.status},data:{status}});
@@ -46,7 +49,7 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
     actorId:actor.id,
     action:action==='SAVE_COMMISSION'?'MERCHANT_COMMISSION_CHANGED':'MERCHANT_REVIEW',
     entityType:'Merchant',entityId:id,
-    metadata:{action,previousStatus:current.status,
+    metadata:{action,kitchenId:action==='SAVE_COMMISSION'?kitchenId:null,previousStatus:current.status,
      status:action==='SAVE_COMMISSION'?current.status:action==='APPROVE'?'APPROVED':action==='REJECT'?'REJECTED':'SUSPENDED',
      commissionRate}
    }});
