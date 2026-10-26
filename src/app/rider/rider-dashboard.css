@@ -25,3 +25,10 @@
 .rd-top-logout:hover:not(:disabled){background:#ffe9f0}
 .rd-logout-error{font-size:12px;color:#b91c1c;margin:4px 12px 12px}
 @media(max-width:800px){body:has(.rd-shell) .rd-sidebar{padding-bottom:calc(78px + env(safe-area-inset-bottom))}body:has(.rd-shell) .rd-logout{margin-top:auto}}
+
+
+/* Dedicated rider subpage navigation: sidebar and bottom tabs are links. */
+.rd-mobile-nav a{display:grid;justify-items:center;align-items:center;gap:3px;color:#878b9b;font-size:10px;font-weight:750;padding:9px 0;border-radius:10px;text-decoration:none}
+.rd-mobile-nav a.active{color:var(--rd-pink);background:#fff0f6}
+.rd-side-link[aria-current="page"]{background:#fff0f6;color:var(--rd-pink)}
+.rd-dashboard .rider-portal-header{margin-bottom:22px}
