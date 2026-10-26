@@ -14,6 +14,8 @@ export async function POST(request:Request,{params}:{params:Promise<{id:string}>
   if(!order||order.status!=='PLACED'||!order.dispatchRequestedAt||order.delivery)return {error:'This request is no longer available',code:409};
   const rider=await tx.rider.findUnique({where:{userId:user.id}});
   if(!rider||!rider.approved||rider.status!=='ONLINE')return {error:'You must be approved and online',code:409};
+  const latestGps=await tx.riderLocation.findFirst({where:{riderId:rider.id,recordedAt:{gte:new Date(Date.now()-45000)}},select:{id:true}});
+  if(!latestGps)return {error:'GPS location is off or stale. Enable live GPS before accepting.',code:409};
   const claimed=await tx.rider.updateMany({where:{id:rider.id,status:'ONLINE',approved:true},data:{status:'BUSY'}});
   if(claimed.count!==1)return {error:'Rider no longer available',code:409};
   await tx.deliveryAssignment.create({data:{orderId:id,riderId:rider.id,assignedById:user.id}});
