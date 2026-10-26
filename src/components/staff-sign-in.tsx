@@ -34,6 +34,7 @@ export default function StaffSignIn({role}:{role:'ADMIN'|'RIDER'}){
     {error&&<p className="adp-staff-login-error" role="alert">{error}</p>}
     <button className="adp-staff-login-submit" disabled={busy||!/^01[3-9]\d{8}$/.test(phone)||!password||(admin&&!password2)}>{busy?'Verifying…':admin?'Secure Admin Sign In':'Sign in as Rider'}<ArrowRight size={18}/></button>
    </form>
+   {!admin&&<p style={{textAlign:"center",marginTop:18}}>New delivery partner? <Link href="/rider/register" style={{fontWeight:700,color:"#e60063"}}>Register as Rider</Link></p>}
    <div className="adp-staff-login-bottom"><ShieldCheck size={16}/><span>Private workspace · Role-restricted authentication</span></div>
    <Link href="/" className="adp-staff-login-home">← Back to AdPanda website</Link>
   </section>
