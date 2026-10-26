@@ -1520,3 +1520,10 @@ body:has(.admin-shell)>.adp-customer-footer,body:has(.merchant-shell)>.adp-custo
  .admin-dispatch-controls>div{flex-direction:column;align-items:stretch}
  .admin-dispatch-controls select,.admin-dispatch-controls button{width:100%}
 }
+
+
+.admin-dispatch-reservation{display:flex;align-items:center;gap:11px;border:1px solid #bfe6cd;background:#f3fbf6;color:#13794f;border-radius:11px;padding:13px 15px;margin:12px 0}
+.admin-dispatch-reservation>span{flex:1;font-size:12px;font-weight:700;line-height:1.5}
+.admin-dispatch-reservation>button{background:#fff;border:1px solid #c2dfce;color:#277a54;border-radius:8px;padding:10px 12px;font-size:11px;font-weight:850;cursor:pointer}
+.admin-dispatch-reservation>button:disabled{opacity:.6;cursor:not-allowed}
+@media(max-width:640px){.admin-dispatch-reservation{flex-wrap:wrap}.admin-dispatch-reservation button{width:100%}}
