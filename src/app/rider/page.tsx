@@ -24,8 +24,8 @@ export default async function Rider(){
  return <RiderDashboardShell name={user.name} status={rider.status} approved={rider.approved} activeCount={active.length}><main className="rider-portal rd-dashboard" id="rider-overview">
   <div className="rider-portal-header"><div><span className="admin-overline">ADPANDA DELIVERY</span><h1>Hello, {user.name}</h1><p>Keep your pickup and delivery information handy.</p></div><span className={'admin-order-badge '+rider.status.toLowerCase()}>{rider.status}</span></div>
   {!rider.approved&&<div className="rider-alert"><ShieldAlert size={20}/><span>Your rider profile has not been approved. Admin must approve you before dispatch.</span></div>}
-  <RiderAvailability approved={rider.approved} status={rider.status}/>
-  <div id="rider-location" className="rd-section"><RiderLocationSharing enabled={rider.approved&&(rider.status==='ONLINE'||rider.status==='BUSY')}/></div>
+  
+  <div id="rider-location" className="rd-section"><RiderLocationSharing enabled={rider.approved&&rider.status!=='SUSPENDED'}/></div>
   <div id="rider-requests" className="rd-section">{rider.approved&&rider.status==='ONLINE'?<RiderRequests/>:<section className="rd-card rd-empty-requests"><div className="rd-empty-icon"><Bike size={24}/></div><h2>Available delivery requests</h2><p>{!rider.approved?'Your rider account is awaiting admin approval.':'Go online to receive delivery requests.'}</p></section>}</div>
   <div className="rider-metrics rd-metrics"><div><Bike size={23}/><span>Active assignments</span><strong>{active.length}</strong></div><div><Package size={23}/><span>Total assignments</span><strong>{rider.deliveries.length}</strong></div><div><Wallet size={23}/><span>Recorded COD outstanding</span><strong>৳{(collected-deposited).toFixed(2)}</strong></div></div>
   <section className="rider-cash-history rd-section" id="rider-wallet"><div><h2>Cash handover history</h2><p>Only Admin-confirmed cash deposits count toward clearing outstanding COD.</p></div>
