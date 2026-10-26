@@ -31,7 +31,8 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
    if(['PICKED_UP','OUT_FOR_DELIVERY','DELIVERED','FAILED'].includes(status)&&!order.delivery)return {error:'Assign a rider first',code:409};
    if(status==='MERCHANT_ACCEPTED'&&!order.delivery)return {error:'A rider must be assigned before accepting the order.',code:409};
    if(status==='READY_FOR_PICKUP'&&!order.delivery)return {error:'Rider assignment must be completed first.',code:409};
-   const updated=await tx.order.updateMany({where:{id,status:order.status},data:{status}});
+   const finalStatus=status==='READY_FOR_PICKUP'&&order.delivery?'RIDER_ASSIGNED':status;
+   const updated=await tx.order.updateMany({where:{id,status:order.status},data:{status:finalStatus}});
    if(updated.count!==1)return {error:'Order changed, refresh and try again',code:409};
    if(status==='CANCELLED')await releaseCancelledOrderStock(tx,id);
    if(order.delivery){
@@ -40,9 +41,11 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
     if(['DELIVERED','FAILED','CANCELLED'].includes(status))
      await tx.rider.updateMany({where:{id:order.delivery.riderId,status:'BUSY'},data:{status:'ONLINE'}});
    }
-   await tx.orderEvent.create({data:{orderId:id,fromStatus:order.status,toStatus:status,actorId:admin.id,note:note||undefined}});
-   await tx.auditLog.create({data:{actorId:admin.id,action:'ADMIN_ORDER_STATUS',entityType:'Order',entityId:id,metadata:{from:order.status,to:status,note:note||null}}});
-   return {ok:true,status};
+   if(finalStatus!==status)
+    await tx.orderEvent.create({data:{orderId:id,fromStatus:order.status,toStatus:'READY_FOR_PICKUP',actorId:admin.id,note:'Order ready for preassigned rider'}});
+   await tx.orderEvent.create({data:{orderId:id,fromStatus:finalStatus!==status?'READY_FOR_PICKUP':order.status,toStatus:finalStatus,actorId:admin.id,note:note||undefined}});
+   await tx.auditLog.create({data:{actorId:admin.id,action:'ADMIN_ORDER_STATUS',entityType:'Order',entityId:id,metadata:{from:order.status,to:finalStatus,note:note||null}}});
+   return {ok:true,status:finalStatus};
   });
   if('error' in result)return NextResponse.json({error:result.error},{status:result.code});
   return NextResponse.json(result);
