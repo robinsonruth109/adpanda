@@ -8,6 +8,8 @@ import RiderRequests from '@/components/rider-requests';
 import RiderAvailability from '@/components/rider-availability';
 import RiderPickupAlerts from '@/components/rider-pickup-alerts';
 import RiderDashboardShell from '@/components/rider-dashboard-shell';
+import RiderDeliveryTabs from '@/components/rider-delivery-tabs';
+import RiderDeliveryActions from '@/components/rider-delivery-actions';
 import './rider-dashboard.css';
 export const dynamic='force-dynamic';
 const finished=['DELIVERED','CANCELLED','FAILED'];
@@ -19,6 +21,9 @@ export default async function Rider({mode='overview'}:{mode?:'overview'|'request
   collections:{select:{amount:true}},deposits:{select:{id:true,amount:true,reference:true,createdAt:true},orderBy:{createdAt:'desc'}}
  }});
  if(!rider)return <main className="section container"><h1>Rider profile not found</h1><p>Contact your administrator to activate a delivery profile.</p></main>;
+ const settlementLogs=await db.auditLog.findMany({where:{entityType:'Order',entityId:{in:rider.deliveries.map(d=>d.orderId)},action:{in:['RIDER_SETTLEMENT_SUBMITTED','MERCHANT_SETTLEMENT_CONFIRMED']}},select:{entityId:true,action:true,createdAt:true},orderBy:{createdAt:'asc'}});
+ const settlementByOrder=new Map<string,string>();
+ for(const log of settlementLogs)settlementByOrder.set(log.entityId,log.action==='MERCHANT_SETTLEMENT_CONFIRMED'?'CLEARED':'SUBMITTED');
  const active=rider.deliveries.filter(d=>!finished.includes(d.order.status));
  const collected=rider.collections.reduce((s,c)=>s+Number(c.amount),0);
  const deposited=rider.deposits.reduce((s,c)=>s+Number(c.amount),0);
@@ -34,7 +39,7 @@ export default async function Rider({mode='overview'}:{mode?:'overview'|'request
    <div className="rider-cash-history-list">{rider.deposits.slice(0,8).map(d=><div key={d.id}><div><strong>৳{Number(d.amount).toFixed(2)}</strong><small>{d.createdAt.toLocaleString('en-BD',{timeZone:'Asia/Dhaka'})}</small></div><span>{d.reference||'Admin cash deposit'}</span></div>)}{!rider.deposits.length&&<div className="rider-cash-no-history">No Admin-confirmed cash deposits recorded yet.</div>}</div>
   </section>}
   {mode==='deliveries'&&<><div className="rider-deliveries-heading rd-section" id="rider-deliveries"><h2>Assigned deliveries</h2><p>Only assignments associated with your rider account appear here.</p></div>
-  <div className="rider-deliveries">{rider.deliveries.map(d=><article className="rider-delivery-card" key={d.id}>
+  <RiderDeliveryTabs statuses={rider.deliveries.map(d=>d.order.status)} settlements={rider.deliveries.map(d=>settlementByOrder.get(d.orderId)||'PENDING')}>{rider.deliveries.map(d=><article className="rider-delivery-card" key={d.id}>
    <div className="rider-delivery-head"><div><span>ORDER</span><h3>{d.order.code}</h3></div><span className={'admin-order-badge '+d.order.status.toLowerCase()}>{d.order.status.replaceAll('_',' ')}</span></div>
    {['PLACED','MERCHANT_ACCEPTED','PREPARING'].includes(d.order.status)&&<div className="rider-preaccept-note">
     <ShieldAlert size={17}/> {d.order.status==='PLACED'?'Rider reserved. Merchant has not accepted this order yet.':'Merchant preparing the order.'} Please wait for READY / RIDER ASSIGNED before pickup.
@@ -42,8 +47,8 @@ export default async function Rider({mode='overview'}:{mode?:'overview'|'request
    <div className="rider-delivery-stop"><div className="rider-delivery-dot pickup"/><div><small>PICKUP FROM</small><strong>{d.order.kitchen.name}</strong><p>{d.order.kitchen.address}</p>{d.order.kitchen.merchant.members[0]?.user.phone&&<a href={'tel:'+d.order.kitchen.merchant.members[0].user.phone}><Phone size={16}/> Call pickup: {d.order.kitchen.merchant.members[0].user.phone}</a>}<a target="_blank" rel="noopener noreferrer" href={'https://www.google.com/maps?q='+String(d.order.kitchen.latitude)+','+String(d.order.kitchen.longitude)}><Navigation size={16}/> Navigate to kitchen</a></div></div>
    <div className="rider-delivery-stop"><div className="rider-delivery-dot destination"/><div><small>DELIVER TO</small><strong>{d.order.recipientName||d.order.customer?.name||'Guest customer'}</strong><p>{d.order.address.details}{d.order.address.landmark?' · '+d.order.address.landmark:''}</p><div className="rider-delivery-links"><a href={'tel:'+(d.order.recipientPhone||d.order.customer?.phone||'')}><Phone size={16}/> Call customer</a><a target="_blank" rel="noopener noreferrer" href={'https://www.google.com/maps?q='+String(d.order.address.latitude)+','+String(d.order.address.longitude)}><MapPin size={16}/> Navigate</a></div></div></div>
    <div className="rider-delivery-total"><span>Collect COD on delivery</span><strong>৳{Number(d.order.codTotal).toFixed(2)}</strong></div>
-   {d.order.status==='DELIVERED'&&<RiderCodConfirmation orderId={d.order.id} amount={Number(d.order.codTotal)} recorded={Boolean(d.order.codCollection)}/>}
-  </article>)}</div>
+   <RiderDeliveryActions orderId={d.order.id} status={d.order.status} merchantPayable={Number(d.order.merchantPayable)} settlement={settlementByOrder.get(d.orderId)||'PENDING'}/>
+  </article>)}</RiderDeliveryTabs>
   {rider.deliveries.length===0&&<div className="admin-empty"><Bike size={37}/><h3>No assignments yet</h3><p>Admin will assign orders once your rider profile is approved and available.</p></div>}
   </>}
   <p className="muted" style={{fontSize:12,marginTop:22}}>Live GPS requires your explicit permission and an active browser page. COD receipt confirmation does not mean the cash has been deposited or reconciled with Admin.</p>
