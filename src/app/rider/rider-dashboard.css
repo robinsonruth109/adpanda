@@ -16,3 +16,12 @@
 }
 .rd-availability{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#fff;border:1px solid #e9ebf1;border-radius:17px;padding:18px 22px;margin-bottom:20px}
 .rd-availability strong{font-size:16px}.rd-availability p{font-size:12px;color:#85899a;margin:6px 0 0}.rd-availability small{color:#c52d52;flex-basis:100%}
+
+
+/* Rider logout actions */
+.rd-logout{width:100%;display:flex;align-items:center;gap:13px;border:1px solid #ffe0e6;border-radius:12px;background:#fff3f5;color:#bb2645;font-size:13px;font-weight:800;padding:13px 15px;margin-top:auto;margin-bottom:12px;text-align:left}
+.rd-logout:hover:not(:disabled){background:#ffe4e9}
+.rd-top-logout{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid #f1d8e0;background:#fff7f9;color:#bf2850;border-radius:10px}
+.rd-top-logout:hover:not(:disabled){background:#ffe9f0}
+.rd-logout-error{font-size:12px;color:#b91c1c;margin:4px 12px 12px}
+@media(max-width:800px){body:has(.rd-shell) .rd-sidebar{padding-bottom:calc(78px + env(safe-area-inset-bottom))}body:has(.rd-shell) .rd-logout{margin-top:auto}}
