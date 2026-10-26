@@ -8,7 +8,7 @@ export const dynamic='force-dynamic';
 const finished=['DELIVERED','CANCELLED','FAILED'];
 export default async function Rider(){
  const user=await currentUser();
- if(!user||user.role!=='RIDER')return <main className="section container"><div className="eyebrow">AdPanda delivery partners</div><h1>Rider access</h1><p>Sign in with your approved rider account. Administrators register eligible accounts from the Riders dashboard.</p><Link className="btn" href="/login">Rider sign in</Link></main>;
+ if(!user||user.role!=='RIDER')return <main className="section container"><div className="eyebrow">AdPanda delivery partners</div><h1>Rider access</h1><p>Sign in with your approved rider account. Administrators register eligible accounts from the Riders dashboard.</p><Link className="btn" href="/rider/login">Rider sign in</Link></main>;
  const rider=await db.rider.findUnique({where:{userId:user.id},include:{
   deliveries:{orderBy:{assignedAt:'desc'},take:50,include:{order:{include:{kitchen:true,address:true,codCollection:true,customer:{select:{name:true,phone:true}}}}}},
   collections:{select:{amount:true}},deposits:{select:{id:true,amount:true,reference:true,createdAt:true},orderBy:{createdAt:'desc'}}
