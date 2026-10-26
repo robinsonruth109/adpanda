@@ -1,3 +1,4 @@
+import {invalidateGroceryPrices} from '@/lib/grocery-price-review';
 import {isTrustedMutation} from '@/lib/request-security';
 import {NextResponse} from 'next/server';
 import {z} from 'zod';
@@ -31,10 +32,11 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
     }
    }
   },
-  select:{id:true}
+  select:{id:true,category:{select:{kitchenId:true}}}
  });
  if(!item)return NextResponse.json({error:'Not found or unauthorized'},{status:404});
  await db.$transaction(async tx=>{
+  await invalidateGroceryPrices(tx,item.category.kitchenId);
   await tx.menuItem.update({where:{id},data:parsed.data});
   await tx.auditLog.create({data:{actorId:user.id,action:'MERCHANT_MENU_ITEM_UPDATE',entityType:'MenuItem',entityId:id,metadata:{fields:Object.keys(parsed.data)}}});
  });
