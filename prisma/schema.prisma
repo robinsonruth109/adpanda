@@ -190,6 +190,7 @@ model Order {
  delivery DeliveryAssignment?
  codCollection CodCollection?
  @@index([status,placedAt])
+ @@index([dispatchRequestedAt,status])
  @@index([kitchenId,placedAt])
 }
 model OrderItem {
