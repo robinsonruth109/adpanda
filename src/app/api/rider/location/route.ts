@@ -11,9 +11,9 @@ export async function POST(request:Request){
  const input=payload.safeParse(await request.json().catch(()=>null));
  if(!input.success)return NextResponse.json({error:'GPS accuracy must be 120 m or better with valid coordinates'},{status:400});
  const rider=await db.rider.findUnique({where:{userId:user.id},select:{id:true,approved:true,status:true}});
- if(!rider?.approved||!['BUSY','ONLINE'].includes(rider.status))return NextResponse.json({error:'Go online and get admin approval to enable GPS sharing'},{status:403});
- const active=await db.deliveryAssignment.findFirst({where:{riderId:rider.id,order:{status:{in:['RIDER_ASSIGNED','PICKED_UP','OUT_FOR_DELIVERY']}}},select:{id:true}});
- // Approved online riders may voluntarily share GPS while waiting for a request.\n // Customer tracking remains scoped to an assigned delivery elsewhere.
+ if(!rider?.approved||rider.status==='SUSPENDED')return NextResponse.json({error:'Admin approval required to enable GPS sharing'},{status:403});
+ if(rider.status==='OFFLINE')await db.rider.update({where:{id:rider.id},data:{status:'ONLINE'}});
+ // Rider availability begins only after a valid GPS position is received.
  const last=await db.riderLocation.findFirst({where:{riderId:rider.id},orderBy:{recordedAt:'desc'},select:{recordedAt:true}});
  if(last&&Date.now()-last.recordedAt.getTime()<7000)return NextResponse.json({ok:true,throttled:true,recordedAt:last.recordedAt.toISOString()});
  const location=await db.riderLocation.create({data:{riderId:rider.id,latitude:input.data.latitude,longitude:input.data.longitude,accuracyMeters:input.data.accuracyMeters}});
