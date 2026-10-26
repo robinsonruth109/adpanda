@@ -86,7 +86,7 @@ export default function GroceryDailyPriceReview({storeId,name,required}:Props){
    if(!res.ok)throw Error(result.error||'দাম verify করা যায়নি');
    setNotice(result.message||'সব পণ্যের দাম যাচাই হয়েছে।');
    setTodayVerified(true);setShow(false);router.refresh();
-  }catch(e){setNotice(e instanceof Error?e.message:'Verification failed');await load()}
+  }catch(e){await load();setNotice(e instanceof Error?e.message:'Verification failed')}
   finally{setBusy(false)}
  }
 
@@ -122,7 +122,7 @@ export default function GroceryDailyPriceReview({storeId,name,required}:Props){
        <div className="grocery-review-list">
        {visible.map(item=><article key={item.id} className={'grocery-review-item'+(reviewed[item.id]?' done':'')}>
         <div className="grocery-review-item-main"><small>{item.category} · {item.unitLabel}</small><strong>{item.name}</strong><span className={item.available?'':'soldout'}>{item.stockQty===null?'Stock untracked':'Stock '+item.stockQty}{!item.available?' · Sold out':''}</span></div>
-        <div className="grocery-review-pricing"><label>আগের দাম / Price (৳)<input inputMode="decimal" type="text" value={priceEdits[item.id]??item.price} onChange={e=>change(item.id,e.target.value)} aria-label={item.name+' today's price in BDT'}/></label>
+        <div className="grocery-review-pricing"><label>আগের দাম / Price (৳)<input inputMode="decimal" type="text" value={priceEdits[item.id]??item.price} onChange={e=>change(item.id,e.target.value)} aria-label={item.name+" today's price in BDT"}/></label>
           {priceEdits[item.id]!==item.price&&<small>Previous ৳{item.price} → New ৳{priceEdits[item.id]}</small>}
         </div>
         <label className="grocery-review-check"><input type="checkbox" checked={reviewed[item.id]||false} onChange={e=>mark(item.id,e.target.checked)}/><span>{reviewed[item.id]?<Check size={16}/>:<ShieldCheck size={16}/>} Verified</span></label>
