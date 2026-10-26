@@ -21,6 +21,8 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
  const {id}=await params;
  try{
   const result=await db.$transaction(async tx=>{
+   // Serialize pre-assignment, acceptance, and cancellation for this order.
+   await tx.$queryRaw`SELECT id FROM \`Order\` WHERE id = ${id} FOR UPDATE`;
    const order=await tx.order.findUnique({where:{id},select:{id:true,status:true,delivery:{select:{riderId:true}},kitchen:{select:{merchantId:true,merchant:{select:{status:true,members:{where:{userId:user.id},select:{role:true}}}}}}}});
    if(!order||order.kitchen.merchant.members.length===0||order.kitchen.merchant.status!=='APPROVED')return {error:'Order not found or merchant not authorized',code:403};
    const next=parsed.data.status;
