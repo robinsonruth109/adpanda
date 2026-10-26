@@ -1167,3 +1167,54 @@ body:has(.admin-shell)>.adp-customer-footer,body:has(.merchant-shell)>.adp-custo
  .grocery-review-confirm{width:100%}
  .grocery-review-foot>div{gap:3px}
 }
+
+
+/* Homepage — separate food / grocery / stationery product shelves */
+.adp-home-product-section{margin:0 0 67px;min-width:0}
+.adp-home-product-section .adp-home-section-heading{margin-bottom:23px}
+.adp-home-product-section .adp-home-food-card{min-width:0}
+.adp-home-product-section .adp-home-food-image{position:relative}
+.adp-home-product-section .adp-home-food-card-info h3{min-height:42px;overflow-wrap:anywhere}
+.adp-home-product-section .adp-home-food-category{color:#e21b70}
+.adp-home-products-grocery .adp-home-overline,.adp-home-products-grocery .adp-home-food-category,.adp-home-products-grocery .adp-home-product-price strong{color:#168a61}
+.adp-home-products-stationery .adp-home-overline,.adp-home-products-stationery .adp-home-food-category,.adp-home-products-stationery .adp-home-product-price strong{color:#6254b7}
+.adp-home-products-grocery .adp-home-food-image{background:linear-gradient(120deg,#e7f6eb,#f6fcef)}
+.adp-home-products-stationery .adp-home-food-image{background:linear-gradient(120deg,#e9eafa,#f9effb)}
+.adp-home-vertical-product-grid{scrollbar-width:thin}
+.adp-home-vertical-product-card{display:flex;flex-direction:column}
+.adp-home-vertical-product-card .adp-home-food-card-info{display:flex;flex:1;flex-direction:column}
+.adp-home-product-shop{display:flex;align-items:center;gap:6px;min-width:0}
+.adp-home-product-shop svg{flex:none}
+.adp-home-product-price-row{margin-top:auto;min-width:0;display:flex!important;align-items:center;justify-content:space-between;gap:10px}
+.adp-home-product-price{min-width:0;display:flex;align-items:baseline;gap:5px;flex-wrap:wrap}
+.adp-home-product-price strong{color:#e21b70;font-size:19px}
+.adp-home-product-price small{font-size:11px;font-weight:750;color:#7a798b}
+.adp-home-product-action{display:inline-flex!important;align-items:center;gap:5px;color:#7f7685;font-size:11px;font-weight:750;white-space:nowrap}
+.adp-home-product-availability{position:absolute;top:12px;left:12px;border-radius:99px;padding:7px 10px;display:inline-flex;align-items:center;gap:6px;background:#fff;box-shadow:0 4px 12px #10102521;font-size:10px;font-weight:850;color:#138556}
+.adp-home-product-availability.closed{color:#a75648;background:#fff6f3}
+.adp-home-products-grocery .adp-home-see-all{color:#168a61}
+.adp-home-products-stationery .adp-home-see-all{color:#6254b7}
+.adp-product-fallback{display:grid;place-items:center;height:100%;font-size:84px}
+.adp-home-product-empty{padding:26px 30px;border:1px dashed #f2cbdc;border-radius:17px;background:linear-gradient(100deg,#fff8fb,#fff);display:flex;align-items:center;gap:19px;min-height:125px}
+.adp-home-products-grocery .adp-home-product-empty{border-color:#ccead8;background:linear-gradient(100deg,#f4fcf7,#fff)}
+.adp-home-products-stationery .adp-home-product-empty{border-color:#dddaf3;background:linear-gradient(100deg,#f7f6ff,#fff)}
+.adp-home-product-empty>span{width:69px;height:69px;flex:0 0 69px;display:grid;place-items:center;font-size:39px;background:#fff;border-radius:16px;box-shadow:0 6px 15px #2a102612}
+.adp-home-product-empty>div{flex:1;min-width:0}
+.adp-home-product-empty h3{margin:0 0 7px;font-size:18px;color:#30263c}
+.adp-home-product-empty p{margin:0;font-size:12px;line-height:1.65;color:#8b8494}
+.adp-home-product-empty>a{display:flex;align-items:center;gap:9px;white-space:nowrap;font-size:12px;font-weight:850;color:#e21b70}
+.adp-home-products-grocery .adp-home-product-empty>a{color:#168a61}
+.adp-home-products-stationery .adp-home-product-empty>a{color:#6254b7}
+@media(max-width:960px){.adp-home-product-section{margin-bottom:50px}}
+@media(max-width:720px){
+ .adp-home-product-section{margin-bottom:43px}
+ .adp-home-vertical-product-grid{display:flex;overflow-x:auto;gap:13px;padding:2px 3px 16px;scroll-snap-type:x mandatory}
+ .adp-home-vertical-product-card{flex:0 0 min(68vw,245px);scroll-snap-align:start}
+ .adp-home-vertical-product-card .adp-home-food-image{height:165px}
+ .adp-home-vertical-product-card .adp-home-food-card-info{min-height:167px}
+ .adp-home-product-empty{padding:21px 17px;gap:13px;flex-wrap:wrap}
+ .adp-home-product-empty>span{width:54px;height:54px;flex-basis:54px;font-size:30px}
+ .adp-home-product-empty>div{flex:1 1 calc(100% - 70px)}
+ .adp-home-product-empty h3{font-size:15px}
+ .adp-home-product-empty>a{margin-left:auto}
+}
