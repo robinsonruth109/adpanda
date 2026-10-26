@@ -10,7 +10,7 @@ export async function GET(){
  if(!recent)return NextResponse.json({requests:[],gpsRequired:true},{headers:{'Cache-Control':'no-store'}});
  const orders=await db.order.findMany({where:{status:'PLACED',dispatchRequestedAt:{not:null},delivery:null},
   select:{id:true,code:true,deliveryFee:true,codTotal:true,dispatchRequestedAt:true,
-   kitchen:{select:{name:true,address:true,latitude:true,longitude:true}},
+   kitchen:{select:{name:true,address:true,latitude:true,longitude:true,merchant:{select:{members:{where:{role:'OWNER'},take:1,select:{user:{select:{phone:true}}}}}}}},
    address:{select:{details:true,landmark:true,latitude:true,longitude:true}}},
   orderBy:{dispatchRequestedAt:'asc'},take:50});
  return NextResponse.json({requests:orders},{headers:{'Cache-Control':'no-store'}});
