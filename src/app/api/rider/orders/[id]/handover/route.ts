@@ -29,6 +29,8 @@ export async function POST(request:Request,{params}:{params:Promise<{id:string}>
    const updated=await tx.order.updateMany({where:{id,status:{in:['PICKED_UP','OUT_FOR_DELIVERY']}},data:{status:'DELIVERED'}});
    if(updated.count!==1)return false;
    await tx.deliveryAssignment.update({where:{orderId:id},data:{deliveredAt:new Date()}});
+   const recent=await tx.riderLocation.findFirst({where:{riderId:order.delivery!.riderId,recordedAt:{gte:new Date(Date.now()-45000)}},select:{id:true}});
+   await tx.rider.updateMany({where:{id:order.delivery!.riderId,status:'BUSY'},data:{status:recent?'ONLINE':'OFFLINE'}});
    await tx.codCollection.create({data:{orderId:id,riderId:order.delivery!.riderId,amount:order.codTotal}});
    await tx.orderEvent.create({data:{orderId:id,fromStatus:order.status,toStatus:'DELIVERED',actorId:user.id,note:'Customer received parcel, COD collected and delivery photograph uploaded'}});
    await tx.auditLog.create({data:{actorId:user.id,action:'RIDER_CUSTOMER_HANDOVER',entityType:'Order',entityId:id,metadata:{photoKey:key,cod:order.codTotal.toFixed(2)}}});
