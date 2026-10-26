@@ -37,6 +37,16 @@ export default function MerchantOrdersManager({initial}:{initial:MerchantOrder[]
    :filter==='RIDER_ASSIGNED'?['RIDER_ASSIGNED','READY_FOR_PICKUP'].includes(o.status):filter===o.status);
   return matches&&[o.code,o.kitchen,o.customer,o.phone,o.rider||''].join(' ').toLowerCase().includes(search.toLowerCase());
  }),[orders,filter,search]);
+ async function requestPickup(order:MerchantOrder){
+  if(busy)return;setBusy(order.id);setNotice('');
+  try{
+   const response=await fetch('/api/merchant/orders/'+encodeURIComponent(order.id)+'/request-pickup',{method:'POST',credentials:'same-origin'});
+   const data=await response.json().catch(()=>({}));
+   if(!response.ok)throw Error(data.error||'Pickup request failed');
+   setNotice('Pickup notification sent to assigned rider for '+order.code+'.');
+  }catch(e){setNotice(e instanceof Error?e.message:'Pickup request failed')}
+  finally{setBusy(null)}
+ }
  const refreshing=()=>{router.refresh();setNotice('Refreshing delivery assignment status…')};
  async function act(order:MerchantOrder,action:'find'|'status',next?:string){
   if(busy)return;
@@ -55,7 +65,7 @@ export default function MerchantOrdersManager({initial}:{initial:MerchantOrder[]
     setOrders(current=>current.map(o=>o.id===order.id?{
      ...o,dispatchRequestedAt:o.dispatchRequestedAt||new Date().toISOString()
     }:o));
-    setNotice('Delivery man requested for '+order.code+'. Admin will assign an available rider; you can accept after assignment.');
+    setNotice('Delivery man requested for '+order.code+'. All available riders can view this request. The first rider to accept is assigned automatically.');
    }else{
     const finalStatus=result.status||next||order.status;
     setOrders(current=>current.map(o=>o.id===order.id?{...o,status:finalStatus}:o));
@@ -93,7 +103,7 @@ export default function MerchantOrdersManager({initial}:{initial:MerchantOrder[]
     {placed&&<div className={'merchant-preaccept-status '+(riderFound?'rider-found':waiting?'rider-searching':'rider-not-requested')}>
      {riderFound?<><CheckCircle2 size={21}/><div><strong>Delivery man found: {order.rider}</strong><p>Rider confirmed by Admin. You can now accept this order.</p>
       {order.riderPhone&&<a href={'tel:'+order.riderPhone}><Phone size={14}/> {order.riderPhone}</a>}</div></>:
-     waiting?<><LoaderCircle size={21} className="merchant-loading-indicator"/><div><strong>Searching for delivery man…</strong><p>Request sent to Admin Dispatch. Waiting for an available rider. This refreshes automatically.</p></div></>:
+     waiting?<><LoaderCircle size={21} className="merchant-loading-indicator"/><div><strong>Searching for delivery man…</strong><p>Broadcasting to available riders. Waiting for the first acceptance. This refreshes automatically.</p></div></>:
      <><Bike size={21}/><div><strong>Find a delivery man before accepting</strong><p>Request manual rider assignment from Admin to unlock acceptance.</p></div></>}
     </div>}
     {!placed&&order.rider&&<div className="merchant-order-rider"><CheckCheck size={17}/> Assigned rider: {order.rider}{order.riderPhone&&<a href={'tel:'+order.riderPhone} className="merchant-rider-phone"><Phone size={13}/>{order.riderPhone}</a>}</div>}
@@ -104,6 +114,7 @@ export default function MerchantOrdersManager({initial}:{initial:MerchantOrder[]
       {riderFound&&<button type="button" disabled={working} onClick={()=>void act(order,'status','MERCHANT_ACCEPTED')}><ShieldCheck size={16}/>{working?'Accepting…':'Accept order'}</button>}
       <button type="button" className="danger" disabled={working} onClick={()=>void act(order,'status','CANCELLED')}>Decline</button>
      </>}
+     {order.rider&&['MERCHANT_ACCEPTED','PREPARING','RIDER_ASSIGNED'].includes(order.status)&&<button type="button" disabled={working} onClick={()=>void requestPickup(order)}><Bike size={16}/> Notify rider to pickup</button>}
      {workflow[order.status]?.map(a=><button key={a.next} className={a.danger?'danger':''} type="button" disabled={working}
       onClick={()=>void act(order,'status',a.next)}>{working?'Updating…':a.label}</button>)}
      <a href={'/orders/'+order.id}>View order & timeline →</a>
@@ -111,6 +122,6 @@ export default function MerchantOrdersManager({initial}:{initial:MerchantOrder[]
    </article>;
   })}</div>
   {shown.length===0&&<div className="merchant-empty-state"><PackageCheck size={35}/><h3>{orders.length?'No matching orders':'No orders yet'}</h3><p>{orders.length?'Choose another status or search.':'Customer orders appear here as soon as they are placed.'}</p></div>}
-  <p className="merchant-small-note">Showing latest {orders.length} orders. Rider matching is controlled by Admin. Before rider confirmation, the Accept button is unavailable.</p>
+  <p className="merchant-small-note">Showing latest {orders.length} orders. Rider requests are broadcast to eligible online riders. The first rider to accept is assigned automatically.</p>
  </div>;
 }
