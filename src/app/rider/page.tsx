@@ -4,6 +4,7 @@ import {db} from '@/lib/db';
 import {Bike,MapPin,Phone,Wallet,Package,Navigation,ShieldAlert} from 'lucide-react';
 import RiderLocationSharing from '@/components/rider-location-sharing';
 import RiderCodConfirmation from '@/components/rider-cod-confirmation';
+import RiderRequests from '@/components/rider-requests';
 export const dynamic='force-dynamic';
 const finished=['DELIVERED','CANCELLED','FAILED'];
 export default async function Rider(){
@@ -21,6 +22,7 @@ export default async function Rider(){
   <div className="rider-portal-header"><div><span className="admin-overline">ADPANDA DELIVERY</span><h1>Hello, {user.name}</h1><p>Keep your pickup and delivery information handy.</p></div><span className={'admin-order-badge '+rider.status.toLowerCase()}>{rider.status}</span></div>
   {!rider.approved&&<div className="rider-alert"><ShieldAlert size={20}/><span>Your rider profile has not been approved. Admin must approve you before dispatch.</span></div>}
   <RiderLocationSharing enabled={rider.approved&&rider.status==='BUSY'&&active.length>0}/>
+  {rider.approved&&rider.status==='ONLINE'&&<RiderRequests/>}
   <div className="rider-metrics"><div><Bike size={23}/><span>Active assignments</span><strong>{active.length}</strong></div><div><Package size={23}/><span>Total assignments</span><strong>{rider.deliveries.length}</strong></div><div><Wallet size={23}/><span>Recorded COD outstanding</span><strong>৳{(collected-deposited).toFixed(2)}</strong></div></div>
   <section className="rider-cash-history"><div><h2>Cash handover history</h2><p>Only Admin-confirmed cash deposits count toward clearing outstanding COD.</p></div>
    <div className="rider-cash-history-list">{rider.deposits.slice(0,8).map(d=><div key={d.id}><div><strong>৳{Number(d.amount).toFixed(2)}</strong><small>{d.createdAt.toLocaleString('en-BD',{timeZone:'Asia/Dhaka'})}</small></div><span>{d.reference||'Admin cash deposit'}</span></div>)}{!rider.deposits.length&&<div className="rider-cash-no-history">No Admin-confirmed cash deposits recorded yet.</div>}</div>
