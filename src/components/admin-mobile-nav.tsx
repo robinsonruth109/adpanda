@@ -22,7 +22,7 @@ const extra:NavItem[]=[
  {href:'/admin/settings',label:'Delivery settings',icon:Settings},
  {href:'/admin/branding',label:'Branding & content',icon:Palette},
 ];
-export default function AdminMobileNav({pending=0,brandName='AdPanda'}:{pending?:number;brandName?:string}){
+export default function AdminMobileNav({pending=0,riderRequests=0,brandName='AdPanda'}:{pending?:number;riderRequests?:number;brandName?:string}){
  const pathname=usePathname();
  const [more,setMore]=useState(false);
  useEffect(()=>{setMore(false)},[pathname]);
@@ -45,7 +45,7 @@ export default function AdminMobileNav({pending=0,brandName='AdPanda'}:{pending?
    </section>
   </div>}
   <nav className="admin-mobile-bottom-nav" aria-label="Admin mobile navigation">
-   {tabs.map(item=><Link href={item.href} key={item.href} aria-current={pathname===item.href?'page':undefined} className={'admin-mobile-tab'+(pathname===item.href?' active':'')}><span className="admin-mobile-tab-icon"><item.icon size={21} strokeWidth={pathname===item.href?2.5:1.9}/>{item.href==='/admin/merchants'&&pending>0&&<span className="admin-mobile-tab-badge">{pending>9?'9+':pending}</span>}</span><span>{item.label}</span></Link>)}
+   {tabs.map(item=><Link href={item.href} key={item.href} aria-current={pathname===item.href?'page':undefined} className={'admin-mobile-tab'+(pathname===item.href?' active':'')}><span className="admin-mobile-tab-icon"><item.icon size={21} strokeWidth={pathname===item.href?2.5:1.9}/>{item.href==='/admin/merchants'&&pending>0&&<span className="admin-mobile-tab-badge">{pending>9?'9+':pending}</span>}{item.href==='/admin/orders'&&riderRequests>0&&<span className="admin-mobile-tab-badge">{riderRequests>9?'9+':riderRequests}</span>}</span><span>{item.label}</span></Link>)}
    <button className={'admin-mobile-tab'+(more||extrasSelected?' active':'')} type="button" onClick={()=>setMore(value=>!value)} aria-haspopup="dialog" aria-expanded={more}><span className="admin-mobile-tab-icon">{more?<X size={21}/>:<Menu size={21}/>}</span><span>More</span></button>
   </nav>
  </div>;
