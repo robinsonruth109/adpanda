@@ -11,7 +11,7 @@ import RiderDashboardShell from '@/components/rider-dashboard-shell';
 import './rider-dashboard.css';
 export const dynamic='force-dynamic';
 const finished=['DELIVERED','CANCELLED','FAILED'];
-export default async function Rider(){
+export default async function Rider({mode='overview'}:{mode?:'overview'|'requests'|'deliveries'|'location'|'wallet'}){
  const user=await currentUser();
  if(!user||user.role!=='RIDER')return <main className="section container"><div className="eyebrow">AdPanda delivery partners</div><h1>Rider access</h1><p>Sign in with your approved rider account. Administrators register eligible accounts from the Riders dashboard.</p><Link className="btn" href="/rider/login">Rider sign in</Link></main>;
  const rider=await db.rider.findUnique({where:{userId:user.id},include:{
@@ -23,17 +23,17 @@ export default async function Rider(){
  const collected=rider.collections.reduce((s,c)=>s+Number(c.amount),0);
  const deposited=rider.deposits.reduce((s,c)=>s+Number(c.amount),0);
  return <RiderDashboardShell name={user.name} status={rider.status} approved={rider.approved} activeCount={active.length}><main className="rider-portal rd-dashboard" id="rider-overview">
-  <div className="rider-portal-header"><div><span className="admin-overline">ADPANDA DELIVERY</span><h1>Hello, {user.name}</h1><p>Keep your pickup and delivery information handy.</p></div><span className={'admin-order-badge '+rider.status.toLowerCase()}>{rider.status}</span></div>
+  <div className="rider-portal-header"><div><span className="admin-overline">ADPANDA DELIVERY</span><h1>{mode==='overview'?'Hello, '+user.name:mode==='requests'?'Available delivery requests':mode==='deliveries'?'My deliveries':mode==='location'?'Live GPS':'Cash & wallet'}</h1><p>{mode==='overview'?'Your delivery performance at a glance.':mode==='requests'?'Review and accept incoming rider requests.':mode==='deliveries'?'Track assigned deliveries and pickup information.':mode==='location'?'Manage your live location and rider availability.':'Review COD collections and confirmed deposits.'}</p></div><span className={'admin-order-badge '+rider.status.toLowerCase()}>{rider.status}</span></div>
   {!rider.approved&&<div className="rider-alert"><ShieldAlert size={20}/><span>Your rider profile has not been approved. Admin must approve you before dispatch.</span></div>}
   
-  <div id="rider-location" className="rd-section"><RiderLocationSharing enabled={rider.approved&&rider.status!=='SUSPENDED'}/></div>
-  <RiderPickupAlerts/>
-  <div id="rider-requests" className="rd-section">{rider.approved&&rider.status==='ONLINE'?<RiderRequests/>:<section className="rd-card rd-empty-requests"><div className="rd-empty-icon"><Bike size={24}/></div><h2>Available delivery requests</h2><p>{!rider.approved?'Your rider account is awaiting admin approval.':'Go online to receive delivery requests.'}</p></section>}</div>
-  <div className="rider-metrics rd-metrics"><div><Bike size={23}/><span>Active assignments</span><strong>{active.length}</strong></div><div><Package size={23}/><span>Total assignments</span><strong>{rider.deliveries.length}</strong></div><div><Wallet size={23}/><span>Recorded COD outstanding</span><strong>৳{(collected-deposited).toFixed(2)}</strong></div></div>
-  <section className="rider-cash-history rd-section" id="rider-wallet"><div><h2>Cash handover history</h2><p>Only Admin-confirmed cash deposits count toward clearing outstanding COD.</p></div>
+  {mode==='location'&&<div id="rider-location" className="rd-section"><RiderLocationSharing enabled={rider.approved&&rider.status!=='SUSPENDED'}/></div>}
+  {(mode==='overview'||mode==='deliveries')&&<RiderPickupAlerts/>}
+  {mode==='requests'&&<div id="rider-requests" className="rd-section">{rider.approved&&rider.status==='ONLINE'?<RiderRequests/>:<section className="rd-card rd-empty-requests"><div className="rd-empty-icon"><Bike size={24}/></div><h2>Available delivery requests</h2><p>{!rider.approved?'Your rider account is awaiting admin approval.':'Go online to receive delivery requests.'}</p></section>}</div>}
+  {mode==='overview'&&<div className="rider-metrics rd-metrics"><div><Bike size={23}/><span>Active assignments</span><strong>{active.length}</strong></div><div><Package size={23}/><span>Total assignments</span><strong>{rider.deliveries.length}</strong></div><div><Wallet size={23}/><span>Recorded COD outstanding</span><strong>৳{(collected-deposited).toFixed(2)}</strong></div></div>}
+  {mode==='wallet'&&<section className="rider-cash-history rd-section" id="rider-wallet"><div><h2>Cash handover history</h2><p>Only Admin-confirmed cash deposits count toward clearing outstanding COD.</p></div>
    <div className="rider-cash-history-list">{rider.deposits.slice(0,8).map(d=><div key={d.id}><div><strong>৳{Number(d.amount).toFixed(2)}</strong><small>{d.createdAt.toLocaleString('en-BD',{timeZone:'Asia/Dhaka'})}</small></div><span>{d.reference||'Admin cash deposit'}</span></div>)}{!rider.deposits.length&&<div className="rider-cash-no-history">No Admin-confirmed cash deposits recorded yet.</div>}</div>
-  </section>
-  <div className="rider-deliveries-heading rd-section" id="rider-deliveries"><h2>Assigned deliveries</h2><p>Only assignments associated with your rider account appear here.</p></div>
+  </section>}
+  {mode==='deliveries'&&<><div className="rider-deliveries-heading rd-section" id="rider-deliveries"><h2>Assigned deliveries</h2><p>Only assignments associated with your rider account appear here.</p></div>
   <div className="rider-deliveries">{rider.deliveries.map(d=><article className="rider-delivery-card" key={d.id}>
    <div className="rider-delivery-head"><div><span>ORDER</span><h3>{d.order.code}</h3></div><span className={'admin-order-badge '+d.order.status.toLowerCase()}>{d.order.status.replaceAll('_',' ')}</span></div>
    {['PLACED','MERCHANT_ACCEPTED','PREPARING'].includes(d.order.status)&&<div className="rider-preaccept-note">
@@ -45,6 +45,7 @@ export default async function Rider(){
    {d.order.status==='DELIVERED'&&<RiderCodConfirmation orderId={d.order.id} amount={Number(d.order.codTotal)} recorded={Boolean(d.order.codCollection)}/>}
   </article>)}</div>
   {rider.deliveries.length===0&&<div className="admin-empty"><Bike size={37}/><h3>No assignments yet</h3><p>Admin will assign orders once your rider profile is approved and available.</p></div>}
+  </>}
   <p className="muted" style={{fontSize:12,marginTop:22}}>Live GPS requires your explicit permission and an active browser page. COD receipt confirmation does not mean the cash has been deposited or reconciled with Admin.</p>
  </main></RiderDashboardShell>;
 }
