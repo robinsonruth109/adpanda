@@ -15,7 +15,7 @@ export default async function Rider(){
  const user=await currentUser();
  if(!user||user.role!=='RIDER')return <main className="section container"><div className="eyebrow">AdPanda delivery partners</div><h1>Rider access</h1><p>Sign in with your approved rider account. Administrators register eligible accounts from the Riders dashboard.</p><Link className="btn" href="/rider/login">Rider sign in</Link></main>;
  const rider=await db.rider.findUnique({where:{userId:user.id},include:{
-  deliveries:{orderBy:{assignedAt:'desc'},take:50,include:{order:{include:{kitchen:true,address:true,codCollection:true,customer:{select:{name:true,phone:true}}}}}},
+  deliveries:{orderBy:{assignedAt:'desc'},take:50,include:{order:{include:{kitchen:{include:{merchant:{include:{members:{where:{role:'OWNER'},take:1,include:{user:{select:{phone:true}}}}}}}},address:true,codCollection:true,customer:{select:{name:true,phone:true}}}}}},
   collections:{select:{amount:true}},deposits:{select:{id:true,amount:true,reference:true,createdAt:true},orderBy:{createdAt:'desc'}}
  }});
  if(!rider)return <main className="section container"><h1>Rider profile not found</h1><p>Contact your administrator to activate a delivery profile.</p></main>;
@@ -39,7 +39,7 @@ export default async function Rider(){
    {['PLACED','MERCHANT_ACCEPTED','PREPARING'].includes(d.order.status)&&<div className="rider-preaccept-note">
     <ShieldAlert size={17}/> {d.order.status==='PLACED'?'Rider reserved. Merchant has not accepted this order yet.':'Merchant preparing the order.'} Please wait for READY / RIDER ASSIGNED before pickup.
    </div>}
-   <div className="rider-delivery-stop"><div className="rider-delivery-dot pickup"/><div><small>PICKUP FROM</small><strong>{d.order.kitchen.name}</strong><p>{d.order.kitchen.address}</p><a target="_blank" rel="noopener noreferrer" href={'https://www.google.com/maps?q='+String(d.order.kitchen.latitude)+','+String(d.order.kitchen.longitude)}><Navigation size={16}/> Navigate to kitchen</a></div></div>
+   <div className="rider-delivery-stop"><div className="rider-delivery-dot pickup"/><div><small>PICKUP FROM</small><strong>{d.order.kitchen.name}</strong><p>{d.order.kitchen.address}</p>{d.order.kitchen.merchant.members[0]?.user.phone&&<a href={'tel:'+d.order.kitchen.merchant.members[0].user.phone}><Phone size={16}/> Call pickup: {d.order.kitchen.merchant.members[0].user.phone}</a>}<a target="_blank" rel="noopener noreferrer" href={'https://www.google.com/maps?q='+String(d.order.kitchen.latitude)+','+String(d.order.kitchen.longitude)}><Navigation size={16}/> Navigate to kitchen</a></div></div>
    <div className="rider-delivery-stop"><div className="rider-delivery-dot destination"/><div><small>DELIVER TO</small><strong>{d.order.recipientName||d.order.customer?.name||'Guest customer'}</strong><p>{d.order.address.details}{d.order.address.landmark?' · '+d.order.address.landmark:''}</p><div className="rider-delivery-links"><a href={'tel:'+(d.order.recipientPhone||d.order.customer?.phone||'')}><Phone size={16}/> Call customer</a><a target="_blank" rel="noopener noreferrer" href={'https://www.google.com/maps?q='+String(d.order.address.latitude)+','+String(d.order.address.longitude)}><MapPin size={16}/> Navigate</a></div></div></div>
    <div className="rider-delivery-total"><span>Collect COD on delivery</span><strong>৳{Number(d.order.codTotal).toFixed(2)}</strong></div>
    {d.order.status==='DELIVERED'&&<RiderCodConfirmation orderId={d.order.id} amount={Number(d.order.codTotal)} recorded={Boolean(d.order.codCollection)}/>}
