@@ -22,17 +22,18 @@ export default function AdminOrderManager({initialOrders,availableRiders}:{initi
  useEffect(()=>setOrders(initialOrders),[initialOrders]);
  const visible=useMemo(()=>orders.filter(o=>(filter==='ALL'||filter===o.status||(filter==='RIDER_SEARCH'&&o.status==='PLACED'&&!!o.dispatchRequestedAt&&!o.riderId))&&[o.code,o.customer,o.phone,o.kitchen,o.riderName||''].join(' ').toLowerCase().includes(term.trim().toLowerCase())),[orders,filter,term]);
  const pending=orders.filter(o=>!['DELIVERED','CANCELLED','FAILED'].includes(o.status)).length;
- async function mutate(order:AdminOrder,action:'status'|'dispatch',status?:string){
+ async function mutate(order:AdminOrder,action:'status'|'dispatch'|'unassign',status?:string){
   if(busy)return;
   if((status==='CANCELLED'||status==='FAILED'||status==='DELIVERED')&&!window.confirm('Confirm '+display(status)+' for order '+order.code+'?'))return;
+  if(action==='unassign'&&!window.confirm('Release this rider? Merchant will have to wait for another rider before acceptance.'))return;
   const riderId=selected[order.id];
   if(action==='dispatch'&&!riderId){setMessage('Select an available rider first.');return}
   setBusy(order.id);setMessage('');
   try{
-   const response=await fetch('/api/admin/orders/'+encodeURIComponent(order.id)+'/'+action,{method:action==='status'?'PATCH':'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(action==='status'?{status}:{riderId})});
+   const response=await fetch('/api/admin/orders/'+encodeURIComponent(order.id)+'/'+action,{method:action==='status'?'PATCH':'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(action==='status'?{status}:action==='dispatch'?{riderId}:{})});
    const data=await response.json();
    if(!response.ok)throw Error(data.error||'Action failed');
-   setOrders(prev=>prev.map(o=>o.id===order.id?{...o,status:data.status||o.status,riderId:action==='dispatch'?riderId:o.riderId,riderName:action==='dispatch'?(availableRiders.find(r=>r.id===riderId)?.name||null):o.riderName}:o));
+   setOrders(prev=>prev.map(o=>o.id===order.id?{...o,status:data.status||o.status,riderId:action==='dispatch'?riderId:action==='unassign'?null:o.riderId,riderName:action==='dispatch'?(availableRiders.find(r=>r.id===riderId)?.name||null):action==='unassign'?null:o.riderName}:o));
    setMessage('Order '+order.code+' updated successfully. COD collection is recorded separately.');
    router.refresh();
   }catch(error){setMessage(error instanceof Error?error.message:'Could not update order');router.refresh()}finally{setBusy(null)}
@@ -59,6 +60,10 @@ export default function AdminOrderManager({initialOrders,availableRiders}:{initi
     <div><span><Bike size={15}/> Rider</span><strong>{order.riderName||'Not assigned'}</strong><small>{order.riderName?order.status==='PLACED'?'Reserved — waiting for Merchant acceptance':'Assigned to delivery':order.dispatchRequestedAt?'Merchant requested delivery rider':'Waiting for Merchant to request a rider'}</small></div>
     <div><span>COD total</span><strong className="admin-order-price">৳{order.codTotal.toLocaleString('en-BD',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong><small>Cash on delivery</small></div>
    </div>
+   {order.status==='PLACED'&&Boolean(order.riderId)&&<div className="admin-dispatch-reservation">
+    <CheckCircle2 size={18}/><span>Rider reserved. Merchant can now accept this order.</span>
+    <button type="button" disabled={busy===order.id} onClick={()=>mutate(order,'unassign')}>Release / replace rider</button>
+   </div>}
    {((order.status==='PLACED'&&!!order.dispatchRequestedAt)||order.status==='READY_FOR_PICKUP')&&!order.riderId&&<div className="admin-dispatch-controls"><label htmlFor={'rider-'+order.id}>Reserve an approved, online delivery rider before Merchant accepts</label><div><select id={'rider-'+order.id} value={selected[order.id]||''} onChange={e=>setSelected(prev=>({...prev,[order.id]:e.target.value}))}><option value="">Select available rider</option>{availableRiders.map(r=><option key={r.id} value={r.id}>{r.name} · {r.phone}</option>)}</select><button disabled={busy===order.id||!selected[order.id]} onClick={()=>mutate(order,'dispatch')}>Confirm rider</button></div></div>}
    <p className="admin-order-tracking-link"><a href={'/orders/'+order.id}>View order details & live rider tracking ↗</a></p>
    {choices[order.status]?.length>0&&<div className="admin-order-actions">{choices[order.status].map(action=><button key={action.status} type="button" disabled={busy===order.id} className={action.danger?'danger':''} onClick={()=>mutate(order,'status',action.status)}>{busy===order.id?'Updating…':action.label}</button>)}</div>}
