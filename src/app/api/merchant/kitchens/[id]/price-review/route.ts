@@ -9,6 +9,7 @@ import {dhakaDate} from '@/lib/kitchen-hours';
 const price=z.string().regex(/^(?:0|[1-9]\d{0,5})(?:\.\d{1,2})?$/,'Use a valid BDT price with up to 2 decimals');
 const itemSchema=z.object({
  id:z.string().min(1).max(191),
+ acknowledged:z.literal(true),
  price
 });
 const reviewSchema=z.object({
