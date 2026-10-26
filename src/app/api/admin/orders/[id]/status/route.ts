@@ -25,6 +25,8 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
  const {id}=await params,{status,note}=parsed.data;
  try {
   const result=await db.$transaction(async tx=>{
+   // Serialize pre-assignment, acceptance, and cancellation for this order.
+   await tx.$queryRaw`SELECT id FROM \`Order\` WHERE id = ${id} FOR UPDATE`;
    const order=await tx.order.findUnique({where:{id},include:{delivery:true}});
    if(!order) return {error:'Order not found',code:404};
    if(!allowed[order.status]?.includes(status))return {error:'Invalid status transition from '+order.status+' to '+status,code:409};
