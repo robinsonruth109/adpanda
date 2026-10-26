@@ -1090,3 +1090,80 @@ body:has(.admin-shell)>.adp-customer-footer,body:has(.merchant-shell)>.adp-custo
 @media(max-width:1050px){.adp-home-vertical{padding:20px 16px;gap:10px}.adp-home-vertical-emoji{flex-basis:52px;width:52px;height:52px;font-size:29px}.adp-home-vertical h3{font-size:16px}}
 @media(max-width:760px){.adp-home-vertical-grid{gap:12px}.adp-home-vertical{flex-direction:column;align-items:flex-start;min-height:0;padding:17px;gap:11px}.adp-home-vertical-emoji{flex-basis:auto}.adp-home-verticals{margin-bottom:42px}}
 @media(max-width:580px){.adp-home-vertical-grid{grid-template-columns:1fr;gap:11px}.adp-home-vertical{flex-direction:row;align-items:center;min-height:104px;padding:17px}.adp-home-vertical-emoji{width:60px;height:60px;font-size:35px;flex:0 0 60px}.adp-home-vertical h3{font-size:17px;margin-bottom:3px}.adp-home-vertical p{margin-bottom:6px}.adp-admin-store-summary{grid-template-columns:1fr 1fr}.merchant-store-type-picker{grid-template-columns:1fr}.merchant-store-type-picker button{display:flex;align-items:center;justify-content:flex-start;padding:12px 15px;gap:13px}.merchant-store-type-picker button>span{font-size:24px}}
+
+
+/* Merchant grocery daily price verification gate */
+.grocery-daily-alert{display:flex;align-items:center;gap:13px;border-radius:14px;padding:16px 20px;margin:0 0 19px;border:1px solid #f5c6db;background:#fff3f8;min-width:0;color:#a42a62}
+.grocery-daily-alert.verified{background:#effaf5;border-color:#bae8d0;color:#14764d}
+.grocery-daily-alert-icon{flex:0 0 39px;width:39px;height:39px;display:grid;place-items:center;border-radius:12px;background:#ffe0ed;color:#d7196b}
+.grocery-daily-alert.verified .grocery-daily-alert-icon{background:#d7f6e5;color:#118754}
+.grocery-daily-alert>div{display:grid;gap:5px;flex:1;min-width:0}
+.grocery-daily-alert strong{font-size:14px}
+.grocery-daily-alert small{font-size:12px;line-height:1.5;color:#877987}
+.grocery-daily-alert.verified small{color:#6a8a7b}
+.grocery-daily-alert>button{border:0;border-radius:9px;background:#e21b70;color:#fff;font-weight:850;font-size:12px;padding:12px 16px;white-space:nowrap;cursor:pointer}
+.grocery-daily-alert.verified>button{background:#15935f}
+.grocery-review-overlay{position:fixed;inset:0;z-index:3000;background:#181327b8;display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(5px)}
+.grocery-review-dialog{width:min(930px,100%);height:min(790px,calc(100dvh - 36px));max-height:calc(100dvh - 36px);display:flex;flex-direction:column;overflow:hidden;border-radius:21px;background:#fff;color:#2a293d;box-shadow:0 22px 70px #0004;min-height:0}
+.grocery-review-head{padding:23px 27px;display:flex;justify-content:space-between;align-items:flex-start;gap:15px;border-bottom:1px solid #eee9f0;flex:0 0 auto}
+.grocery-review-identity{display:flex;gap:15px;align-items:flex-start;min-width:0}
+.grocery-review-identity>span{flex:0 0 52px;width:52px;height:52px;border-radius:14px;background:#fff0f6;color:#e21b70;display:grid;place-items:center}
+.grocery-review-head small{color:#e21b70;letter-spacing:1.4px;font-size:10px;font-weight:900}
+.grocery-review-head h2{font-size:23px;line-height:1.25;letter-spacing:-.5px;margin:7px 0}
+.grocery-review-head p{color:#777385;font-size:12px;line-height:1.6;margin:0}
+.grocery-review-head>button{flex:0 0 36px;display:grid;place-items:center;width:36px;height:36px;border:0;background:#f7f6fa;border-radius:10px;color:#757184;cursor:pointer}
+.grocery-review-toolbar{padding:15px 26px 10px;background:#fffbfd;border-bottom:1px solid #f4ebf0;flex:0 0 auto}
+.grocery-review-toolbar>div:first-child{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.grocery-review-date{display:flex;align-items:center;gap:6px;color:#8c7081;font-size:12px}
+.grocery-review-toolbar strong{font-size:12px;color:#d31a68}
+.grocery-review-progress{height:8px;border-radius:99px;background:#f1e1e8;overflow:hidden;margin:12px 0}
+.grocery-review-progress>span{height:100%;display:block;background:linear-gradient(90deg,#e21b70,#ff63ad);transition:width .2s ease;border-radius:inherit}
+.grocery-review-toolbar p{color:#777589;font-size:11px;line-height:1.6;margin:0 0 8px}
+.grocery-review-content{padding:17px 25px;min-height:0;overflow-y:auto;overscroll-behavior:contain;flex:1}
+.grocery-review-search{display:flex;gap:10px;align-items:center;border:1px solid #e9e5ee;border-radius:11px;background:#faf9fc;padding:8px 11px;margin:0 0 13px;color:#aaa0ae}
+.grocery-review-search input{height:35px;flex:1;border:0;outline:0;min-width:0;background:transparent;color:#302b3d;font-size:13px}
+.grocery-review-search>button{border:0;background:transparent;color:#d21c68;padding:5px;display:grid;place-items:center;cursor:pointer}
+.grocery-review-list{display:grid;gap:9px}
+.grocery-review-item{display:grid;grid-template-columns:minmax(0,1fr) minmax(140px,200px) 118px;gap:17px;align-items:center;padding:14px 16px;border:1px solid #eeeaf0;border-radius:13px;background:#fff}
+.grocery-review-item.done{border-color:#bce8d1;background:#f7fefa}
+.grocery-review-item-main{display:grid;gap:6px;min-width:0}
+.grocery-review-item-main small{color:#d51e71;font-size:10px;font-weight:850}
+.grocery-review-item-main strong{font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+.grocery-review-item-main>span{font-size:11px;color:#1d9368}.grocery-review-item-main .soldout{color:#b5832b}
+.grocery-review-pricing label{display:grid;gap:5px;color:#79748a;font-size:11px;font-weight:800}
+.grocery-review-pricing input{border:1px solid #e0dbe6;border-radius:9px;background:#fff;color:#282539;padding:11px;min-height:42px;font-size:15px;font-weight:850;width:100%;min-width:0}
+.grocery-review-pricing input:focus{outline:2px solid #e21b7044;border-color:#e21b70}
+.grocery-review-pricing>small{display:block;font-size:10px;color:#c8365e;line-height:1.4;margin-top:6px}
+.grocery-review-check{display:flex;align-items:center;gap:8px;white-space:nowrap;cursor:pointer;font-size:12px;font-weight:850;color:#746e80}
+.grocery-review-check>input{width:17px;height:17px;accent-color:#159763;cursor:pointer}
+.grocery-review-check>span{display:flex;gap:5px;align-items:center}
+.grocery-review-item.done .grocery-review-check{color:#148857}
+.grocery-review-empty{border:1px dashed #f3c6d9;background:#fff9fc;border-radius:14px;padding:35px 25px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;color:#837586;font-size:13px}
+.grocery-review-empty a,.grocery-review-empty button{background:#e21b70;color:white;padding:11px 15px;border-radius:9px;border:0;font-weight:850;font-size:12px}
+.grocery-review-empty h3{font-size:18px;margin:0;color:#2b2334}.grocery-review-empty p{margin:0;line-height:1.7}
+.grocery-review-foot{display:flex;align-items:center;justify-content:space-between;gap:13px;padding:17px 26px;border-top:1px solid #edeaf1;background:#fff;flex:0 0 auto}
+.grocery-review-foot>div{display:grid;gap:5px;min-width:0}
+.grocery-review-foot strong{font-size:13px;color:#222036}
+.grocery-review-foot small{font-size:10px;color:#8d8a9b;line-height:1.5}
+.grocery-review-foot p{color:#d21c68;font-size:12px;line-height:1.5;margin:4px 0 0}
+.grocery-review-confirm{border:0;background:#e21b70;border-radius:10px;color:#fff;padding:13px 20px;font-size:13px;font-weight:850;display:flex;gap:8px;align-items:center;justify-content:center;white-space:nowrap;min-height:45px;cursor:pointer}
+.grocery-review-confirm:disabled{background:#f7d5e3;color:#ba6b8d;cursor:not-allowed}
+@media(max-width:720px){
+ .grocery-daily-alert{padding:13px;flex-wrap:wrap;gap:10px}
+ .grocery-daily-alert>button{margin-left:auto}
+ .grocery-review-overlay{padding:0;align-items:flex-end}
+ .grocery-review-dialog{width:100%;height:100dvh;max-height:100dvh;border-radius:17px 17px 0 0}
+ .grocery-review-head{padding:17px 16px}
+ .grocery-review-head h2{font-size:18px}
+ .grocery-review-identity{gap:10px}
+ .grocery-review-identity>span{width:39px;height:39px;flex-basis:39px}
+ .grocery-review-identity>span svg{width:22px}
+ .grocery-review-toolbar{padding:13px 16px 8px}
+ .grocery-review-content{padding:13px 13px 16px}
+ .grocery-review-item{grid-template-columns:minmax(0,1fr) minmax(110px,132px);gap:12px;padding:12px}
+ .grocery-review-pricing{grid-column:2;grid-row:1/3}
+ .grocery-review-check{grid-column:1;grid-row:2}
+ .grocery-review-foot{padding:13px 15px calc(16px + env(safe-area-inset-bottom,0px));align-items:stretch;flex-direction:column}
+ .grocery-review-confirm{width:100%}
+ .grocery-review-foot>div{gap:3px}
+}
