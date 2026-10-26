@@ -5,7 +5,7 @@ import MerchantReviews from '@/components/merchant-reviews';
 export const dynamic='force-dynamic';
 export default async function Admin(){
  const user=await requireRole(['ADMIN']);
- if(!user)return <main className="section container"><h1>Administrator access</h1><p>Please sign in using your authorized admin account.</p><Link className="btn" href="/login">Sign in</Link></main>;
+ if(!user)return <main className="section container"><h1>Administrator access</h1><p>Please sign in using your authorized admin account.</p><Link className="btn" href="/admin-access">Admin sign in</Link></main>;
  const [merchants,orders,users,kitchens]=await Promise.all([
   db.merchant.findMany({orderBy:{createdAt:'desc'},include:{kitchens:true,members:{include:{user:{select:{name:true,phone:true}}}}}}),
   db.order.count(),db.user.count(),db.kitchen.count()
