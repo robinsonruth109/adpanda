@@ -6,7 +6,7 @@ export async function adminMerchantOverview(pendingOnly=false){
   where:pendingOnly?{status:'PENDING'}:undefined,
   orderBy:{createdAt:'desc'},
   include:{
-   members:{include:{user:{select:{name:true,phone:true}}}}},
+   members:{include:{user:{select:{name:true,phone:true}}}},
    kitchens:{include:{categories:{select:{_count:{select:{items:true}}}}}}
   }
  });
