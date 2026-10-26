@@ -1218,3 +1218,77 @@ body:has(.admin-shell)>.adp-customer-footer,body:has(.merchant-shell)>.adp-custo
  .adp-home-product-empty h3{font-size:15px}
  .adp-home-product-empty>a{margin-left:auto}
 }
+
+
+/* Customer-only authentication and dedicated staff access */
+.adp-customer-auth-page{min-height:660px;padding:55px 24px 72px;background:#fafafa;color:#282236;display:flex;align-items:center;justify-content:center}
+.adp-customer-auth-shell{max-width:1080px;width:100%;display:grid;grid-template-columns:1fr 1fr;border:1px solid #f1e5ec;box-shadow:0 16px 48px #3117240b;border-radius:24px;overflow:hidden;background:#fff;min-height:560px}
+.adp-customer-auth-showcase{background:linear-gradient(130deg,#fcdeeb,#fcebf3 65%,#fff3f8);padding:49px 43px 45px;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.adp-customer-auth-mini{font-size:11px;letter-spacing:1.5px;font-weight:900;color:#d3196a}
+.adp-customer-auth-art{height:160px;margin:25px 0 19px;display:flex;align-items:center;justify-content:center;gap:15px}
+.adp-customer-auth-art>span{display:grid;place-items:center;background:#fff;width:100px;height:100px;border-radius:23px;font-size:51px;box-shadow:0 13px 28px #ca2a701d;transform:rotate(-9deg)}
+.adp-customer-auth-art>span:nth-child(2){width:115px;height:115px;font-size:57px;transform:translateY(-13px) rotate(6deg)}
+.adp-customer-auth-art>span:nth-child(3){transform:rotate(9deg)}
+.adp-customer-auth-showcase h2{font-size:clamp(27px,3vw,40px);line-height:1.17;letter-spacing:-1.1px;color:#2c2134;margin:7px 0 16px}
+.adp-customer-auth-showcase h2 em{font-style:normal;color:#e21b70}
+.adp-customer-auth-showcase>p{font-size:14px;line-height:1.9;color:#726476;max-width:400px;margin:0 0 30px}
+.adp-customer-auth-perks{display:flex;gap:10px;flex-wrap:wrap}
+.adp-customer-auth-perks>span{display:flex;gap:7px;align-items:center;background:#ffffffb5;border:1px solid #ffffffa6;border-radius:50px;padding:10px;font-size:10px;font-weight:850;color:#a83b70}
+.adp-customer-auth-form-side{padding:46px 45px 35px;min-width:0}
+.adp-customer-auth-eyebrow{letter-spacing:1.5px;font-size:11px;font-weight:900;color:#e21b70;margin-bottom:13px}
+.adp-customer-auth-form-side h1{font-size:clamp(27px,2.6vw,37px);letter-spacing:-1.2px;line-height:1.16;margin:0 0 11px;color:#252138}
+.adp-customer-auth-intro{font-size:13px;color:#807b8b;line-height:1.8;margin:0 0 23px}
+.adp-customer-auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:5px;background:#f7f4f8;border:1px solid #f1ebf1;border-radius:12px;margin:0 0 23px}
+.adp-customer-auth-tabs>a{text-align:center;padding:12px 6px;border-radius:9px;font-size:12px;color:#777284;font-weight:900}
+.adp-customer-auth-tabs>a.active{background:#e21b70;color:#fff;box-shadow:0 5px 15px #e21b7026}
+.adp-customer-auth-fields{display:grid;gap:16px}
+.adp-customer-auth-fields>label{display:grid;gap:8px;color:#4d475d;font-size:12px;font-weight:850;min-width:0}
+.adp-customer-auth-fields>label>div{display:flex;align-items:center;gap:10px;border:1px solid #e1dfe8;border-radius:11px;background:#fff;padding:0 13px;color:#ad9aa9;min-width:0}
+.adp-customer-auth-fields>label>div:focus-within{border-color:#e21b70;box-shadow:0 0 0 3px #e21b701a;color:#e21b70}
+.adp-customer-auth-fields input{font-size:14px;width:100%;min-width:0;min-height:48px;border:0;background:transparent;color:#292436;outline:0}
+.adp-customer-auth-fields label small{color:#8b8796;font-size:10px;font-weight:550}
+.adp-customer-auth-fields label>div>button{flex:0 0 29px;display:grid;place-items:center;border:0;background:transparent;color:#91899e}
+.adp-customer-auth-error,.adp-staff-login-error{margin:0;color:#ae2242;font-size:12px;line-height:1.6;background:#fff1f4;border:1px solid #f2cfd8;border-radius:9px;padding:12px}
+.adp-customer-auth-submit{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;border:0;border-radius:10px;background:#e21b70;color:#fff;padding:15px;font-weight:900;font-size:13px;margin-top:5px;box-shadow:0 10px 18px #e21b7020}
+.adp-customer-auth-submit:disabled,.adp-staff-login-submit:disabled{opacity:.57;cursor:not-allowed}
+.adp-customer-auth-guest{margin-top:25px;display:flex;align-items:flex-start;gap:13px;background:#f0faf5;border:1px solid #d5eee0;border-radius:12px;padding:17px;color:#168658}
+.adp-customer-auth-guest>svg{flex:0 0 22px;margin-top:3px}
+.adp-customer-auth-guest strong{font-size:13px;color:#126e50}
+.adp-customer-auth-guest p{font-size:11px;line-height:1.7;color:#6d8378;margin:6px 0 8px}
+.adp-customer-auth-guest a{display:inline-flex;gap:7px;align-items:center;font-size:11px;font-weight:900;color:#128450}
+.adp-customer-auth-partner-note{font-size:11px;color:#8d8896;text-align:center;margin:21px 0 0}
+.adp-customer-auth-partner-note a{font-weight:850;color:#d91a6d}
+.adp-staff-login-page{padding:70px 20px 85px;background:#f7f7fb;display:flex;align-items:center;justify-content:center;min-height:640px}
+.adp-staff-login-card{width:min(465px,100%);border:1px solid #e5e5ed;border-radius:22px;box-shadow:0 18px 48px #181a3421;padding:38px 39px 30px;background:#fff;text-align:left}
+.adp-staff-login-icon{width:60px;height:60px;background:#251f35;border-radius:15px;color:#fff;display:grid;place-items:center;margin-bottom:23px}
+.adp-staff-login-kicker{color:#d91a6b;letter-spacing:1.5px;font-size:10px;font-weight:950}
+.adp-staff-login-card h1{font-size:29px;letter-spacing:-.9px;margin:10px 0;color:#292438}
+.adp-staff-login-card>p{font-size:12px;color:#878393;line-height:1.8;margin:0 0 26px}
+.adp-staff-login-card form{display:grid;gap:17px}
+.adp-staff-login-card form>label{display:grid;gap:8px;color:#514d60;font-size:12px;font-weight:900}
+.adp-staff-login-card form>label>div{display:flex;gap:9px;align-items:center;color:#968b9b;border:1px solid #e1e0e8;border-radius:10px;padding:0 12px}
+.adp-staff-login-card form>label>div:focus-within{border-color:#e21b70;box-shadow:0 0 0 3px #e21b7016}
+.adp-staff-login-card input{flex:1;min-width:0;min-height:47px;font-size:14px;border:0;background:transparent;outline:0}
+.adp-staff-login-card form>label>div>button{border:0;background:transparent;color:#8b8095;display:grid;place-items:center}
+.adp-staff-login-submit{display:flex;gap:9px;align-items:center;justify-content:center;width:100%;min-height:48px;border:0;border-radius:10px;background:#251f35;color:#fff;font-weight:900;font-size:13px;margin-top:6px}
+.adp-staff-login-bottom{display:flex;gap:8px;align-items:center;justify-content:center;color:#7b7889;font-size:10px;margin-top:25px;background:#f7f7f9;padding:12px;border-radius:9px}
+.adp-staff-login-bottom svg{color:#18835e}
+.adp-staff-login-home{display:block;font-size:12px;color:#7a7282;text-align:center;margin-top:21px}
+.adp-footer-bottom>a.adp-footer-admin-link{font-size:10px;color:#92859b;text-decoration:none;letter-spacing:.1px}
+.adp-footer-bottom>a.adp-footer-admin-link:hover{color:#fff;text-decoration:underline}
+@media(max-width:850px){
+ .adp-customer-auth-shell{grid-template-columns:1fr;max-width:590px}
+ .adp-customer-auth-showcase{display:none}
+ .adp-customer-auth-page{padding:32px 18px 75px;min-height:0}
+ .adp-customer-auth-form-side{padding:35px 34px}
+}
+@media(max-width:520px){
+ .adp-customer-auth-page{padding:16px 12px 35px}
+ .adp-customer-auth-shell{border-radius:15px;box-shadow:none}
+ .adp-customer-auth-form-side{padding:26px 19px 30px}
+ .adp-customer-auth-form-side h1{font-size:27px}
+ .adp-customer-auth-fields input,.adp-staff-login-card input{font-size:16px}
+ .adp-staff-login-page{padding:25px 12px 75px;min-height:0}
+ .adp-staff-login-card{padding:30px 22px;border-radius:16px}
+ .adp-footer-bottom>a.adp-footer-admin-link{flex-basis:100%;text-align:left}
+}
