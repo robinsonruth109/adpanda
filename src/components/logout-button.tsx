@@ -2,7 +2,7 @@
 import {useState} from 'react';
 import {useRouter} from 'next/navigation';
 
-export default function LogoutButton(){
+export default function LogoutButton({redirectTo="/login"}:{redirectTo?:string}={}){
  const router=useRouter();
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState('');
@@ -12,7 +12,7 @@ export default function LogoutButton(){
   try{
    const response=await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin',cache:'no-store'});
    if(!response.ok)throw new Error('Logout failed. Please try again.');
-   router.replace('/login');
+   router.replace(redirectTo);
    router.refresh();
   }catch(err){setError(err instanceof Error?err.message:'Logout failed.');setBusy(false);}
  }
