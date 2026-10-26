@@ -1292,3 +1292,195 @@ body:has(.admin-shell)>.adp-customer-footer,body:has(.merchant-shell)>.adp-custo
  .adp-staff-login-card{padding:30px 22px;border-radius:16px}
  .adp-footer-bottom>a.adp-footer-admin-link{flex-basis:100%;text-align:left}
 }
+
+
+/* AdPanda admin dashboard: real business reporting */
+.adp-admin-dashboard .admin-top{margin-bottom:25px}
+.adp-admin-dashboard .admin-top h1{font-size:clamp(28px,2.4vw,36px)}
+.adp-admin-business-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:15px}
+.adp-admin-business-kpi{display:flex;flex-direction:column;align-items:flex-start;border:1px solid #ece8ee;background:#fff;border-radius:17px;padding:22px;min-height:177px;box-shadow:0 5px 20px #24122c05;min-width:0}
+.adp-admin-business-kpi-icon{height:42px;width:42px;border-radius:12px;display:grid;place-items:center;color:#d71a69;background:#fff0f7;margin-bottom:13px}
+.adp-admin-business-kpi.blue .adp-admin-business-kpi-icon{background:#edf3ff;color:#5375c5}
+.adp-admin-business-kpi.green .adp-admin-business-kpi-icon{background:#e9f8ef;color:#138451}
+.adp-admin-business-kpi.purple .adp-admin-business-kpi-icon{background:#f2efff;color:#6957bb}
+.adp-admin-business-kpi small{color:#757084;font-size:12px;font-weight:700}
+.adp-admin-business-kpi strong{font-size:clamp(22px,2.3vw,30px);letter-spacing:-1px;margin:8px 0;color:#232238;overflow-wrap:anywhere;line-height:1.2}
+.adp-admin-business-kpi p{font-size:11px;color:#8f899b;margin:auto 0 0;line-height:1.5}
+.adp-admin-secondary-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:23px}
+.adp-admin-secondary-kpis>div{display:flex;flex-direction:column;gap:8px;border:1px solid #e8e7ef;background:#fff;border-radius:15px;padding:17px 20px;min-width:0}
+.adp-admin-secondary-kpis>div>span{display:flex;align-items:center;gap:8px;color:#746e83;font-size:12px;font-weight:750}
+.adp-admin-secondary-kpis svg{color:#e21b70}
+.adp-admin-secondary-kpis strong{font-size:23px;color:#252138}
+.adp-admin-secondary-kpis small{font-size:10px;color:#8e8998;line-height:1.5}
+.adp-admin-dashboard-columns{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;margin-bottom:22px}
+.adp-admin-dashboard-panel{background:#fff;border:1px solid #e9e7ef;border-radius:18px;padding:24px;min-width:0;box-shadow:0 5px 20px #23234505}
+.adp-admin-panel-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:21px}
+.adp-admin-panel-header h2{font-size:20px;letter-spacing:-.5px;color:#252039;margin:5px 0 6px}
+.adp-admin-panel-header p{font-size:12px;color:#8b8797;margin:0;line-height:1.6}
+.adp-admin-panel-header>a{display:flex;align-items:center;gap:6px;color:#dd1d70;font-size:12px;font-weight:850;white-space:nowrap}
+.adp-admin-chart-total{display:inline-block;background:#fff0f7;color:#d91d6a;padding:8px 11px;font-size:11px;font-weight:900;border-radius:99px;white-space:nowrap}
+.adp-admin-order-chart{height:215px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:15px;align-items:stretch}
+.adp-admin-chart-day{display:flex;flex-direction:column;align-items:center;min-width:0;gap:9px}
+.adp-admin-chart-day strong{font-size:12px;color:#4d465b}
+.adp-admin-chart-day>span{font-size:10px;font-weight:800;color:#85808e}
+.adp-admin-chart-track{display:flex;align-items:flex-end;justify-content:center;width:100%;height:145px;background:repeating-linear-gradient(to top,transparent,transparent 35px,#f2f1f6 35px,#f2f1f6 36px);border-radius:7px}
+.adp-admin-chart-track>div{width:min(38px,80%);background:linear-gradient(0deg,#e21b70,#ff91bc);border-radius:8px 8px 2px 2px;min-height:3px}
+.adp-admin-business-pulse{display:grid;gap:14px}
+.adp-admin-business-pulse>div{display:flex;justify-content:space-between;gap:12px;align-items:center;padding-bottom:12px;border-bottom:1px solid #f1eff4}
+.adp-admin-business-pulse>div:last-child{border:0;padding:0}
+.adp-admin-business-pulse>div>span{color:#716d7c;font-size:12px;display:flex;align-items:center;gap:10px}
+.adp-admin-business-pulse>div>span svg{color:#e21b70}
+.adp-admin-business-pulse strong{font-size:13px;color:#29243b;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.adp-admin-business-caveat{display:block;font-size:10px;line-height:1.6;color:#97909b;margin-top:21px}
+.adp-admin-recent-orders{margin-bottom:22px}
+.adp-admin-recent-list{display:grid;gap:0}
+.adp-admin-recent-order{display:flex;align-items:center;gap:14px;border-bottom:1px solid #f0edf3;padding:13px 0}
+.adp-admin-recent-order:last-child{border-bottom:0}
+.adp-admin-recent-icon{display:grid;place-items:center;background:#faf3f8;font-size:24px;width:44px;height:44px;flex:0 0 44px;border-radius:13px}
+.adp-admin-recent-order>div{min-width:0;flex:1;display:grid;gap:5px}
+.adp-admin-recent-order>div>strong{font-size:13px;color:#29233b}
+.adp-admin-recent-order>div>small{color:#938c9a;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.adp-admin-recent-order>strong{font-size:13px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.adp-admin-recent-order .merchant-status{white-space:nowrap;font-size:10px}
+.adp-admin-no-orders,.adp-admin-no-pending{display:flex;gap:9px;align-items:center;color:#6c8376;background:#f5fbf7;padding:18px;border-radius:12px;font-size:12px}
+.adp-admin-pending-queue{display:grid;gap:12px}
+.adp-admin-pending-row{border:1px solid #ece8ef;border-radius:12px;padding:16px;display:flex;justify-content:space-between;gap:20px}
+.adp-admin-pending-row>div:first-child{display:grid;gap:7px}
+.adp-admin-pending-row>div>strong{font-size:15px}
+.adp-admin-pending-row>div>small{color:#898493;font-size:11px}
+.adp-admin-pending-location{display:flex;gap:7px;align-items:center;flex-wrap:wrap;font-size:11px;color:#696477}
+.adp-admin-pending-location a{display:inline-flex;align-items:center;gap:3px;color:#e21b70;font-weight:800}
+.adp-admin-pending-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.adp-admin-pending-controls>label{display:grid;gap:4px;font-size:10px;color:#8f8999}
+.adp-admin-pending-controls>label>span{display:flex;align-items:center;gap:3px}
+.adp-admin-pending-controls input{width:65px;border:1px solid #dad8e0;padding:7px;border-radius:7px}
+.adp-admin-pending-controls button{display:flex;align-items:center;justify-content:center;gap:5px;border:0;padding:11px 13px;border-radius:8px;font-size:11px;font-weight:850}
+.adp-admin-pending-approve{background:#e21b70;color:white}
+.adp-admin-pending-reject{background:#f4f2f6;color:#6e6578}
+.adp-admin-pending-controls button:disabled{opacity:.55;cursor:not-allowed}
+.adp-admin-pending-see-all{display:inline-flex;justify-self:end;gap:7px;align-items:center;color:#e21b70;font-size:12px;font-weight:800}
+/* Merchant management: grouped shop cards and distinct approval / commission actions */
+.adp-merchant-page-heading h1{font-size:clamp(26px,2.5vw,36px);margin:8px 0 8px;color:#252039}
+.adp-merchant-page-heading p{max-width:670px}
+.adp-merchant-overview-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:16px}
+.adp-merchant-overview-card{display:flex;flex-direction:column;border:1px solid #efdfeb;background:#fff8fb;border-radius:17px;gap:8px;padding:20px;min-width:0}
+.adp-merchant-overview-card.orange{background:#fffbf4;border-color:#f1e6ca}
+.adp-merchant-overview-card.green{background:#f6fdf9;border-color:#d9efe2}
+.adp-merchant-overview-card.red{background:#fff7f8;border-color:#f1dfe4}
+.adp-merchant-overview-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:#ffe3ef;color:#e21b70;margin-bottom:3px}
+.adp-merchant-overview-card.green .adp-merchant-overview-icon{background:#e1f7ea;color:#16875a}
+.adp-merchant-overview-card.orange .adp-merchant-overview-icon{background:#fff1d9;color:#d0871a}
+.adp-merchant-overview-card.red .adp-merchant-overview-icon{background:#ffe7ed;color:#c64e6b}
+.adp-merchant-overview-card small{font-size:12px;color:#787487;font-weight:800}
+.adp-merchant-overview-card strong{font-size:29px;color:#272039;line-height:1.15}
+.adp-merchant-overview-card span{font-size:10px;color:#908999;line-height:1.4}
+.adp-merchant-network-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:19px}
+.adp-merchant-network-strip>div{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid #e9e7ef;border-radius:13px;padding:15px}
+.adp-merchant-network-strip>div>span{font-size:26px;flex:none}
+.adp-merchant-network-strip>div>div{display:grid;gap:4px;min-width:0}
+.adp-merchant-network-strip strong{font-size:12px;color:#383047}
+.adp-merchant-network-strip small{font-size:10px;color:#92899c}
+.adp-merchant-manager{min-width:0}
+.adp-merchant-type-tabs{display:flex;gap:9px;flex-wrap:wrap;margin:22px 0 15px}
+.adp-merchant-type-tabs button{display:flex;align-items:center;gap:9px;border-radius:10px;background:#fff;border:1px solid #e9e5ed;color:#7b7187;font-size:12px;font-weight:850;padding:13px 14px;cursor:pointer}
+.adp-merchant-type-tabs button.selected{background:#e21b70;color:#fff;border-color:#e21b70}
+.adp-merchant-type-tabs button b{font-size:10px;font-weight:900;border-radius:30px;background:#f5f1f6;padding:3px 7px;color:#675b72}
+.adp-merchant-type-tabs button.selected b{background:#ffffff30;color:#fff}
+.adp-merchant-searchbar{display:flex;gap:12px;padding:14px;background:#fff;border:1px solid #eae7ee;border-radius:13px;margin-bottom:23px}
+.adp-merchant-search-input{display:flex;align-items:center;gap:10px;flex:1;min-width:0;border:1px solid #e7e3ee;background:#fbfafd;border-radius:9px;padding:0 13px;color:#9790a2}
+.adp-merchant-search-input input{border:0;background:transparent;outline:0;padding:12px 0;min-width:0;width:100%;font-size:12px}
+.adp-merchant-searchbar select{padding:11px 13px;border:1px solid #e7e3ee;background:#fbfafd;border-radius:9px;font-size:12px;color:#676076}
+.adp-merchant-feedback{display:flex;gap:9px;align-items:center;border-radius:10px;padding:12px 15px;font-size:12px;margin:0 0 17px}
+.adp-merchant-feedback.success{background:#eaf9f1;color:#11784d}
+.adp-merchant-feedback.error{background:#fff0f2;color:#b32c49}
+.adp-merchant-type-section{margin-bottom:31px;min-width:0}
+.adp-merchant-group-heading{display:flex;align-items:center;gap:11px;padding:0 2px 14px}
+.adp-merchant-group-icon{display:grid;place-items:center;height:45px;width:45px;background:#fff0f7;border-radius:13px;font-size:25px}
+.adp-merchant-group-icon.grocery{background:#eaf9ef}
+.adp-merchant-group-icon.stationery{background:#f0effc}
+.adp-merchant-group-heading>div:nth-child(2){flex:1;min-width:0}
+.adp-merchant-group-heading h2{margin:0 0 3px;font-size:18px;color:#282239;letter-spacing:-.4px}
+.adp-merchant-group-heading p{margin:0;font-size:11px;color:#86808f}
+.adp-merchant-group-count{font-size:11px;background:#fff;border:1px solid #eceaf0;border-radius:30px;padding:9px 12px;font-weight:800;color:#777083}
+.adp-merchant-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
+.adp-merchant-card{display:flex;flex-direction:column;gap:16px;border:1px solid #eae6ef;background:#fff;padding:22px;border-radius:17px;min-width:0;box-shadow:0 6px 22px #18112a06}
+.adp-merchant-card-head{display:flex;align-items:center;gap:12px;min-width:0}
+.adp-merchant-card-symbol{display:grid;place-items:center;flex:0 0 51px;height:51px;border-radius:13px;background:#fff0f7;font-size:27px}
+.adp-merchant-card-symbol.grocery{background:#eaf9ef}
+.adp-merchant-card-symbol.stationery{background:#f0effc}
+.adp-merchant-card-title{min-width:0;flex:1}
+.adp-merchant-card-title h3{font-size:18px;letter-spacing:-.3px;color:#242039;margin:0 0 5px;overflow-wrap:anywhere}
+.adp-merchant-card-title>span{font-size:10px;color:#92899d;display:flex;align-items:center;gap:4px}
+.adp-merchant-card-head .merchant-status{font-size:9px;white-space:nowrap;padding:7px 9px}
+.adp-merchant-card-owner{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-bottom:1px solid #f0edf3;padding-bottom:13px}
+.adp-merchant-card-owner>div{display:grid;gap:5px;min-width:0}
+.adp-merchant-card-owner small{font-size:9px;font-weight:850;letter-spacing:.7px;color:#ada5b3}
+.adp-merchant-card-owner strong,.adp-merchant-card-owner a{font-size:12px;font-weight:750;color:#4a4056;overflow-wrap:anywhere}
+.adp-merchant-card-owner a{color:#d71b67}
+.adp-merchant-card-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.adp-merchant-card-metrics>div{display:grid;gap:7px;justify-items:start;border-radius:10px;background:#f9f8fb;padding:13px}
+.adp-merchant-card-metrics svg{color:#d91a6d}
+.adp-merchant-card-metrics small{font-size:10px;color:#90889b}
+.adp-merchant-card-metrics strong{font-size:17px;color:#24203a}
+.adp-merchant-card-finance{display:grid;grid-template-columns:1fr 1fr;gap:14px;border:1px solid #edeaf0;border-radius:10px;padding:13px}
+.adp-merchant-card-finance>span{display:grid;gap:7px;min-width:0}
+.adp-merchant-card-finance small{font-size:10px;color:#8b8294}
+.adp-merchant-card-finance strong{font-size:15px;color:#232039;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.adp-merchant-card-address{display:flex;align-items:flex-start;gap:9px;font-size:12px;color:#776f81}
+.adp-merchant-card-address>svg{color:#e21b70;flex:none}
+.adp-merchant-card-address>div{display:grid;gap:7px}
+.adp-merchant-card-address a{display:inline-flex;align-items:center;gap:4px;color:#d41d6b;font-weight:800;font-size:11px}
+.adp-merchant-map-panel{margin-top:-4px}
+.adp-merchant-map-toggle{background:#fff7fb;color:#cb276c;border:1px solid #f3d8e5;border-radius:9px;padding:11px;width:100%;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:850}
+.adp-merchant-map-toggle svg:last-child{margin-left:auto}
+.adp-merchant-card-commission{display:flex;align-items:center;justify-content:space-between;gap:11px;background:#faf9fc;padding:14px;border-radius:11px}
+.adp-merchant-card-commission>div:first-child{display:grid;gap:5px}
+.adp-merchant-card-commission>div:first-child>span{display:flex;align-items:center;gap:7px;font-size:12px;color:#53465c;font-weight:900}
+.adp-merchant-card-commission small{font-size:10px;color:#9991a0}
+.adp-merchant-commission-control{display:flex;align-items:center;gap:8px}
+.adp-merchant-rate-input{display:flex;align-items:center;gap:3px;border:1px solid #e2deeb;background:#fff;border-radius:8px;padding:0 8px}
+.adp-merchant-rate-input input{width:53px;min-width:0;padding:9px 0;border:0;background:transparent;outline:0;font-size:13px;font-weight:850;color:#323046}
+.adp-merchant-rate-input span{color:#827d8f;font-size:12px}
+.adp-merchant-save-rate{border:0;border-radius:8px;background:#e21b70;color:#fff;font-size:11px;font-weight:850;padding:11px}
+.adp-merchant-save-rate:disabled{background:#e6e3ea;color:#9c95a6;cursor:not-allowed}
+.adp-merchant-card-actions{border-top:1px solid #f0edf3;padding-top:15px;display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
+.adp-merchant-card-actions>button{display:flex;align-items:center;gap:6px;justify-content:center;padding:11px 13px;border:0;border-radius:9px;font-size:11px;font-weight:850}
+.adp-merchant-approve{background:#e21b70;color:#fff}
+.adp-merchant-approve:disabled{background:#e7f6ed;color:#168353;cursor:not-allowed;opacity:1}
+.adp-merchant-action-neutral{background:#f4f2f7;color:#685b77}
+.adp-merchant-action-danger{background:#fff0f2;color:#c92c4b}
+.adp-merchant-card-actions button:disabled:not(.adp-merchant-approve){opacity:.5;cursor:not-allowed}
+.adp-merchant-state-note{display:flex;align-items:center;gap:5px;color:#9891a1;font-size:11px}
+.adp-merchant-group-empty{display:flex;align-items:center;gap:10px;padding:25px 19px;border:1px dashed #e8e5ed;border-radius:13px;background:#fff;font-size:12px;color:#95909e}
+@media(max-width:1250px){
+ .adp-merchant-card-grid{grid-template-columns:1fr}
+ .adp-admin-business-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .adp-admin-secondary-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:900px){
+ .adp-admin-dashboard-columns{grid-template-columns:1fr}
+ .adp-merchant-overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:690px){
+ .adp-admin-business-kpis,.adp-admin-secondary-kpis{gap:10px}
+ .adp-admin-business-kpi{padding:17px;min-height:150px}
+ .adp-admin-business-kpi strong{font-size:21px}
+ .adp-admin-secondary-kpis>div{padding:14px}
+ .adp-admin-dashboard-panel{padding:17px}
+ .adp-admin-order-chart{gap:5px}
+ .adp-admin-recent-order{gap:8px}
+ .adp-admin-recent-icon{width:33px;height:33px;flex-basis:33px;font-size:18px}
+ .adp-admin-recent-order>strong{font-size:11px}
+ .adp-admin-recent-order .merchant-status{font-size:8px;padding:6px}
+ .adp-admin-pending-row{flex-direction:column;gap:12px}
+ .adp-admin-pending-controls{justify-content:flex-start}
+ .adp-merchant-network-strip{grid-template-columns:1fr}
+ .adp-merchant-overview-grid{gap:10px}
+ .adp-merchant-overview-card{padding:15px}
+ .adp-merchant-type-tabs{overflow-x:auto;flex-wrap:nowrap;padding-bottom:7px}
+ .adp-merchant-type-tabs button{white-space:nowrap}
+ .adp-merchant-searchbar{flex-direction:column;gap:9px}
+ .adp-merchant-card{padding:16px}
+ .adp-merchant-card-finance strong{font-size:13px}
+ .adp-merchant-card-commission{flex-wrap:wrap}
+}
