@@ -11,11 +11,13 @@ export async function adminMerchantOverview(pendingOnly=false){
   }
  });
  const ids=merchants.flatMap(m=>m.kitchens.map(k=>k.id));
- const [allOrders,delivered]=ids.length?await Promise.all([
-  db.order.groupBy({by:['kitchenId'],where:{kitchenId:{in:ids}},_count:{_all:true}}),
-  db.order.groupBy({by:['kitchenId'],where:{kitchenId:{in:ids},status:'DELIVERED'},
-   _count:{_all:true},_sum:{foodSubtotal:true,commissionAmount:true}})
- ]):[[],[]];
+ const allOrders=ids.length?await db.order.groupBy({
+  by:['kitchenId'],where:{kitchenId:{in:ids}},_count:{_all:true}
+ }):[];
+ const delivered=ids.length?await db.order.groupBy({
+  by:['kitchenId'],where:{kitchenId:{in:ids},status:'DELIVERED'},
+  _count:{_all:true},_sum:{foodSubtotal:true,commissionAmount:true}
+ }):[];
  const ordersMap=new Map(allOrders.map(row=>[row.kitchenId,row._count._all]));
  const deliveredMap=new Map(delivered.map(row=>[row.kitchenId,{
   count:row._count._all,sales:Number(row._sum.foodSubtotal||0),commission:Number(row._sum.commissionAmount||0)
