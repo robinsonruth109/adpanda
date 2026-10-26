@@ -14,7 +14,15 @@ export const hoursSchema=z.array(z.object({
 });
 export type DayHours=z.infer<typeof hoursSchema>;
 export const defaultKitchenHours:DayHours=dayNames.map((_,day)=>({day,closed:false,open:'10:00',close:'22:00'}));
-export type AvailabilityRecord={acceptingOrders:boolean;availabilityMode:string;weeklyHours:unknown;active?:boolean;merchant?:{status:string}};
+export type AvailabilityRecord={acceptingOrders:boolean;availabilityMode:string;weeklyHours:unknown;active?:boolean;merchant?:{status:string};storeType?:string;groceryReviewedDate?:string|null};
+export function dhakaDate(at=new Date()){
+ const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Dhaka',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(at);
+ const part=(key:string)=>parts.find(p=>p.type===key)?.value||'';
+ return part('year')+'-'+part('month')+'-'+part('day');
+}
+export function groceryPriceCheckNeeded(kitchen:{storeType?:string;groceryReviewedDate?:string|null},at=new Date()){
+ return kitchen.storeType==='GROCERY'&&kitchen.groceryReviewedDate!==dhakaDate(at);
+}
 export function validHours(value:unknown):DayHours|null{
  const result=hoursSchema.safeParse(value);
  return result.success?result.data:null;
@@ -29,6 +37,8 @@ function isOpenFromDay(d:DayHours[number],nowMinutes:number,previousDay:boolean)
 export function kitchenAvailability(kitchen:AvailabilityRecord,at=new Date()){
  if(kitchen.active===false||kitchen.merchant&&kitchen.merchant.status!=='APPROVED')
   return {open:false,reason:'Kitchen is unavailable',mode:kitchen.availabilityMode};
+ if(groceryPriceCheckNeeded(kitchen,at))
+  return {open:false,reason:'আজকের grocery product prices যাচাই করা হয়নি (daily review required)',mode:kitchen.availabilityMode};
  if(kitchen.availabilityMode!=='AUTO')
   return {open:kitchen.acceptingOrders,reason:kitchen.acceptingOrders?'Manually open':'Manually closed',mode:'MANUAL'};
  const weekly=validHours(kitchen.weeklyHours);
