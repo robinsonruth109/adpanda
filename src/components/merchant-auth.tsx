@@ -34,7 +34,7 @@ export default function MerchantAuth({mode}:{mode:Mode}){
   if(signup&&!agreed){setError('Please accept the merchant terms to continue.');return;}
   setBusy(true);
   try{
-   const response=await fetch(signup?'/api/auth/register':'/api/auth/login',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(signup?{name:name.trim(),phone,password}:{phone,password})});
+   const response=await fetch(signup?'/api/auth/register':'/api/auth/merchant/login',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(signup?{name:name.trim(),phone,password}:{phone,password})});
    const body=await response.json().catch(()=>({}));
    if(!response.ok)throw new Error(body.error||'Something went wrong. Please try again.');
    router.replace(signup?'/merchant':(body.redirectTo||'/merchant'));
