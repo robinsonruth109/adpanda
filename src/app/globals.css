@@ -1484,3 +1484,39 @@ body:has(.admin-shell)>.adp-customer-footer,body:has(.merchant-shell)>.adp-custo
  .adp-merchant-card-finance strong{font-size:13px}
  .adp-merchant-card-commission{flex-wrap:wrap}
 }
+
+
+/* Dispatch-first workflow: Merchant requests rider before accepting an order */
+.merchant-rider-policy,.admin-rider-search-banner{display:flex;align-items:flex-start;gap:15px;padding:19px 20px;border:1px solid #f4cede;background:linear-gradient(100deg,#fff0f7,#fff);border-radius:15px;margin-bottom:21px}
+.merchant-rider-policy>svg,.admin-rider-search-banner>svg{flex:0 0 25px;color:#e21b70}
+.merchant-rider-policy strong,.admin-rider-search-banner strong{font-size:14px;color:#2c2440}
+.merchant-rider-policy p,.admin-rider-search-banner p{font-size:12px;color:#847b89;line-height:1.7;margin:6px 0 0}
+.merchant-order-card .merchant-order-actions button{display:inline-flex;align-items:center;gap:7px}
+.merchant-preaccept-status{display:flex;align-items:flex-start;gap:12px;padding:15px;border:1px solid #f1d7e4;background:#fff7fa;border-radius:11px;margin:12px 0}
+.merchant-preaccept-status>svg{color:#e21b70;flex:0 0 21px;margin-top:3px}
+.merchant-preaccept-status strong{font-size:12px;line-height:1.5;color:#b62468}
+.merchant-preaccept-status p{font-size:11px;line-height:1.6;margin:5px 0 0;color:#827889}
+.merchant-preaccept-status.rider-searching{background:#fffbf1;border-color:#f6e5bd}
+.merchant-preaccept-status.rider-searching>svg,.merchant-preaccept-status.rider-searching strong{color:#aa760f}
+.merchant-preaccept-status.rider-found{background:#f0fbf5;border-color:#c3ebd5}
+.merchant-preaccept-status.rider-found>svg,.merchant-preaccept-status.rider-found strong{color:#12885a}
+.merchant-preaccept-status a,.merchant-rider-phone{display:inline-flex;align-items:center;gap:5px;color:#178655;font-weight:800;font-size:11px;margin-top:7px}
+.merchant-order-actions .merchant-rider-wait-button{background:#f9f1db;color:#99702b;cursor:not-allowed;opacity:1;white-space:normal}
+.merchant-status-chip.rider-searching{background:#fff1d7;color:#a77612}
+.merchant-loading-indicator{animation:adp-rider-search-spin 1.8s linear infinite}
+@keyframes adp-rider-search-spin{to{transform:rotate(360deg)}}
+.admin-rider-search-banner{background:#fff7fb;align-items:center}
+.admin-rider-search-banner>div{flex:1;min-width:0}
+.admin-rider-search-banner>button{background:#e21b70;color:#fff;border:0;border-radius:9px;padding:11px 16px;font-size:12px;font-weight:850;white-space:nowrap;cursor:pointer}
+.admin-dispatch-controls{background:#fffaf0;border:1px solid #f7e4b4;border-radius:12px;padding:15px;margin:13px 0}
+.admin-dispatch-controls>label{font-size:12px;font-weight:850;color:#77592a;display:block;margin-bottom:8px}
+.admin-dispatch-controls>div{display:flex;gap:10px;align-items:center}
+.admin-dispatch-controls select{flex:1;min-width:0;border:1px solid #e9dab1;background:#fff;border-radius:8px;padding:11px}
+.admin-dispatch-controls button{border:0;background:#e21b70;color:#fff;border-radius:8px;font-size:12px;font-weight:850;padding:12px 14px;white-space:nowrap}
+.admin-dispatch-controls button:disabled{background:#e8d9df;color:#947c84;cursor:not-allowed}
+@media(max-width:700px){
+ .merchant-rider-policy,.admin-rider-search-banner{padding:14px;gap:10px;flex-wrap:wrap}
+ .admin-rider-search-banner>button{margin-left:auto}
+ .admin-dispatch-controls>div{flex-direction:column;align-items:stretch}
+ .admin-dispatch-controls select,.admin-dispatch-controls button{width:100%}
+}
