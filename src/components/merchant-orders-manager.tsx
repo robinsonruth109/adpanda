@@ -1,6 +1,7 @@
 'use client';
 import {useEffect,useMemo,useState} from 'react';
 import {useRouter,useSearchParams} from 'next/navigation';
+import MerchantDispatchProof from '@/components/merchant-dispatch-proof';
 import {Search,RefreshCcw,Clock3,CheckCheck,ChefHat,PackageCheck,Phone,MapPin,Bike,LoaderCircle,ShieldCheck,CheckCircle2} from 'lucide-react';
 
 export type MerchantOrder={
@@ -107,6 +108,7 @@ export default function MerchantOrdersManager({initial}:{initial:MerchantOrder[]
      <><Bike size={21}/><div><strong>Find a delivery man before accepting</strong><p>Request manual rider assignment from Admin to unlock acceptance.</p></div></>}
     </div>}
     {!placed&&order.rider&&<div className="merchant-order-rider"><CheckCheck size={17}/> Assigned rider: {order.rider}{order.riderPhone&&<a href={'tel:'+order.riderPhone} className="merchant-rider-phone"><Phone size={13}/>{order.riderPhone}</a>}</div>}
+    {order.status==='RIDER_ASSIGNED'&&order.rider&&<MerchantDispatchProof orderId={order.id}/>}
     <div className="merchant-order-actions">
      {placed&&<>
       {!riderFound&&!riderSearched&&<button type="button" disabled={working} onClick={()=>void act(order,'find')}><Bike size={16}/> {working?'Requesting…':'Find delivery man'}</button>}
