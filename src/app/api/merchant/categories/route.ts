@@ -1,3 +1,4 @@
+import {invalidateGroceryPrices} from '@/lib/grocery-price-review';
 import {NextResponse} from 'next/server';
 import {z} from 'zod';
 import {db} from '@/lib/db';
@@ -15,6 +16,7 @@ export async function POST(request:Request){
  const existing=await db.menuCategory.findFirst({where:{kitchenId,name}});
  if(existing)return NextResponse.json({error:'Category already exists'},{status:409});
  const cat=await db.$transaction(async tx=>{
+  await invalidateGroceryPrices(tx,kitchenId);
   const newCat=await tx.menuCategory.create({data:{kitchenId,name}});
   await tx.auditLog.create({data:{actorId:user.id,action:'MERCHANT_CATEGORY_CREATED',entityType:'MenuCategory',entityId:newCat.id,metadata:{kitchenId,name}}});
   return newCat;
