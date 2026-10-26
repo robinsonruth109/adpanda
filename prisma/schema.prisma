@@ -109,6 +109,10 @@ model Kitchen {
  active Boolean @default(false)
  acceptingOrders Boolean @default(false)
  availabilityMode String @default("MANUAL") @db.VarChar(16)
+ groceryReviewedDate String? @db.VarChar(10)
+ groceryCatalogVersion Int @default(0)
+ groceryPriceReviewedAt DateTime?
+ groceryPriceReviewedById String?
  weeklyHours Json?
  bannerKey String? @db.VarChar(300)
  bannerMimeType String? @db.VarChar(32)
