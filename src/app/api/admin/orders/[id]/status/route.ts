@@ -29,6 +29,8 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
    if(!order) return {error:'Order not found',code:404};
    if(!allowed[order.status]?.includes(status))return {error:'Invalid status transition from '+order.status+' to '+status,code:409};
    if(['PICKED_UP','OUT_FOR_DELIVERY','DELIVERED','FAILED'].includes(status)&&!order.delivery)return {error:'Assign a rider first',code:409};
+   if(status==='MERCHANT_ACCEPTED'&&!order.delivery)return {error:'A rider must be assigned before accepting the order.',code:409};
+   if(status==='READY_FOR_PICKUP'&&!order.delivery)return {error:'Rider assignment must be completed first.',code:409};
    const updated=await tx.order.updateMany({where:{id,status:order.status},data:{status}});
    if(updated.count!==1)return {error:'Order changed, refresh and try again',code:409};
    if(status==='CANCELLED')await releaseCancelledOrderStock(tx,id);
