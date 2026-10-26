@@ -21,16 +21,27 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
  const {id}=await params;
  try{
   const result=await db.$transaction(async tx=>{
-   const order=await tx.order.findUnique({where:{id},select:{id:true,status:true,kitchen:{select:{merchantId:true,merchant:{select:{status:true,members:{where:{userId:user.id},select:{role:true}}}}}}}});
+   const order=await tx.order.findUnique({where:{id},select:{id:true,status:true,delivery:{select:{riderId:true}},kitchen:{select:{merchantId:true,merchant:{select:{status:true,members:{where:{userId:user.id},select:{role:true}}}}}}}});
    if(!order||order.kitchen.merchant.members.length===0||order.kitchen.merchant.status!=='APPROVED')return {error:'Order not found or merchant not authorized',code:403};
    const next=parsed.data.status;
    if(!transitions[order.status]?.includes(next))return {error:'Cannot change this order from '+order.status+' to '+next,code:409};
-   const updated=await tx.order.updateMany({where:{id,status:order.status},data:{status:next}});
+   if(next==='MERCHANT_ACCEPTED'&&!order.delivery)return {error:'Find a delivery man first. Waiting for Admin to assign an available rider.',code:409};
+   if(next==='READY_FOR_PICKUP'&&!order.delivery)return {error:'Rider must be assigned before marking ready.',code:409};
+   const savedStatus=next==='READY_FOR_PICKUP'?'RIDER_ASSIGNED':next;
+   const updated=await tx.order.updateMany({where:{id,status:order.status},data:{status:savedStatus}});
    if(updated.count!==1)return {error:'Order updated by someone else. Refresh.',code:409};
-   if(next==='CANCELLED')await releaseCancelledOrderStock(tx,id);
-   await tx.orderEvent.create({data:{orderId:id,fromStatus:order.status,toStatus:next,actorId:user.id,note:next==='CANCELLED'?'Kitchen declined before acceptance':'Kitchen workflow update'}});
-   await tx.auditLog.create({data:{actorId:user.id,action:'MERCHANT_ORDER_STATUS',entityType:'Order',entityId:id,metadata:{from:order.status,to:next,merchantId:order.kitchen.merchantId}}});
-   return {ok:true,status:next};
+   if(next==='CANCELLED'){
+    await releaseCancelledOrderStock(tx,id);
+    if(order.delivery){
+     await tx.rider.updateMany({where:{id:order.delivery.riderId,status:'BUSY'},data:{status:'ONLINE'}});
+    }
+   }
+   if(next==='READY_FOR_PICKUP'){
+    await tx.orderEvent.create({data:{orderId:id,fromStatus:order.status,toStatus:'READY_FOR_PICKUP',actorId:user.id,note:'Merchant marked order ready for rider'}});
+   }
+   await tx.orderEvent.create({data:{orderId:id,fromStatus:next==='READY_FOR_PICKUP'?'READY_FOR_PICKUP':order.status,toStatus:savedStatus,actorId:user.id,note:next==='CANCELLED'?'Kitchen declined before acceptance':next==='READY_FOR_PICKUP'?'Prepared order released to preassigned delivery rider':'Merchant workflow update'}});
+   await tx.auditLog.create({data:{actorId:user.id,action:'MERCHANT_ORDER_STATUS',entityType:'Order',entityId:id,metadata:{from:order.status,to:savedStatus,merchantId:order.kitchen.merchantId}}});
+   return {ok:true,status:savedStatus};
   });
   if('error' in result)return NextResponse.json({error:result.error},{status:result.code});
   return NextResponse.json(result);
