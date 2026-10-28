@@ -2,9 +2,12 @@ import {NextResponse} from 'next/server';
 import {db} from '@/lib/db';
 import {currentUser} from '@/lib/auth';
 import {isTrustedMutation} from '@/lib/request-security';
+import {z} from 'zod';
 export async function POST(request:Request,{params}:{params:Promise<{id:string}>}){
  if(!isTrustedMutation(request))return NextResponse.json({error:'Invalid origin'},{status:403});
  const user=await currentUser();if(!user)return NextResponse.json({error:'Sign in required'},{status:401});
+ const input=z.object({reviewedEvidence:z.literal(true),confirmedFundsReceived:z.literal(true)}).strict().safeParse(await request.json().catch(()=>null));
+ if(!input.success)return NextResponse.json({error:'Review the proof and verify actual receipt of funds before confirming'},{status:400});
  const {id}=await params;
  const result=await db.$transaction(async tx=>{
   await tx.$queryRaw`SELECT id FROM \`Order\` WHERE id = ${id} FOR UPDATE`;
@@ -15,7 +18,7 @@ export async function POST(request:Request,{params}:{params:Promise<{id:string}>
   if(!submitted)return {error:'Rider has not submitted payment evidence',code:409};
   const confirmed=await tx.auditLog.findFirst({where:{entityType:'Order',entityId:id,action:'MERCHANT_SETTLEMENT_CONFIRMED'}});
   if(confirmed)return {ok:true,alreadyConfirmed:true};
-  await tx.auditLog.create({data:{actorId:user.id,action:'MERCHANT_SETTLEMENT_CONFIRMED',entityType:'Order',entityId:id,metadata:{submittedId:submitted.id,amount:order.merchantPayable.toFixed(2),riderId:order.delivery.riderId}}});
+  await tx.auditLog.create({data:{actorId:user.id,action:'MERCHANT_SETTLEMENT_CONFIRMED',entityType:'Order',entityId:id,metadata:{submittedId:submitted.id,amount:order.merchantPayable.toFixed(2),riderId:order.delivery.riderId,reviewedEvidence:true,confirmedFundsReceived:true}}});
   await tx.orderEvent.create({data:{orderId:id,fromStatus:'DELIVERED',toStatus:'DELIVERED',actorId:user.id,note:'Merchant verified rider settlement for base payable amount'}});
   await tx.rider.updateMany({where:{id:order.delivery.riderId,status:'BUSY'},data:{status:'OFFLINE'}});
   return {ok:true,verified:true};
