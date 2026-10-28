@@ -18,7 +18,7 @@ export async function POST(request:Request,{params}:{params:Promise<{id:string}>
   if(!submitted)return {error:'Rider has not submitted payment evidence',code:409};
   const confirmed=await tx.auditLog.findFirst({where:{entityType:'Order',entityId:id,action:'MERCHANT_SETTLEMENT_CONFIRMED'}});
   if(confirmed)return {ok:true,alreadyConfirmed:true};
-  await tx.auditLog.create({data:{actorId:user.id,action:'MERCHANT_SETTLEMENT_CONFIRMED',entityType:'Order',entityId:id,metadata:{submittedId:submitted.id,amount:order.merchantPayable.toFixed(2),riderId:order.delivery.riderId,reviewedEvidence:true,confirmedFundsReceived:true}}});
+  await tx.auditLog.create({data:{actorId:user.id,action:'MERCHANT_SETTLEMENT_CONFIRMED',entityType:'Order',entityId:id,metadata:{submittedId:submitted.id,amount:order.codTotal.sub(order.deliveryFee).toFixed(2),customerCod:order.codTotal.toFixed(2),deliveryCharge:order.deliveryFee.toFixed(2),riderId:order.delivery.riderId,reviewedEvidence:true,confirmedFundsReceived:true}}});
   await tx.orderEvent.create({data:{orderId:id,fromStatus:'DELIVERED',toStatus:'DELIVERED',actorId:user.id,note:'Merchant verified rider settlement for base payable amount'}});
   await tx.rider.updateMany({where:{id:order.delivery.riderId,status:'BUSY'},data:{status:'OFFLINE'}});
   return {ok:true,verified:true};
