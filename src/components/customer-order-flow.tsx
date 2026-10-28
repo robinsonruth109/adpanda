@@ -24,7 +24,7 @@ export default function CustomerOrderFlow({storeType,kitchenId,kitchenName,items
  function change(id:string,delta:number){setError('');const product=items.find(i=>i.id===id);const limit=product?.stockQty===null||product?.stockQty===undefined?20:Math.max(0,Math.min(20,product.stockQty));setCart(v=>({...v,[id]:Math.max(0,Math.min(limit,(v[id]||0)+delta))}))}
  async function place(e:React.FormEvent<HTMLFormElement>){
   e.preventDefault();if(busy)return;
-  if(!pinConfirmed||!latitude||!longitude){setError('📍 ডেলিভারি লোকেশন pin করে Confirm করুন।');return}
+  if(!pinConfirmed||!latitude||!longitude){setError('📍 ম্যাপে আপনার বাসার গেটের জায়গায় পিন বসিয়ে নিচের “এই পিন নিশ্চিত করুন” বাটনে চাপ দিন।');return}
   if(!recipientName.trim()||recipientName.trim().length<2){setError('আপনার পূর্ণ নাম লিখুন।');return}
   if(!/^01[3-9]\d{8}$/.test(recipientPhone)){setError('সঠিক ১১ ডিজিটের বাংলাদেশি মোবাইল নম্বর দিন।');return}
   if(details.trim().length<8){setError('বাসা / রাস্তা / এলাকার বিস্তারিত ঠিকানা লিখুন।');return}
@@ -58,7 +58,11 @@ export default function CustomerOrderFlow({storeType,kitchenId,kitchenName,items
   <label className="customer-form-field"><span>মোবাইল নম্বর (11 Digits) <b>*</b></span><input type="tel" inputMode="numeric" autoComplete="tel-national" pattern="01[3-9][0-9]{8}" maxLength={11} required value={recipientPhone} onChange={e=>setRecipientPhone(e.target.value.replace(/\D/g,'').slice(0,11))} placeholder="01XXXXXXXXX"/></label></div></div>
   <div className="customer-guest-checkout-section"><div className="customer-guest-section-heading"><span><Navigation size={19}/></span><div><h3>2. Delivery Pin / লোকেশন</h3><p>ম্যাপে ডেলিভারি জায়গা বা বাসার গেট ঠিকমতো Pin করুন।</p></div></div>
    <div className="customer-guest-map-wrap"><KitchenMapPicker mode="delivery" latitude={latitude} longitude={longitude} onChange={(a,b)=>{setLatitude(a);setLongitude(b);setPinConfirmed(false)}}/></div>
-   <label className="customer-pin-confirm"><input type="checkbox" checked={pinConfirmed} onChange={e=>setPinConfirmed(e.target.checked)} required disabled={!latitude||!longitude}/> <span>আমি ঠিক জায়গায় Pin দিয়েছি — Rider এই লোকেশনে খাবার পৌঁছাবে।</span></label>
+   <div className={'customer-pin-step'+(pinConfirmed?' is-confirmed':'')} role="group" aria-label="Confirm delivery map pin">
+    <div className="customer-pin-step-top"><MapPin size={21}/><div><strong>{pinConfirmed?'লোকেশন নিশ্চিত হয়েছে ✅':'এখানে আপনার ডেলিভারি পিন নিশ্চিত করুন'}</strong><p>{pinConfirmed?'এই পিনের লোকেশনই Rider পাবেন। জায়গা পরিবর্তন করলে আবার নিশ্চিত করতে হবে।':'ম্যাপে বাসার গেটের সঠিক জায়গায় পিন বসান, তারপর নিচের বাটন চাপুন।'}</p></div></div>
+    <button type="button" className="customer-pin-confirm-action" disabled={!latitude||!longitude} aria-pressed={pinConfirmed} onClick={()=>{setPinConfirmed(v=>!v);setError('')}}>{pinConfirmed?'✓ পিন নিশ্চিত — পরিবর্তন করতে ক্লিক করুন':'📍 এই ডেলিভারি পিন নিশ্চিত করুন'}</button>
+    {!latitude||!longitude?<small>প্রথমে ম্যাপে জায়গা নির্বাচন করুন অথবা GPS ব্যবহার করুন।</small>:!pinConfirmed?<small>এই ধাপটি সম্পূর্ণ না করলে অর্ডার কনফার্ম করা যাবে না।</small>:<small>লোকেশন নিশ্চিত হয়েছে। এখন ঠিকানা পূরণ করে অর্ডার দিন।</small>}
+   </div>
   </div>
   <div className="customer-guest-checkout-section"><div className="customer-guest-section-heading"><span><House size={19}/></span><div><h3>3. সম্পূর্ণ ঠিকানা (Address Details)</h3><p>ম্যাপের Pin-এর পাশাপাশি বাড়ির তথ্য দিন।</p></div></div>
    <div className="customer-guest-input-grid"><label className="customer-form-field"><span>ঠিকানার ধরন (Address Type)</span><select value={label} onChange={e=>setLabel(e.target.value as 'Home'|'Office'|'Other')}><option value="Home">🏠 বাসা / Home</option><option value="Office">🏢 অফিস / Office</option><option value="Other">📍 অন্যান্য / Other</option></select></label></div>
@@ -67,6 +71,7 @@ export default function CustomerOrderFlow({storeType,kitchenId,kitchenName,items
   </div>
   <div className="customer-guest-checkout-bottom"><div className="customer-guest-total"><span>খাবার ৳{subtotal.toFixed(2)} + ডেলিভারি ৳{fee.toFixed(2)}</span><div><strong>মোট Cash on Delivery</strong><b>৳{(subtotal+fee).toFixed(2)}</b></div></div>
    {error&&<p role="alert" className="customer-order-error">{error}</p>}
+   {!pinConfirmed&&<p className="customer-pin-footer-hint"><MapPin size={15}/> অর্ডার দেওয়ার আগে উপরে গিয়ে <strong>“এই ডেলিভারি পিন নিশ্চিত করুন”</strong> চাপুন।</p>}
    <button type="submit" className="btn customer-checkout-btn" disabled={busy||!pinConfirmed||!recipientName.trim()||!/^01[3-9]\d{8}$/.test(recipientPhone)||details.trim().length<8}>{busy?'অর্ডার নেওয়া হচ্ছে…':'অর্ডার কনফার্ম করুন · COD'}</button>
    <p className="customer-guest-checkout-footnote"><ShieldCheck size={14}/> কোনো অগ্রিম Payment নেই। Rider-এর হাতে Cash পরিশোধ করুন।</p>
   </div>
