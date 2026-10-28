@@ -4,6 +4,7 @@ import Link from 'next/link';
 import {Store,ShoppingBag,Clock3,CheckCheck,Wallet,ArrowUpRight,UtensilsCrossed,Bell,MapPin,Truck} from 'lucide-react';
 import MerchantApplication from '@/components/merchant-application';
 import KitchenAvailability from '@/components/kitchen-availability';
+import MerchantSalesReport from '@/components/merchant-sales-report';
 import {kitchenAvailability} from '@/lib/kitchen-hours';
 export const dynamic='force-dynamic';
 function dhakaStart(){
@@ -11,12 +12,38 @@ function dhakaStart(){
  const get=(key:string)=>parts.find(p=>p.type===key)?.value||'01';
  return new Date(get('year')+'-'+get('month')+'-'+get('day')+'T00:00:00+06:00');
 }
-export default async function MerchantDashboard(){
+function dateKey(date:Date){const p=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Dhaka',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(date);const v=(key:string)=>p.find(x=>x.type===key)?.value||'01';return v('year')+'-'+v('month')+'-'+v('day')}
+function safeDate(value:string|undefined,defaultDate:string){return value&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&!Number.isNaN(Date.parse(value))&&value<=defaultDate?value:defaultDate}
+export default async function MerchantDashboard({searchParams}:{searchParams:Promise<{from?:string;to?:string}>}){
  const user=await currentUser();
  if(!user)return <main className="section container"><h1>Become an AdPanda merchant</h1><p>Open your cloud kitchen in Alamdanga. Sign in to apply.</p><div className="links"><Link href="/merchant/signup" className="btn">Become a merchant</Link><Link href="/merchant/login" className="btn secondary">Merchant sign in</Link></div></main>;
  const merchants=await db.merchant.findMany({where:{members:{some:{userId:user.id}}},include:{kitchens:{include:{categories:{include:{_count:{select:{items:true}}}}}}}});
  if(!merchants.length)return <main className="section container"><div className="eyebrow">Merchant onboarding</div><h1>Welcome, {user.name}</h1><p>Register your food kitchen, grocery shop or stationery shop for Admin approval.</p><MerchantApplication/></main>;
  const ids=merchants.flatMap(m=>m.kitchens.map(k=>k.id)),today=dhakaStart();
+ const params=await searchParams, todayKey=dateKey(new Date());
+ const from=safeDate(params.from,todayKey),to=safeDate(params.to,todayKey);
+ const startKey=from<=to?from:to,endKey=from<=to?to:from;
+ const rangeStart=new Date(startKey+'T00:00:00+06:00'),rangeEnd=new Date(new Date(endKey+'T00:00:00+06:00').getTime()+86400000);
+ const [soldOrders,failedOrders]=await Promise.all([
+  db.order.findMany({where:{kitchenId:{in:ids},status:'DELIVERED',delivery:{deliveredAt:{gte:rangeStart,lt:rangeEnd}}},select:{id:true,foodSubtotal:true,items:{select:{itemName:true,menuItemId:true,quantity:true,lineTotal:true}}}}),
+  db.order.count({where:{kitchenId:{in:ids},status:'FAILED',updatedAt:{gte:rangeStart,lt:rangeEnd}}})
+ ]);
+ const productMap=new Map<string,{name:string;quantity:number;orders:number;sales:number}>();
+ let soldUnits=0,salesTotal=0;
+ for(const order of soldOrders){
+  salesTotal+=Number(order.foodSubtotal);
+  const counted=new Set<string>();
+  for(const item of order.items){
+   soldUnits+=item.quantity;
+   const key=item.menuItemId||'legacy:'+item.itemName;
+   const p=productMap.get(key)||{name:item.itemName,quantity:0,orders:0,sales:0};
+   p.quantity+=item.quantity;p.sales+=Number(item.lineTotal);
+   if(!counted.has(key)){p.orders++;counted.add(key)}
+   productMap.set(key,p);
+  }
+ }
+ const products=[...productMap.values()].sort((a,b)=>b.sales-a.sales);
+ 
  const [todayOrders,activeOrders,totalOrders,deliveredToday,recent,completed,allItems]=await Promise.all([
   db.order.count({where:{kitchenId:{in:ids},placedAt:{gte:today}}}),
   db.order.count({where:{kitchenId:{in:ids},status:{notIn:['DELIVERED','FAILED','CANCELLED']}}}),
@@ -36,6 +63,7 @@ export default async function MerchantDashboard(){
    <div className="merchant-dashboard-kpi"><span className="green"><CheckCheck size={20}/></span><small>Delivered today</small><strong>{deliveredToday.length}</strong><p>Food sales: ৳{Number(todayRevenue?._sum.foodSubtotal||0).toFixed(2)}</p></div>
    <div className="merchant-dashboard-kpi"><span className="purple"><UtensilsCrossed size={20}/></span><small>Menu items</small><strong>{allItems}</strong><p>Across your kitchens</p></div>
   </div>
+  <MerchantSalesReport from={startKey} to={endKey} today={todayKey} orders={soldOrders.length} units={soldUnits} revenue={salesTotal} average={soldOrders.length?salesTotal/soldOrders.length:0} failed={failedOrders} products={products}/>
   <div className="merchant-dashboard-columns">
    <section className="merchant-dashboard-surface"><div className="merchant-surface-heading"><div><span className="merchant-kicker">ORDER ACTIVITY</span><h2>Recent orders</h2></div><Link href="/merchant/orders">View all →</Link></div>
     {recent.map(o=><Link href="/merchant/orders" className="merchant-dashboard-order" key={o.id}><span className="merchant-dashboard-order-symbol"><ShoppingBag size={18}/></span><div><strong>{o.code}</strong><small>{o.recipientName||o.customer?.name||'Guest customer'} · {o.kitchen.name}</small></div><span className={'merchant-status-chip '+o.status.toLowerCase()}>{o.status.replaceAll('_',' ')}</span><strong>৳{Number(o.codTotal).toFixed(2)}</strong></Link>)}
