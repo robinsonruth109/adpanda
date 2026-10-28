@@ -27,7 +27,7 @@ export async function POST(request:Request,{params}:{params:Promise<{id:string}>
  try{
   const client=new S3Client({endpoint,region:process.env.BUCKET_REGION||'auto',forcePathStyle:process.env.BUCKET_FORCE_PATH_STYLE==='true',credentials:{accessKeyId,secretAccessKey}});
   await client.send(new PutObjectCommand({Bucket:bucket,Key:key,Body:bytes,ContentType:file.type}));
-  await db.auditLog.create({data:{actorId:user.id,action:'RIDER_SETTLEMENT_SUBMITTED',entityType:'Order',entityId:id,metadata:{proofKey:key,method,amount:order.merchantPayable.toFixed(2),riderId:order.delivery!.riderId}}});
+  await db.auditLog.create({data:{actorId:user.id,action:'RIDER_SETTLEMENT_SUBMITTED',entityType:'Order',entityId:id,metadata:{proofKey:key,method,amount:order.codTotal.sub(order.deliveryFee).toFixed(2),customerCod:order.codTotal.toFixed(2),deliveryCharge:order.deliveryFee.toFixed(2),riderId:order.delivery!.riderId}}});
   return NextResponse.json({ok:true,pendingMerchantConfirmation:true});
  }catch(e){console.error('Settlement evidence upload failed',e);return NextResponse.json({error:'Could not submit settlement evidence'},{status:500})}
 }
