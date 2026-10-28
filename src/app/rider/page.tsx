@@ -10,6 +10,7 @@ import RiderPickupAlerts from '@/components/rider-pickup-alerts';
 import RiderDashboardShell from '@/components/rider-dashboard-shell';
 import RiderDeliveryTabs from '@/components/rider-delivery-tabs';
 import RiderDeliveryActions from '@/components/rider-delivery-actions';
+import RiderFinance from '@/components/rider-finance';
 import './rider-dashboard.css';
 export const dynamic='force-dynamic';
 const finished=['DELIVERED','CANCELLED','FAILED'];
@@ -24,6 +25,11 @@ export default async function Rider({mode='overview'}:{mode?:'overview'|'request
  const settlementLogs=await db.auditLog.findMany({where:{entityType:'Order',entityId:{in:rider.deliveries.map(d=>d.orderId)},action:{in:['RIDER_SETTLEMENT_SUBMITTED','MERCHANT_SETTLEMENT_CONFIRMED']}},select:{entityId:true,action:true,createdAt:true},orderBy:{createdAt:'asc'}});
  const settlementByOrder=new Map<string,string>();
  for(const log of settlementLogs)settlementByOrder.set(log.entityId,log.action==='MERCHANT_SETTLEMENT_CONFIRMED'?'CLEARED':'SUBMITTED');
+ const financeDeliveries=mode==='overview'||mode==='wallet'?await db.deliveryAssignment.findMany({where:{riderId:rider.id,order:{status:'DELIVERED'}},orderBy:{deliveredAt:'desc'},take:500,select:{orderId:true,deliveredAt:true,order:{select:{code:true,codTotal:true,deliveryFee:true}}}}):[];
+ const financeLogs=financeDeliveries.length?await db.auditLog.findMany({where:{entityType:'Order',entityId:{in:financeDeliveries.map(d=>d.orderId)},action:{in:['RIDER_SETTLEMENT_SUBMITTED','MERCHANT_SETTLEMENT_CONFIRMED']}},select:{entityId:true,action:true,createdAt:true},orderBy:{createdAt:'asc'}}):[];
+ const financeStates=new Map<string,'PENDING'|'SUBMITTED'|'CLEARED'>();
+ for(const log of financeLogs)financeStates.set(log.entityId,log.action==='MERCHANT_SETTLEMENT_CONFIRMED'?'CLEARED':'SUBMITTED');
+ const financeRecords=financeDeliveries.filter(d=>d.deliveredAt).map(d=>({id:d.orderId,code:d.order.code,deliveredAt:d.deliveredAt!.toISOString(),cod:Number(d.order.codTotal),fee:Number(d.order.deliveryFee),net:Number(d.order.codTotal.sub(d.order.deliveryFee)),status:financeStates.get(d.orderId)||'PENDING' as const}));
  const active=rider.deliveries.filter(d=>!finished.includes(d.order.status));
  const collected=rider.collections.reduce((s,c)=>s+Number(c.amount),0);
  const deposited=rider.deposits.reduce((s,c)=>s+Number(c.amount),0);
@@ -34,10 +40,9 @@ export default async function Rider({mode='overview'}:{mode?:'overview'|'request
   {mode==='location'&&<div id="rider-location" className="rd-section"><RiderLocationSharing enabled={rider.approved&&rider.status!=='SUSPENDED'}/></div>}
   {(mode==='overview'||mode==='deliveries')&&<RiderPickupAlerts/>}
   {mode==='requests'&&<div id="rider-requests" className="rd-section">{rider.approved&&rider.status==='ONLINE'?<RiderRequests/>:<section className="rd-card rd-empty-requests"><div className="rd-empty-icon"><Bike size={24}/></div><h2>Available delivery requests</h2><p>{!rider.approved?'Your rider account is awaiting admin approval.':'Go online to receive delivery requests.'}</p></section>}</div>}
-  {mode==='overview'&&<div className="rider-metrics rd-metrics"><div><Bike size={23}/><span>Active assignments</span><strong>{active.length}</strong></div><div><Package size={23}/><span>Total assignments</span><strong>{rider.deliveries.length}</strong></div><div><Wallet size={23}/><span>Recorded COD outstanding</span><strong>৳{(collected-deposited).toFixed(2)}</strong></div></div>}
-  {mode==='wallet'&&<section className="rider-cash-history rd-section" id="rider-wallet"><div><h2>Cash handover history</h2><p>Only Admin-confirmed cash deposits count toward clearing outstanding COD.</p></div>
-   <div className="rider-cash-history-list">{rider.deposits.slice(0,8).map(d=><div key={d.id}><div><strong>৳{Number(d.amount).toFixed(2)}</strong><small>{d.createdAt.toLocaleString('en-BD',{timeZone:'Asia/Dhaka'})}</small></div><span>{d.reference||'Admin cash deposit'}</span></div>)}{!rider.deposits.length&&<div className="rider-cash-no-history">No Admin-confirmed cash deposits recorded yet.</div>}</div>
-  </section>}
+  {mode==='overview'&&<RiderFinance records={financeRecords} mode="overview"/>}
+  {mode==='overview'&&<div className="rider-metrics rd-metrics"><div><Bike size={23}/><span>Active assignments</span><strong>{active.length}</strong></div><div><Package size={23}/><span>Total assignments</span><strong>{rider.deliveries.length}</strong></div><div><Wallet size={23}/><span>Merchant payment outstanding</span><strong>৳{financeRecords.filter(d=>d.status!=='CLEARED').reduce((a,d)=>a+d.net,0).toFixed(2)}</strong></div></div>}
+  {mode==='wallet'&&<RiderFinance records={financeRecords} mode="wallet"/>}
   {mode==='deliveries'&&<><div className="rider-deliveries-heading rd-section" id="rider-deliveries"><h2>Assigned deliveries</h2><p>Only assignments associated with your rider account appear here.</p></div>
   <RiderDeliveryTabs statuses={rider.deliveries.map(d=>d.order.status)} settlements={rider.deliveries.map(d=>settlementByOrder.get(d.orderId)||'PENDING')}>{rider.deliveries.map(d=><article className="rider-delivery-card" key={d.id}>
    <div className="rider-delivery-head"><div><span>ORDER</span><h3>{d.order.code}</h3></div><span className={'admin-order-badge '+d.order.status.toLowerCase()}>{d.order.status.replaceAll('_',' ')}</span></div>
