@@ -2,12 +2,13 @@
 import {useEffect,useMemo,useState} from 'react';
 import {useRouter,useSearchParams} from 'next/navigation';
 import MerchantDispatchProof from '@/components/merchant-dispatch-proof';
+import MerchantPaymentReview from '@/components/merchant-payment-review';
 import {Search,RefreshCcw,Clock3,CheckCheck,ChefHat,PackageCheck,Phone,MapPin,Bike,LoaderCircle,ShieldCheck,CheckCircle2} from 'lucide-react';
 
 export type MerchantOrder={
  id:string;code:string;status:string;customer:string;phone:string;address:string;kitchen:string;
  items:{name:string;quantity:number;lineTotal:number}[];codTotal:number;foodSubtotal:number;
- placedAt:string;rider:string|null;riderPhone:string|null;dispatchRequestedAt:string|null;settlement:string
+ placedAt:string;rider:string|null;riderPhone:string|null;dispatchRequestedAt:string|null;settlement:string;paymentMethod:string|null;paymentAmount:string|null;paymentSubmittedAt:string|null;merchantPayable:number
 };
 const tabs=[['ALL','All'],['PLACED','New'],['SEARCHING','Finding rider'],['MERCHANT_ACCEPTED','Accepted'],
  ['PREPARING','Preparing'],['RIDER_ASSIGNED','Rider dispatch'],['DELIVERED','Delivered']] as const;
@@ -47,18 +48,6 @@ export default function MerchantOrdersManager({initial}:{initial:MerchantOrder[]
    setNotice('Pickup notification sent to assigned rider for '+order.code+'.');
   }catch(e){setNotice(e instanceof Error?e.message:'Pickup request failed')}
   finally{setBusy(null)}
- }
- async function verifySettlement(order:MerchantOrder){
-  if(busy)return;
-  if(!window.confirm('Have you verified the merchant payable amount was received? Screenshots alone do not prove payment.'))return;
-  setBusy(order.id);setNotice('');
-  try{
-   const r=await fetch('/api/merchant/orders/'+encodeURIComponent(order.id)+'/confirm-settlement',{method:'POST',credentials:'same-origin'});
-   const data=await r.json().catch(()=>({}));
-   if(!r.ok)throw Error(data.error||'Confirmation failed');
-   setOrders(current=>current.map(o=>o.id===order.id?{...o,settlement:'CLEARED'}:o));
-   setNotice('Merchant payment verified for '+order.code);router.refresh();
-  }catch(e){setNotice(e instanceof Error?e.message:'Confirmation failed')}finally{setBusy(null)}
  }
  const refreshing=()=>{router.refresh();setNotice('Refreshing delivery assignment status…')};
  async function act(order:MerchantOrder,action:'find'|'status',next?:string){
@@ -121,7 +110,7 @@ export default function MerchantOrdersManager({initial}:{initial:MerchantOrder[]
     </div>}
     {!placed&&order.rider&&<div className="merchant-order-rider"><CheckCheck size={17}/> Assigned rider: {order.rider}{order.riderPhone&&<a href={'tel:'+order.riderPhone} className="merchant-rider-phone"><Phone size={13}/>{order.riderPhone}</a>}</div>}
     {order.status==='RIDER_ASSIGNED'&&order.rider&&<MerchantDispatchProof orderId={order.id}/>}
-    {order.status==='DELIVERED'&&order.settlement==='SUBMITTED'&&<div className="merchant-dispatch-proof"><strong>Rider has submitted payment evidence</strong><p>Verify that funds were actually received before clearing this payment.</p><button type="button" disabled={working} onClick={()=>void verifySettlement(order)}>Confirm payment received</button></div>}
+    {order.status==='DELIVERED'&&order.settlement==='SUBMITTED'&&<MerchantPaymentReview orderId={order.id} orderCode={order.code} amount={order.merchantPayable} method={order.paymentMethod} submittedAt={order.paymentSubmittedAt} onConfirmed={()=>setOrders(current=>current.map(o=>o.id===order.id?{...o,settlement:'CLEARED'}:o))}/>}
     {order.status==='DELIVERED'&&order.settlement==='CLEARED'&&<p style={{color:'#098b64',fontWeight:700}}>Merchant settlement verified</p>}
     <div className="merchant-order-actions">
      {placed&&<>
