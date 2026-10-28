@@ -1,7 +1,17 @@
 'use client';
-import {useState} from 'react';
-import {Camera,PackageCheck} from 'lucide-react';
+import {useRef,useState} from 'react';
+import {Camera,ImagePlus,PackageCheck,CheckCircle2} from 'lucide-react';
 import {useRouter} from 'next/navigation';
+function PhotoInput({title,value,onChange}:{title:string;value:File|null;onChange:(file:File|null)=>void}){
+ const camera=useRef<HTMLInputElement>(null),gallery=useRef<HTMLInputElement>(null);
+ return <div className="merchant-dispatch-photo"><strong>{title}</strong><div className="merchant-dispatch-pickers">
+ <button type="button" onClick={()=>camera.current?.click()}><Camera size={17}/> Open Camera</button>
+ <button type="button" onClick={()=>gallery.current?.click()}><ImagePlus size={17}/> Choose File</button></div>
+ <input ref={camera} className="merchant-dispatch-hidden" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={e=>onChange(e.target.files?.[0]||null)}/>
+ <input ref={gallery} className="merchant-dispatch-hidden" type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>onChange(e.target.files?.[0]||null)}/>
+ {value&&<div className="merchant-dispatch-selected"><CheckCircle2 size={16}/><span>{value.name} · {(value.size/1024/1024).toFixed(2)} MB</span><button type="button" onClick={()=>onChange(null)}>Remove</button></div>}
+ </div>;
+}
 export default function MerchantDispatchProof({orderId}:{orderId:string}){
  const router=useRouter();
  const [parcel,setParcel]=useState<File|null>(null),[handover,setHandover]=useState<File|null>(null);
@@ -18,12 +28,11 @@ export default function MerchantDispatchProof({orderId}:{orderId:string}){
    router.refresh();
   }catch(e){setError(e instanceof Error?e.message:'Dispatch failed')}finally{setBusy(false)}
  }
- return <div className="merchant-dispatch-proof" style={{padding:'14px',border:'1px solid #f5c3d5',borderRadius:14,marginTop:12,background:'#fff8fa'}}>
-  <strong style={{display:'flex',gap:8,alignItems:'center'}}><Camera size={18}/> Dispatch parcel · 2 photos required</strong>
-  <p style={{fontSize:12}}>Take a clear photo of the sealed order and a separate photo showing the handover to the assigned rider.</p>
-  <label style={{display:'block',marginBottom:10,fontSize:12}}>1. Ready parcel photo<input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={e=>setParcel(e.target.files?.[0]||null)} style={{display:'block',width:'100%',marginTop:5}}/></label>
-  <label style={{display:'block',marginBottom:10,fontSize:12}}>2. Parcel handover to rider<input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={e=>setHandover(e.target.files?.[0]||null)} style={{display:'block',width:'100%',marginTop:5}}/></label>
-  {error&&<p role="alert" style={{color:'#b91c1c',fontSize:12}}>{error}</p>}
-  <button type="button" className="btn" disabled={!parcel||!handover||busy} onClick={()=>void submit()}><PackageCheck size={16}/>{busy?'Saving dispatch proof…':'Dispatch & hand over parcel'}</button>
- </div>;
+ return <section className="merchant-dispatch-proof merchant-dispatch-camera">
+  <div className="merchant-dispatch-heading"><Camera size={20}/><div><strong>Dispatch parcel · 2 photos required</strong><p>Capture the sealed parcel and the actual rider handover separately.</p></div></div>
+  <PhotoInput title="1. Ready parcel photo" value={parcel} onChange={setParcel}/>
+  <PhotoInput title="2. Handover to delivery rider" value={handover} onChange={setHandover}/>
+  {error&&<p role="alert" className="merchant-dispatch-error">{error}</p>}
+  <button type="button" className="merchant-dispatch-submit" disabled={!parcel||!handover||busy} onClick={()=>void submit()}><PackageCheck size={18}/>{busy?'Uploading photos…':'Dispatch & hand over parcel'}</button>
+ </section>;
 }
