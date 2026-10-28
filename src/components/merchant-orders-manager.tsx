@@ -3,15 +3,16 @@ import {useEffect,useMemo,useState} from 'react';
 import {useRouter,useSearchParams} from 'next/navigation';
 import MerchantDispatchProof from '@/components/merchant-dispatch-proof';
 import MerchantPaymentReview from '@/components/merchant-payment-review';
+import MerchantReturnReview from '@/components/merchant-return-review';
 import {Search,RefreshCcw,Clock3,CheckCheck,ChefHat,PackageCheck,Phone,MapPin,Bike,LoaderCircle,ShieldCheck,CheckCircle2} from 'lucide-react';
 
 export type MerchantOrder={
  id:string;code:string;status:string;customer:string;phone:string;address:string;kitchen:string;
  items:{name:string;quantity:number;lineTotal:number}[];codTotal:number;foodSubtotal:number;
- placedAt:string;rider:string|null;riderPhone:string|null;dispatchRequestedAt:string|null;settlement:string;paymentMethod:string|null;paymentAmount:string|null;paymentSubmittedAt:string|null;merchantPayable:number
+ placedAt:string;rider:string|null;riderPhone:string|null;dispatchRequestedAt:string|null;settlement:string;paymentMethod:string|null;paymentAmount:string|null;paymentSubmittedAt:string|null;merchantPayable:number;returnState:string
 };
 const tabs=[['ALL','All'],['PLACED','New'],['SEARCHING','Finding rider'],['MERCHANT_ACCEPTED','Accepted'],
- ['PREPARING','Preparing'],['RIDER_ASSIGNED','Rider dispatch'],['DELIVERED','Delivered']] as const;
+ ['PREPARING','Preparing'],['RIDER_ASSIGNED','Rider dispatch'],['DELIVERED','Delivered'],['FAILED','Returns']] as const;
 const workflow:Record<string,{next:string;label:string;danger?:boolean}[]>={
  MERCHANT_ACCEPTED:[{next:'PREPARING',label:'Start preparing'}],
  PREPARING:[{next:'READY_FOR_PICKUP',label:'Mark ready for pickup'}]
@@ -79,7 +80,7 @@ export default function MerchantOrdersManager({initial}:{initial:MerchantOrder[]
  }
  return <div className="merchant-orders-manager">
   <div className="merchant-rider-policy"><Bike size={23}/><div><strong>Delivery rider first, then order acceptance</strong>
-   <p>প্রথমে <b>Find delivery man</b> request দিন → Admin rider assign করবে → তারপর Accept order ও preparation শুরু করুন।</p></div></div>
+   <p>Find rider broadcasts to online riders; the first rider to accept is assigned. Failed delivery parcels must be returned and confirmed by the merchant.</p></div></div>
   <div className="merchant-order-tabs" role="group" aria-label="Filter orders">
    {tabs.map(([id,label])=><button type="button" key={id} className={filter===id?'active':''} onClick={()=>setFilter(id)}>
     {label}
@@ -109,6 +110,7 @@ export default function MerchantOrdersManager({initial}:{initial:MerchantOrder[]
      <><Bike size={21}/><div><strong>Find a delivery man before accepting</strong><p>Request manual rider assignment from Admin to unlock acceptance.</p></div></>}
     </div>}
     {!placed&&order.rider&&<div className="merchant-order-rider"><CheckCheck size={17}/> Assigned rider: {order.rider}{order.riderPhone&&<a href={'tel:'+order.riderPhone} className="merchant-rider-phone"><Phone size={13}/>{order.riderPhone}</a>}</div>}
+    {order.status==='FAILED'&&<MerchantReturnReview orderId={order.id} returnState={order.returnState}/>}
     {order.status==='RIDER_ASSIGNED'&&order.rider&&<MerchantDispatchProof orderId={order.id}/>}
     {order.status==='DELIVERED'&&order.settlement==='SUBMITTED'&&<MerchantPaymentReview orderId={order.id} orderCode={order.code} amount={order.merchantPayable} method={order.paymentMethod} submittedAt={order.paymentSubmittedAt} onConfirmed={()=>setOrders(current=>current.map(o=>o.id===order.id?{...o,settlement:'CLEARED'}:o))}/>}
     {order.status==='DELIVERED'&&order.settlement==='CLEARED'&&<p style={{color:'#098b64',fontWeight:700}}>Merchant settlement verified</p>}
