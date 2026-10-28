@@ -3,7 +3,7 @@ import {GetObjectCommand,S3Client} from '@aws-sdk/client-s3';
 import {db} from '@/lib/db';
 import {currentUser} from '@/lib/auth';
 export const runtime='nodejs';
-const allowed=['parcel','rider-handover','customer-handover','payment'] as const;
+const allowed=['parcel','rider-handover','customer-handover','payment','return-rider','return-merchant'] as const;
 export async function GET(request:Request,{params}:{params:Promise<{id:string}>}){
  const user=await currentUser();if(!user)return NextResponse.json({error:'Authentication required'},{status:401});
  const {id}=await params;
@@ -13,11 +13,11 @@ export async function GET(request:Request,{params}:{params:Promise<{id:string}>}
  if(!privileged)return NextResponse.json({error:'Forbidden'},{status:403});
  const type=new URL(request.url).searchParams.get('type');
  if(!allowed.includes(type as typeof allowed[number]))return NextResponse.json({error:'Invalid evidence type'},{status:400});
- const actions=type==='payment'?['RIDER_SETTLEMENT_SUBMITTED']:type==='customer-handover'?['RIDER_CUSTOMER_HANDOVER']:['MERCHANT_DISPATCH_PROOF'];
+ const actions=type==='return-rider'?['RIDER_RETURN_SUBMITTED']:type==='return-merchant'?['MERCHANT_RETURN_RECEIVED']:type==='payment'?['RIDER_SETTLEMENT_SUBMITTED']:type==='customer-handover'?['RIDER_CUSTOMER_HANDOVER']:['MERCHANT_DISPATCH_PROOF'];
  const proof=await db.auditLog.findFirst({where:{entityType:'Order',entityId:id,action:{in:actions}},orderBy:{createdAt:'desc'},select:{metadata:true}});
  const meta=proof?.metadata;
  if(!meta||typeof meta!=='object'||Array.isArray(meta))return NextResponse.json({error:'No evidence uploaded'},{status:404});
- const field=type==='payment'?'proofKey':type==='customer-handover'?'photoKey':type==='parcel'?'parcelKey':'handoverKey';
+ const field=type==='return-rider'||type==='return-merchant'?'photoKey':type==='payment'?'proofKey':type==='customer-handover'?'photoKey':type==='parcel'?'parcelKey':'handoverKey';
  const key=meta[field];const prefix=type==='payment'?'settlement-proof/':'delivery-proof/';
  if(typeof key!=='string'||!key.startsWith(prefix+id+'/'))return NextResponse.json({error:'Invalid evidence reference'},{status:404});
  const bucket=process.env.BUCKET_NAME,endpoint=process.env.BUCKET_ENDPOINT,accessKeyId=process.env.BUCKET_ACCESS_KEY_ID,secretAccessKey=process.env.BUCKET_SECRET_ACCESS_KEY;
