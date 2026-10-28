@@ -15,10 +15,11 @@ export async function POST(request:Request,{params}:{params:Promise<{id:string}>
   const order=await tx.order.findUnique({where:{id},include:{delivery:{include:{rider:true}}}});
   if(!order||order.delivery?.rider.userId!==user.id)return {error:'Not your order',code:403};
   if(!['PICKED_UP','OUT_FOR_DELIVERY'].includes(order.status))return {error:'Only an undelivered pickup can be refused',code:409};
+  if(await tx.codCollection.findUnique({where:{orderId:id},select:{id:true}}))return {error:'COD already collected',code:409};
   await tx.order.update({where:{id},data:{status:'FAILED'}});
   await tx.orderEvent.create({data:{orderId:id,fromStatus:order.status,toStatus:'FAILED',actorId:user.id,note:'Customer refused parcel: '+input.data.reason}});
   await tx.auditLog.create({data:{actorId:user.id,action:'RIDER_CUSTOMER_REFUSED',entityType:'Order',entityId:id,metadata:{reason:input.data.reason,returnRequired:true}}});
-  return {ok:true,returnRequired:true};
+  return {ok:true,returnRequired:true,returnStatus:'AWAITING_RIDER_RETURN',deliveryFeeEarned:0,codCollected:0};
  });
  return NextResponse.json(result,{status:'error'in result?result.code:200});
 }
