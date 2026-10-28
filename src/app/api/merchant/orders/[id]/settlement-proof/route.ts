@@ -1,6 +1,5 @@
 import {NextResponse} from 'next/server';
 import {GetObjectCommand,S3Client} from '@aws-sdk/client-s3';
-import {Readable} from 'node:stream';
 import {db} from '@/lib/db';
 import {currentUser} from '@/lib/auth';
 export const runtime='nodejs';
@@ -23,6 +22,6 @@ export async function GET(_request:Request,{params}:{params:Promise<{id:string}>
   const mime=file.ContentType;
   if(!mime||!['image/jpeg','image/png','image/webp'].includes(mime)||!file.Body)return NextResponse.json({error:'Invalid evidence type'},{status:415});
   const bytes=await file.Body.transformToByteArray();
-  return new NextResponse(Buffer.from(bytes),{headers:{'Content-Type':mime,'Cache-Control':'private, no-store, max-age=0','X-Content-Type-Options':'nosniff','Content-Disposition':'inline; filename="payment-proof"'}});
+  return new NextResponse(new Uint8Array(bytes),{headers:{'Content-Type':mime,'Cache-Control':'private, no-store, max-age=0','X-Content-Type-Options':'nosniff','Content-Disposition':'inline; filename="payment-proof"'}});
  }catch(err){console.error('Settlement proof read failed',err);return NextResponse.json({error:'Could not read evidence'},{status:502})}
 }
