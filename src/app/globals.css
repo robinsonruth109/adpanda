@@ -1529,3 +1529,16 @@ body:has(.admin-shell)>.adp-customer-footer,body:has(.merchant-shell)>.adp-custo
 @media(max-width:640px){.admin-dispatch-reservation{flex-wrap:wrap}.admin-dispatch-reservation button{width:100%}}
 
 .rider-preaccept-note{display:flex;align-items:center;gap:9px;background:#fff9eb;border:1px solid #f4dfb0;color:#946a1e;border-radius:10px;padding:12px 13px;font-size:12px;line-height:1.55;margin-bottom:13px}.rider-preaccept-note svg{flex:none}
+
+
+/* Private merchant settlement evidence review */
+.merchant-payment-review{margin-top:15px;border:1px solid #f4d5e2;border-radius:15px;background:#fffafd;padding:18px;display:grid;gap:14px}
+.merchant-payment-review-head{display:flex;align-items:center;gap:11px}.merchant-payment-review-head strong{font-size:15px;color:#252438}.merchant-payment-review-head p{font-size:12px;color:#707385;margin:5px 0 0;line-height:1.5}
+.merchant-payment-review-icon{display:grid;place-items:center;min-width:42px;height:42px;background:#ffe8f1;border-radius:12px;color:#db1b71}
+.merchant-payment-info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.merchant-payment-info div{border:1px solid #ececf2;background:#fff;border-radius:10px;padding:12px;min-width:0}.merchant-payment-info small,.merchant-payment-info strong{display:block}.merchant-payment-info small{font-size:11px;color:#7b8090}.merchant-payment-info strong{font-size:14px;margin-top:6px;overflow-wrap:anywhere}
+.merchant-payment-proof{border:1px solid #e8e9ef;border-radius:12px;padding:12px;background:white;display:grid;gap:10px}.merchant-payment-proof-title{display:flex;gap:8px;align-items:center;color:#34374a;font-size:13px}.merchant-payment-proof img{display:block;width:100%;height:auto;max-height:340px;object-fit:contain;border-radius:8px;background:#f4f4f7;cursor:zoom-in}.merchant-payment-proof button{border:1px solid #e7c8d6;border-radius:10px;background:#fff4f8;color:#d01e69;padding:10px;display:flex;gap:7px;align-items:center;justify-content:center;font-weight:750}
+.merchant-payment-check{display:flex;align-items:flex-start;gap:10px;font-size:12px;line-height:1.5;color:#3d4050}.merchant-payment-check input{accent-color:#df1b73;width:17px;height:17px;flex-shrink:0;margin:0}
+.merchant-payment-confirm{display:flex;justify-content:center;align-items:center;gap:9px;width:100%;padding:13px;background:#078e61;color:white;border:0;border-radius:11px;font-size:13px;font-weight:800}.merchant-payment-confirm:disabled{opacity:.45;cursor:not-allowed}
+.merchant-payment-warning{color:#9a6e24;font-size:11px;line-height:1.5}.merchant-payment-error{color:#b91c1c;font-size:12px}
+.merchant-proof-overlay{position:fixed;inset:0;background:#131320d9;z-index:200;display:grid;place-items:center;padding:16px}.merchant-proof-modal{width:min(900px,100%);max-height:95vh;display:grid;gap:12px}.merchant-proof-modal button{justify-self:end;border:0;border-radius:8px;padding:10px 15px;background:white;color:#292637;font-weight:800}.merchant-proof-modal img{max-width:100%;max-height:80vh;object-fit:contain;margin:auto}
+@media(max-width:520px){.merchant-payment-review{padding:13px}.merchant-payment-info{grid-template-columns:1fr}}
