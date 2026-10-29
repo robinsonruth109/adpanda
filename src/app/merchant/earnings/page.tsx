@@ -43,6 +43,8 @@ export default async function MerchantEarningsPage() {
     earned={wallet.earnings.toFixed(2)}
     reserved={wallet.reserved.toFixed(2)}
     paid={wallet.paid.toFixed(2)}
+    directPaid={wallet.directPaid.toFixed(2)}
+    directPending={wallet.directPending.toFixed(2)}
     waiting={wallet.awaitingCash.toFixed(2)}
     records={merchant.settlements.map(s=>({
      id:s.id,amount:s.amount.toFixed(2),status:s.status,createdAt:s.createdAt.toISOString(),
