@@ -7,14 +7,15 @@ import {Banknote,CheckCircle2,ClipboardList,History,ReceiptText,RefreshCw,Search
 export type CashRider={id:string;name:string;phone:string;collected:string;deposited:string;outstanding:string};
 export type CashDepositRow={id:string;rider:string;amount:string;reference:string;createdAt:string};
 export type CashSettlementRow={id:string;merchant:string;amount:string;status:string;reference:string|null;createdAt:string};
+export type RiderMerchantSettlementRow={id:string;orderCode:string;merchant:string;kitchen:string;rider:string;cod:string;deliveryCharge:string;amount:string;method:string;status:string;submittedAt:string|null;confirmedAt:string|null;confirmationId:string|null};
 export type CashCollectionRow={id:string;orderCode:string;rider:string;amount:string;createdAt:string};
 
 const fmt=(value:string)=>'৳'+Number(value).toLocaleString('en-BD',{minimumFractionDigits:2,maximumFractionDigits:2});
 const time=(iso:string)=>new Date(iso).toLocaleString('en-BD',{timeZone:'Asia/Dhaka',dateStyle:'medium',timeStyle:'short'});
 export default function AdminCashReconciliation({
- riders,deposits,collections,settlements,totalCollected,totalDeposited,deliveredAwaitingCod
+ riders,deposits,collections,settlements,riderMerchantSettlements,totalCollected,totalDeposited,deliveredAwaitingCod
 }:{
- riders:CashRider[];deposits:CashDepositRow[];collections:CashCollectionRow[];settlements:CashSettlementRow[];
+ riders:CashRider[];deposits:CashDepositRow[];collections:CashCollectionRow[];settlements:CashSettlementRow[];riderMerchantSettlements:RiderMerchantSettlementRow[];
  totalCollected:string;totalDeposited:string;deliveredAwaitingCod:number
 }){
  const router=useRouter();
@@ -78,8 +79,27 @@ export default function AdminCashReconciliation({
    <div className="adp-finance-panel-heading"><div><span className="admin-overline">LATEST 50</span><h2>Rider-confirmed COD receipts</h2><p>Receipt does not mean the money has reached Admin.</p></div><ReceiptText size={24}/></div>
    <div className="admin-table-scroll"><table className="admin-data-table"><thead><tr><th>Time</th><th>Order</th><th>Rider</th><th>Collected cash</th></tr></thead><tbody>{collections.map(c=><tr key={c.id}><td>{time(c.createdAt)}</td><td>{c.orderCode}</td><td>{c.rider}</td><td><strong>{fmt(c.amount)}</strong></td></tr>)}</tbody></table>{!collections.length&&<div className="admin-empty">No COD cash receipts have been confirmed.</div>}</div>
   </section>
+
   <section className="adp-finance-panel">
-   <div className="adp-finance-panel-heading"><div><span className="admin-overline">MERCHANT PAYABLES</span><h2>Merchant settlements</h2><p>Merchant payouts are separate from rider cash handover. This list is read-only.</p></div><Banknote size={24}/></div>
+   <div className="adp-finance-panel-heading"><div><span className="admin-overline">RIDER → MERCHANT · LATEST 100</span><h2>Rider-to-merchant settlement history</h2><p>Actual rider payment submissions and merchant confirmations linked by order. These are NOT separate platform payouts.</p></div><ReceiptText size={24}/></div>
+   <div className="adp-pay-stats" style={{marginBottom:16}}>
+    <div><span>Confirmed merchant receipts</span><strong>{riderMerchantSettlements.filter(s=>s.status==='CLEARED').length}</strong></div>
+    <div><span>Confirmed amount</span><strong>{fmt(riderMerchantSettlements.filter(s=>s.status==='CLEARED').reduce((n,s)=>n+Number(s.amount),0).toFixed(2))}</strong></div>
+    <div><span>Pending merchant confirmation</span><strong>{riderMerchantSettlements.filter(s=>s.status!=='CLEARED').length}</strong></div>
+   </div>
+   <div className="admin-table-scroll"><table className="admin-data-table"><thead><tr><th>Order</th><th>Merchant / Rider</th><th>COD</th><th>Delivery fee</th><th>Paid to merchant</th><th>Method</th><th>Status / date</th><th>Proof</th></tr></thead><tbody>
+    {riderMerchantSettlements.map(s=><tr key={s.id}>
+     <td><a href={'/orders/'+s.id} target="_blank" rel="noopener noreferrer">{s.orderCode}</a></td>
+     <td><strong>{s.merchant}</strong><div>{s.kitchen}</div><small>Rider: {s.rider}</small></td>
+     <td>{fmt(s.cod)}</td><td>{fmt(s.deliveryCharge)}</td><td><strong>{fmt(s.amount)}</strong></td>
+     <td>{s.method==='BKASH'?'bKash':s.method==='CASH'?'Cash':s.method}</td>
+     <td><strong>{s.status==='CLEARED'?'Merchant confirmed':'Waiting for merchant'}</strong><div><small>Submitted: {s.submittedAt?time(s.submittedAt):'—'}</small></div>{s.confirmedAt&&<div><small>Confirmed: {time(s.confirmedAt)}</small></div>}</td>
+     <td><a href={'/api/orders/'+s.id+'/evidence?type=payment'} target="_blank" rel="noopener noreferrer">View proof ↗</a></td>
+    </tr>)}
+   </tbody></table>{!riderMerchantSettlements.length&&<div className="admin-empty">No rider-to-merchant payment submissions recorded yet.</div>}</div>
+  </section>
+  <section className="adp-finance-panel">
+   <div className="adp-finance-panel-heading"><div><span className="admin-overline">MERCHANT PAYABLES</span><h2>Platform merchant payouts</h2><p>Separate platform payout requests; direct rider-to-merchant payments appear above. This list is read-only.</p></div><Banknote size={24}/></div>
    <div className="admin-table-scroll"><table className="admin-data-table"><thead><tr><th>Merchant</th><th>Amount</th><th>Status</th><th>Reference</th></tr></thead><tbody>{settlements.map(s=><tr key={s.id}><td>{s.merchant}</td><td>{fmt(s.amount)}</td><td>{s.status}</td><td>{s.reference||'—'}</td></tr>)}</tbody></table>{!settlements.length&&<div className="admin-empty">No merchant settlements yet.</div>}</div>
   </section>
   <div className="adp-finance-fine-print"><RefreshCw size={15}/> Dashboard reads the live database on refresh. Reconciliation prevents deposits exceeding rider-confirmed COD. Merchant payables and rider earnings are not automatically settled.</div>
