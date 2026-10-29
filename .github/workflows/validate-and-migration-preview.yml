@@ -1,0 +1,45 @@
+name: Validate and preview initial database migration
+
+on:
+  push:
+    branches:
+      - feature/platform-foundation
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: mysql://adpanda:example@127.0.0.1:3306/adpanda_preview
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Validate Prisma schema
+        run: npx prisma validate
+      - name: Generate Prisma client
+        run: npx prisma generate
+      - name: Generate INITIAL schema SQL for review only
+        run: |
+          mkdir -p migration-preview
+          npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > migration-preview/initial.sql
+          test -s migration-preview/initial.sql
+      - name: Upload SQL preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: adpanda-initial-mysql-schema-preview
+          path: migration-preview/initial.sql
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Production build
+        run: npm run build
+
+# NO production MySQL credentials are used; this workflow NEVER executes SQL.

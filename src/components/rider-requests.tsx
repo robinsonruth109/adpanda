@@ -1,0 +1,14 @@
+'use client';
+import {useEffect,useState} from 'react';
+type RequestItem={id:string;code:string;codTotal:string|number;deliveryFee:string|number;kitchen:{name:string;address:string;latitude:string|number;longitude:string|number;merchant:{members:{user:{phone:string}}[]}};address:{details:string;landmark:string|null;latitude:string|number;longitude:string|number}};
+export default function RiderRequests(){
+ const [items,setItems]=useState<RequestItem[]>([]);
+ const [error,setError]=useState('');
+ const [busy,setBusy]=useState<string|null>(null);
+ useEffect(()=>{let live=true;const load=async()=>{try{const r=await fetch('/api/rider/requests',{cache:'no-store'});if(r.ok){const data=await r.json();if(live)setItems(data.requests||[]);}}catch{}};void load();const timer=setInterval(()=>void load(),5000);return()=>{live=false;clearInterval(timer)}},[]);
+ async function accept(id:string){setBusy(id);setError('');try{const r=await fetch('/api/rider/requests/'+encodeURIComponent(id)+'/accept',{method:'POST'});const data=await r.json();if(!r.ok)throw new Error(data.error||'Cannot accept request');window.location.reload();}catch(e){setError(e instanceof Error?e.message:'Failed to accept');setItems(list=>list.filter(o=>o.id!==id))}finally{setBusy(null)}}
+ return <section className="rider-cash-history"><div><h2>Open delivery requests</h2><p>Broadcast requests from merchants. First available rider to accept gets the delivery automatically. Updates every 5 seconds.</p></div>
+ {error&&<p role="alert">{error}</p>}
+ <div className="rider-deliveries">{items.map(o=><article className="rider-delivery-card" key={o.id}><div className="rider-delivery-head"><h3>{o.code}</h3><span>NEW REQUEST</span></div><div className="rider-delivery-stop"><div><small>PICKUP</small><strong>{o.kitchen.name}</strong><p>{o.kitchen.address}</p>{o.kitchen.merchant.members[0]?.user.phone&&<a href={'tel:'+o.kitchen.merchant.members[0].user.phone}>Call pickup: {o.kitchen.merchant.members[0].user.phone}</a>}<a target="_blank" rel="noopener noreferrer" href={'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(String(o.kitchen.latitude)+','+String(o.kitchen.longitude))}>Navigate to pickup ↗</a></div></div><div className="rider-delivery-stop"><div><small>DROP OFF</small><p>{o.address.details}{o.address.landmark?' · '+o.address.landmark:''}</p><a target="_blank" rel="noopener noreferrer" href={'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(String(o.address.latitude)+','+String(o.address.longitude))}>Navigate to drop-off ↗</a></div></div><div className="rider-delivery-total"><span>Customer COD</span><strong>৳{Number(o.codTotal).toFixed(2)}</strong></div><button className="btn" disabled={busy!==null} onClick={()=>void accept(o.id)}>{busy===o.id?'Accepting...':'Accept Delivery'}</button></article>)}</div>
+ {!items.length&&<p>No open delivery requests at the moment.</p>}</section>
+}

@@ -1,0 +1,353 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+enum UserRole {
+  CUSTOMER
+  MERCHANT
+  RIDER
+  ADMIN
+  MANAGER
+  DISPATCHER
+  ACCOUNTANT
+}
+enum StoreType {
+ FOOD
+ GROCERY
+ STATIONERY
+}
+enum KitchenStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+enum OrderStatus {
+  PLACED
+  MERCHANT_ACCEPTED
+  PREPARING
+  READY_FOR_PICKUP
+  RIDER_ASSIGNED
+  PICKED_UP
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+  FAILED
+}
+enum RiderStatus {
+  OFFLINE
+  ONLINE
+  BUSY
+  SUSPENDED
+}
+enum SettlementStatus {
+  PENDING
+  APPROVED
+  PAID
+  REJECTED
+}
+enum LedgerAccountType {
+  ASSET
+  LIABILITY
+  REVENUE
+  EXPENSE
+}
+model User {
+ id String @id @default(cuid())
+ phone String @unique @db.VarChar(20)
+ name String
+ passwordHash String?
+ adminSecondPasswordHash String?
+ role UserRole @default(CUSTOMER)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ customerOrders Order[] @relation("CustomerOrders")
+ rider Rider?
+ merchantMemberships MerchantMember[]
+ addresses Address[]
+ sessions Session[]
+}
+model Merchant {
+ id String @id @default(cuid())
+ name String
+ status KitchenStatus @default(PENDING)
+ createdAt DateTime @default(now())
+ members MerchantMember[]
+ kitchens Kitchen[]
+ settlements MerchantSettlement[]
+}
+model MerchantMember {
+ merchantId String
+ userId String
+ role String @default("OWNER")
+ merchant Merchant @relation(fields:[merchantId],references:[id])
+ user User @relation(fields:[userId],references:[id])
+ @@id([merchantId,userId])
+}
+model ServiceZone {
+ id String @id @default(cuid())
+ name String @unique
+ active Boolean @default(true)
+ kitchens Kitchen[]
+ addresses Address[]
+}
+model Kitchen {
+ id String @id @default(cuid())
+ storeType StoreType @default(FOOD)
+ merchantId String
+ zoneId String?
+ name String
+ slug String @unique
+ description String? @db.Text
+ address String
+ latitude Decimal @db.Decimal(10,7)
+ longitude Decimal @db.Decimal(10,7)
+ commissionRate Decimal? @db.Decimal(5,2)
+ active Boolean @default(false)
+ acceptingOrders Boolean @default(false)
+ availabilityMode String @default("MANUAL") @db.VarChar(16)
+ groceryReviewedDate String? @db.VarChar(10)
+ groceryCatalogVersion Int @default(0)
+ groceryPriceReviewedAt DateTime?
+ groceryPriceReviewedById String?
+ weeklyHours Json?
+ bannerKey String? @db.VarChar(300)
+ bannerMimeType String? @db.VarChar(32)
+ bannerVersion Int @default(0)
+ approvedAt DateTime?
+ merchant Merchant @relation(fields:[merchantId],references:[id])
+ zone ServiceZone? @relation(fields:[zoneId],references:[id])
+ categories MenuCategory[]
+ orders Order[]
+ @@index([merchantId,active])
+ @@index([storeType,active])
+}
+model MenuCategory {
+ id String @id @default(cuid())
+ kitchenId String
+ name String
+ active Boolean @default(true)
+ sortOrder Int @default(0)
+ kitchen Kitchen @relation(fields:[kitchenId],references:[id])
+ items MenuItem[]
+}
+model MenuItem {
+ id String @id @default(cuid())
+ unitLabel String @default("piece") @db.VarChar(32)
+ stockQty Int?
+ categoryId String
+ name String
+ description String? @db.Text
+ price Decimal @db.Decimal(12,2)
+ available Boolean @default(true)
+ imageKey String? @db.VarChar(300)
+ imageMimeType String? @db.VarChar(32)
+ imageVersion Int @default(0)
+ category MenuCategory @relation(fields:[categoryId],references:[id])
+ orderItems OrderItem[]
+}
+model Address {
+ id String @id @default(cuid())
+ userId String?
+ zoneId String?
+ label String?
+ details String
+ landmark String?
+ latitude Decimal @db.Decimal(10,7)
+ longitude Decimal @db.Decimal(10,7)
+ user User? @relation(fields:[userId],references:[id])
+ zone ServiceZone? @relation(fields:[zoneId],references:[id])
+ orders Order[]
+}
+model Order {
+ id String @id @default(cuid())
+ code String @unique
+ customerId String?
+ recipientName String? @db.VarChar(100)
+ recipientPhone String? @db.VarChar(20)
+ guestTokenHash String? @unique @db.Char(64)
+ kitchenId String
+ addressId String
+ status OrderStatus @default(PLACED)
+ dispatchRequestedAt DateTime?
+ foodSubtotal Decimal @db.Decimal(12,2)
+ deliveryFee Decimal @db.Decimal(12,2)
+ discountAmount Decimal @default(0) @db.Decimal(12,2)
+ codTotal Decimal @db.Decimal(12,2)
+ commissionRate Decimal @db.Decimal(5,2)
+ commissionAmount Decimal @db.Decimal(12,2)
+ merchantPayable Decimal @db.Decimal(12,2)
+ placedAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ customer User? @relation("CustomerOrders",fields:[customerId],references:[id])
+ kitchen Kitchen @relation(fields:[kitchenId],references:[id])
+ address Address @relation(fields:[addressId],references:[id])
+ items OrderItem[]
+ events OrderEvent[]
+ delivery DeliveryAssignment?
+ codCollection CodCollection?
+ @@index([status,placedAt])
+ @@index([dispatchRequestedAt,status])
+ @@index([kitchenId,placedAt])
+}
+model OrderItem {
+ id String @id @default(cuid())
+ orderId String
+ menuItemId String?
+ itemName String
+ unitPrice Decimal @db.Decimal(12,2)
+ quantity Int
+ lineTotal Decimal @db.Decimal(12,2)
+ order Order @relation(fields:[orderId],references:[id])
+ menuItem MenuItem? @relation(fields:[menuItemId],references:[id])
+}
+model OrderEvent {
+ id String @id @default(cuid())
+ orderId String
+ fromStatus OrderStatus?
+ toStatus OrderStatus
+ actorId String?
+ note String? @db.Text
+ createdAt DateTime @default(now())
+ order Order @relation(fields:[orderId],references:[id])
+ @@index([orderId,createdAt])
+}
+model Rider {
+ id String @id @default(cuid())
+ userId String @unique
+ status RiderStatus @default(OFFLINE)
+ approved Boolean @default(false)
+ user User @relation(fields:[userId],references:[id])
+ deliveries DeliveryAssignment[]
+ collections CodCollection[]
+ deposits CashDeposit[]
+ locations RiderLocation[]
+}
+model RiderLocation {
+ id BigInt @id @default(autoincrement())
+ riderId String
+ latitude Decimal @db.Decimal(10,7)
+ longitude Decimal @db.Decimal(10,7)
+ accuracyMeters Float?
+ recordedAt DateTime @default(now())
+ rider Rider @relation(fields:[riderId],references:[id])
+ @@index([riderId,recordedAt])
+}
+model DeliveryAssignment {
+ id String @id @default(cuid())
+ orderId String @unique
+ riderId String
+ assignedById String
+ assignedAt DateTime @default(now())
+ pickedUpAt DateTime?
+ deliveredAt DateTime?
+ order Order @relation(fields:[orderId],references:[id])
+ rider Rider @relation(fields:[riderId],references:[id])
+ @@index([riderId,deliveredAt])
+}
+model CodCollection {
+ id String @id @default(cuid())
+ orderId String @unique
+ riderId String
+ amount Decimal @db.Decimal(12,2)
+ collectedAt DateTime @default(now())
+ order Order @relation(fields:[orderId],references:[id])
+ rider Rider @relation(fields:[riderId],references:[id])
+}
+model CashDeposit {
+ id String @id @default(cuid())
+ riderId String
+ amount Decimal @db.Decimal(12,2)
+ receivedById String
+ reference String? @unique
+ createdAt DateTime @default(now())
+ rider Rider @relation(fields:[riderId],references:[id])
+}
+model MerchantSettlement {
+ id String @id @default(cuid())
+ merchantId String
+ requestedById String?
+ amount Decimal @db.Decimal(12,2)
+ status SettlementStatus @default(PENDING)
+ payoutMethod String? @db.VarChar(20)
+ payoutAccount String? @db.VarChar(120)
+ bankName String? @db.VarChar(120)
+ reviewedById String?
+ reviewedAt DateTime?
+ reviewNote String? @db.VarChar(500)
+ paidAt DateTime?
+ reference String? @unique
+ merchant Merchant @relation(fields:[merchantId],references:[id])
+ createdAt DateTime @default(now())
+ @@index([merchantId,status,createdAt])
+}
+model LedgerAccount {
+ id String @id @default(cuid())
+ code String @unique
+ name String
+ type LedgerAccountType
+ entries LedgerEntry[]
+}
+model LedgerTransaction {
+ id String @id @default(cuid())
+ referenceType String
+ referenceId String
+ memo String?
+ createdAt DateTime @default(now())
+ entries LedgerEntry[]
+ @@index([referenceType,referenceId])
+}
+model LedgerEntry {
+ id String @id @default(cuid())
+ transactionId String
+ accountId String
+ debit Decimal @default(0) @db.Decimal(14,2)
+ credit Decimal @default(0) @db.Decimal(14,2)
+ transaction LedgerTransaction @relation(fields:[transactionId],references:[id])
+ account LedgerAccount @relation(fields:[accountId],references:[id])
+ @@index([accountId])
+}
+model PlatformSetting {
+ key String @id
+ value String @db.Text
+ updatedAt DateTime @updatedAt
+}
+model AuditLog {
+ id String @id @default(cuid())
+ actorId String?
+ action String
+ entityType String
+ entityId String
+ metadata Json?
+ createdAt DateTime @default(now())
+ @@index([entityType,entityId,createdAt])
+}
+
+model Session {
+ id String @id @default(cuid())
+ userId String
+ tokenHash String @unique @db.Char(64)
+ expiresAt DateTime
+ createdAt DateTime @default(now())
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ @@index([userId])
+ @@index([expiresAt])
+}
+
+model BrandAsset {
+ id String @id @default(cuid())
+ kind String @db.VarChar(16)
+ objectKey String @db.VarChar(300)
+ mimeType String @db.VarChar(32)
+ title String? @db.VarChar(140)
+ subtitle String? @db.VarChar(300)
+ ctaLabel String? @db.VarChar(50)
+ href String? @db.VarChar(200)
+ sortOrder Int @default(0)
+ active Boolean @default(true)
+ createdAt DateTime @default(now())
+ @@index([kind,active,sortOrder])
+}

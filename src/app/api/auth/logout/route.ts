@@ -1,0 +1,1 @@
+import {NextResponse} from 'next/server';import {logout} from '@/lib/auth';export async function POST(request:Request){const origin=request.headers.get('origin');if(origin&&new URL(origin).host!==request.headers.get('host'))return NextResponse.json({error:'Invalid origin'},{status:403});await logout();return NextResponse.json({ok:true})}

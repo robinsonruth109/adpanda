@@ -1,0 +1,35 @@
+'use client';
+import {useMemo,useRef,useState} from 'react';
+import GoogleKitchenMap from './google-kitchen-map';
+type Props={latitude:string;longitude:string;onChange:(lat:string,lng:string)=>void;mode?:'kitchen'|'delivery'};
+const TILE=256, SIZE=512;
+function clampLat(v:number){return Math.max(-85,Math.min(85,v))}
+function world(lat:number,lng:number,zoom:number){const sin=Math.sin(clampLat(lat)*Math.PI/180);const scale=TILE*2**zoom;return {x:(lng+180)/360*scale,y:(0.5-Math.log((1+sin)/(1-sin))/(4*Math.PI))*scale}}
+function geo(x:number,y:number,zoom:number){const scale=TILE*2**zoom;return {lat:180/Math.PI*Math.atan(Math.sinh(Math.PI*(1-2*y/scale))),lng:x/scale*360-180}}
+export default function KitchenMapPicker(props:Props){
+ const key=process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+ if(key)return <GoogleKitchenMap {...props} apiKey={key}/>;
+ return <BasicKitchenMapPicker {...props}/>;
+}
+function BasicKitchenMapPicker({latitude,longitude,onChange,mode='kitchen'}:Props){
+ const [zoom,setZoom]=useState(18);
+ const [locating,setLocating]=useState(false);
+ const [center,setCenter]=useState<{lat:number;lng:number}>({lat:23.7602612,lng:88.948616});
+ const drag=useRef<{x:number;y:number;lat:number;lng:number;moved:boolean}|null>(null);
+ const [link,setLink]=useState('');const [error,setError]=useState('');
+ const lat=Number(latitude),lng=Number(longitude),valid=latitude.trim()!==''&&longitude.trim()!==''&&Number.isFinite(lat)&&Number.isFinite(lng)&&Math.abs(lat)<=85&&Math.abs(lng)<=180;
+ const focus=valid?{lat,lng}:center;
+ const map=useMemo(()=>{const p=world(focus.lat,focus.lng,zoom);const left=p.x-SIZE/2,top=p.y-SIZE/2;const tiles=[] as {x:number;y:number;src:string;left:number;top:number}[];const max=2**zoom;for(let x=Math.floor(left/TILE);x<=Math.floor((left+SIZE)/TILE);x++)for(let y=Math.floor(top/TILE);y<=Math.floor((top+SIZE)/TILE);y++){if(y>=0&&y<max)tiles.push({x,y,src:`https://tile.openstreetmap.org/${zoom}/${(x+max)%max}/${y}.png`,left:x*TILE-left,top:y*TILE-top})}return {tiles,p}},[focus.lat,focus.lng,zoom]);
+ function moveMap(dx:number,dy:number,startLat:number,startLng:number){const base=world(startLat,startLng,zoom);const p=geo(base.x-dx,base.y-dy,zoom);onChange(p.lat.toFixed(7),p.lng.toFixed(7));setCenter(p)}
+ function pick(x:number,y:number){const p=geo(map.p.x+x-SIZE/2,map.p.y+y-SIZE/2,zoom);onChange(p.lat.toFixed(7),p.lng.toFixed(7));setCenter(p);setError('')}
+ function locate(){if(!navigator.geolocation){setError('Location service unavailable');return;}setLocating(true);navigator.geolocation.getCurrentPosition(p=>{onChange(p.coords.latitude.toFixed(7),p.coords.longitude.toFixed(7));setCenter({lat:p.coords.latitude,lng:p.coords.longitude});setError('GPS accuracy: about '+Math.round(p.coords.accuracy)+' meters. Confirm entrance manually.');setLocating(false)},()=>{setError('GPS location unavailable. Select on map manually.');setLocating(false)},{enableHighAccuracy:true,timeout:12000,maximumAge:0})}
+ function parse(){const value=link.trim();const m=value.match(/(?:@|!3d)(-?\d{1,2}\.\d+)(?:,|!4d)(-?\d{1,3}\.\d+)/)||value.match(/[?&]q=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/)||value.match(/^(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)$/);if(!m){setError('Paste coordinates or a Google Maps URL containing coordinates (@latitude,longitude). Short share links may need to be opened first.');return}const a=Number(m[1]),b=Number(m[2]);if(!Number.isFinite(a)||!Number.isFinite(b)||Math.abs(a)>85||Math.abs(b)>180){setError('Invalid latitude or longitude');return}onChange(a.toFixed(7),b.toFixed(7));setCenter({lat:a,lng:b});setError('')}
+ return <section className="location-picker"><h3>📍 {mode==='delivery'?'ডেলিভারি পিন (Delivery point)':'Confirm exact kitchen entrance'}</h3><p className="muted">{mode==='delivery'?'GPS একটু এদিক-ওদিক হতে পারে। Map টেনে আসল গেটের জায়গায় Pin বসান। Zoom করে নিশ্চিত করুন।':'Desktop/browser GPS may point to a nearby street. Drag the map beneath the fixed pink pin to select the correct building entrance. Tap to reposition, use +/- for zoom or use arrow keys for fine adjustment.'}</p>
+ <div className="location-picker-map" role="application" tabIndex={0} aria-label="Drag the map below the fixed location pin, or use arrow keys to adjust" onPointerDown={e=>{e.currentTarget.setPointerCapture(e.pointerId);drag.current={x:e.clientX,y:e.clientY,lat:focus.lat,lng:focus.lng,moved:false}}} onPointerMove={e=>{if(!drag.current)return;const d=drag.current;const scale=SIZE/e.currentTarget.getBoundingClientRect().width;const dx=(e.clientX-d.x)*scale,dy=(e.clientY-d.y)*scale;if(Math.abs(dx)>3||Math.abs(dy)>3)d.moved=true;moveMap(dx,dy,d.lat,d.lng)}} onPointerUp={e=>{if(!drag.current)return;const d=drag.current;if(!d.moved){const r=e.currentTarget.getBoundingClientRect();pick((e.clientX-r.left)*SIZE/r.width,(e.clientY-r.top)*SIZE/r.height)}drag.current=null}} onPointerCancel={()=>{drag.current=null}} onKeyDown={e=>{const offsets:{[key:string]:[number,number]}={ArrowUp:[0,20],ArrowDown:[0,-20],ArrowLeft:[20,0],ArrowRight:[-20,0]};const offset=offsets[e.key];if(offset){e.preventDefault();moveMap(offset[0],offset[1],focus.lat,focus.lng)}}}>
+ {map.tiles.map(t=><img draggable={false} alt="" key={t.x+'-'+t.y} src={t.src} style={{position:'absolute',width:(TILE/SIZE*100)+'%',height:(TILE/SIZE*100)+'%',left:(t.left/SIZE*100)+'%',top:(t.top/SIZE*100)+'%',pointerEvents:'none'}}/>)}
+ <div className="location-picker-marker" aria-hidden="true">📍</div><div className="location-zoom-controls"><button type="button" aria-label="Zoom in" onPointerDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();setZoom(z=>Math.min(19,z+1))}} disabled={zoom>=19}>+</button><button type="button" aria-label="Zoom out" onPointerDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();setZoom(z=>Math.max(12,z-1))}} disabled={zoom<=12}>−</button><button type="button" aria-label="Use current GPS location" onPointerDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();locate()}} disabled={locating}>◎</button></div><span className="location-picker-attribution">© OpenStreetMap contributors</span></div>
+ <div className="location-picker-row"><input aria-label="Paste map coordinates or Google Maps URL" value={link} placeholder="Paste Google Maps URL or lat,lng" onChange={e=>setLink(e.target.value)}/><button type="button" className="btn secondary" onClick={parse}>Use coordinates</button></div>
+ {error&&<p role="alert" style={{color:'#b91c1c'}}>{error}</p>}
+ <p className="muted" style={{fontSize:12}}>Zoom: {zoom} · Selected: {valid?`${latitude}, ${longitude}`:'Tap the map to select the kitchen'}. {valid&&<a target="_blank" rel="noopener noreferrer" href={`https://www.google.com/maps?q=${lat},${lng}`}>Verify in Google Maps ↗</a>}</p>
+ </section>
+}
