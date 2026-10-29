@@ -14,7 +14,8 @@ export async function POST(request:Request){
  if(!rider?.approved)return NextResponse.json({error:'Admin approval required'},{status:403});
  if(rider.status==='SUSPENDED')return NextResponse.json({error:'Account suspended'},{status:403});
  if(rider.status==='BUSY')return NextResponse.json({error:'Complete your active delivery before changing availability'},{status:409});
- if(input.data.online&&(await riderCommissionSummary(db,rider.id)).blocked)return NextResponse.json({error:'Previous-day AdPanda commission requires Admin approval before going online'},{status:423});
+ const commission=input.data.online?await riderCommissionSummary(db,rider.id):null;
+ if(commission&&(commission.blocked||commission.daily.some(d=>d.date===commission.today&&Boolean(d.state))))return NextResponse.json({error:'Previous-day AdPanda commission requires Admin approval before going online'},{status:423});
  const next=input.data.online?'ONLINE':'OFFLINE';
  await db.rider.update({where:{id:rider.id},data:{status:next}});
  return NextResponse.json({ok:true,status:next},{headers:{'Cache-Control':'no-store'}});
