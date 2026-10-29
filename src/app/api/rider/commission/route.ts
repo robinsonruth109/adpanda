@@ -12,6 +12,8 @@ export async function POST(request:Request){
  const rider=await db.rider.findUnique({where:{userId:user.id},select:{id:true}});if(!rider)return NextResponse.json({error:'Rider not found'},{status:404});
  const data=await request.formData().catch(()=>null);const date=data?.get('date'),method=data?.get('method'),file=data?.get('proof');
  if(typeof date!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(date)||!['BKASH','CASH'].includes(String(method)))return NextResponse.json({error:'Invalid date or method'},{status:400});
+ const active=await db.deliveryAssignment.count({where:{riderId:rider.id,order:{status:{in:['PLACED','MERCHANT_ACCEPTED','PREPARING','READY','RIDER_ASSIGNED','PICKED_UP','OUT_FOR_DELIVERY']}}}});
+ if(date===undefined||active>0)return NextResponse.json({error:'Complete all active deliveries before paying your daily AdPanda commission'},{status:409});
  const wallet=await riderCommissionSummary(db,rider.id);const day=wallet.daily.find(d=>d.date===date);
  if(!day||day.amount.lte(0)||date>wallet.today)return NextResponse.json({error:'No eligible AdPanda commission due for this date'},{status:409});
  if(day.state)return NextResponse.json({error:'A submission already exists for this date; contact Admin for review'},{status:409});
