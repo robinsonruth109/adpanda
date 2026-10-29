@@ -19,7 +19,7 @@ export default async function Page(){
  ]);
  const riderPayments=await db.auditLog.findMany({where:{entityType:'Order',action:{in:['RIDER_SETTLEMENT_SUBMITTED','MERCHANT_SETTLEMENT_CONFIRMED']}},orderBy:{createdAt:'desc'},take:300,select:{id:true,entityId:true,action:true,createdAt:true,metadata:true}});
  const paymentOrderIds=[...new Set(riderPayments.map(p=>p.entityId))];
- const paymentOrders=paymentOrderIds.length?await db.order.findMany({where:{id:{in:paymentOrderIds}},select:{id:true,code:true,codTotal:true,deliveryFee:true,kitchen:{select:{name:true,merchant:{select:{name:true}}}},delivery:{select:{rider:{select:{user:{select:{name:true}}}}}}}}):[];
+ const paymentOrders=paymentOrderIds.length?await db.order.findMany({where:{id:{in:paymentOrderIds}},select:{id:true,code:true,codTotal:true,deliveryFee:true,commissionAmount:true,kitchen:{select:{name:true,merchant:{select:{name:true}}}},delivery:{select:{rider:{select:{user:{select:{name:true}}}}}}}}):[];
  const paymentOrderMap=new Map(paymentOrders.map(o=>[o.id,o]));
  const paymentState=new Map<string,{submittedAt:string|null;confirmedAt:string|null;method:string;amount:string;confirmationId:string|null}>();
  for(const log of [...riderPayments].reverse()){
@@ -37,7 +37,7 @@ export default async function Page(){
  }
  const riderMerchantSettlements=[...paymentState.entries()].flatMap(([orderId,payment])=>{
   const order=paymentOrderMap.get(orderId);if(!order)return [];
-  return [{id:orderId,orderCode:order.code,merchant:order.kitchen.merchant.name,kitchen:order.kitchen.name,rider:order.delivery?.rider.user.name||'Unknown rider',cod:order.codTotal.toFixed(2),deliveryCharge:order.deliveryFee.toFixed(2),amount:order.codTotal.sub(order.deliveryFee).toFixed(2),method:payment.method,status:payment.confirmedAt?'CLEARED':'AWAITING_MERCHANT',submittedAt:payment.submittedAt,confirmedAt:payment.confirmedAt,confirmationId:payment.confirmationId}];
+  return [{id:orderId,orderCode:order.code,merchant:order.kitchen.merchant.name,kitchen:order.kitchen.name,rider:order.delivery?.rider.user.name||'Unknown rider',cod:order.codTotal.toFixed(2),deliveryCharge:order.deliveryFee.toFixed(2),amount:order.codTotal.sub(order.deliveryFee).sub(order.commissionAmount).toFixed(2),method:payment.method,status:payment.confirmedAt?'CLEARED':'AWAITING_MERCHANT',submittedAt:payment.submittedAt,confirmedAt:payment.confirmedAt,confirmationId:payment.confirmationId}];
  }).sort((a,b)=>(b.confirmedAt||b.submittedAt||'').localeCompare(a.confirmedAt||a.submittedAt||'')).slice(0,100);
  const collected=new Map(collectionsByRider.map(r=>[r.riderId,new Prisma.Decimal(r._sum.amount??0)]));
  const deposited=new Map(depositsByRider.map(r=>[r.riderId,new Prisma.Decimal(r._sum.amount??0)]));
