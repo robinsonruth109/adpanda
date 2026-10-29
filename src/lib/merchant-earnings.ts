@@ -10,7 +10,7 @@ export async function merchantEarnings(db:FinanceDb,merchantId:string){
   db.order.aggregate({where:{kitchen:{merchantId},status:'DELIVERED',codCollection:{is:null}},_count:{_all:true},_sum:{merchantPayable:true}}),
   db.merchantSettlement.aggregate({where:{merchantId,status:{in:['PENDING','APPROVED','PAID']}},_sum:{amount:true}}),
   db.merchantSettlement.aggregate({where:{merchantId,status:'PAID'},_sum:{amount:true}}),
-  db.order.findMany({where:{kitchen:{merchantId},status:'DELIVERED',codCollection:{isNot:null},delivery:{isNot:null}},select:{id:true,merchantPayable:true,codTotal:true,deliveryFee:true}})
+  db.order.findMany({where:{kitchen:{merchantId},status:'DELIVERED',codCollection:{isNot:null},delivery:{isNot:null}},select:{id:true,merchantPayable:true,codTotal:true,deliveryFee:true,commissionAmount:true}})
  ]);
  const gross=decimal(eligible._sum.foodSubtotal);
  const fee=decimal(eligible._sum.commissionAmount);
@@ -21,8 +21,8 @@ export async function merchantEarnings(db:FinanceDb,merchantId:string){
  const riderEvents=riderOrderIds.length?await db.auditLog.findMany({where:{entityType:'Order',entityId:{in:riderOrderIds},action:{in:['RIDER_SETTLEMENT_SUBMITTED','MERCHANT_SETTLEMENT_CONFIRMED']}},select:{entityId:true,action:true}}):[];
  const paymentState=new Map<string,string>();
  for(const event of riderEvents)if(event.action==='MERCHANT_SETTLEMENT_CONFIRMED'||!paymentState.has(event.entityId))paymentState.set(event.entityId,event.action);
- const directPaid=riderOrders.filter(o=>paymentState.get(o.id)==='MERCHANT_SETTLEMENT_CONFIRMED').reduce((n,o)=>n.add(o.codTotal.sub(o.deliveryFee)),zero());
- const directPending=riderOrders.filter(o=>paymentState.get(o.id)!=='MERCHANT_SETTLEMENT_CONFIRMED').reduce((n,o)=>n.add(o.codTotal.sub(o.deliveryFee)),zero());
+ const directPaid=riderOrders.filter(o=>paymentState.get(o.id)==='MERCHANT_SETTLEMENT_CONFIRMED').reduce((n,o)=>n.add(o.codTotal.sub(o.deliveryFee).sub(o.commissionAmount)),zero());
+ const directPending=riderOrders.filter(o=>paymentState.get(o.id)!=='MERCHANT_SETTLEMENT_CONFIRMED').reduce((n,o)=>n.add(o.codTotal.sub(o.deliveryFee).sub(o.commissionAmount)),zero());
  const riderExcluded=riderOrders.reduce((n,o)=>n.add(o.merchantPayable),zero());
  const platformEligible=Prisma.Decimal.max(zero(),earnings.minus(riderExcluded));
  const held=decimal(reserved._sum.amount);
