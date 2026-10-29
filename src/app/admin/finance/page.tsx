@@ -1,4 +1,5 @@
 import {Prisma} from '@prisma/client';
+import Link from 'next/link';
 import {db} from '@/lib/db';
 import {requireRole} from '@/lib/auth';
 import AdminCashReconciliation from '@/components/admin-cash-reconciliation';
@@ -41,7 +42,7 @@ export default async function Page(){
  const collected=new Map(collectionsByRider.map(r=>[r.riderId,new Prisma.Decimal(r._sum.amount??0)]));
  const deposited=new Map(depositsByRider.map(r=>[r.riderId,new Prisma.Decimal(r._sum.amount??0)]));
  const sum=(map:Map<string,Prisma.Decimal>)=>[...map.values()].reduce((n,v)=>n.add(v),zero()).toFixed(2);
- return <section className="adp-finance-page"><div className="admin-breadcrumb">Finance / <strong>COD reconciliation</strong></div><span className="admin-overline">ADPANDA FINANCE</span><h1>Cash & COD reconciliation</h1><p className="muted">Trace rider-confirmed collections, record cash physically received by Admin and compare merchant settlements.</p>
+ return <section className="adp-finance-page"><div className="admin-breadcrumb">Finance / <strong>COD reconciliation</strong></div><span className="admin-overline">ADPANDA FINANCE</span><h1>Cash & COD reconciliation</h1><p><Link href="/admin/rider-commissions" className="btn">Review rider AdPanda commission payments →</Link></p><p className="muted">Trace rider-confirmed collections, record cash physically received by Admin and compare merchant settlements.</p>
   <AdminCashReconciliation
    riders={riders.map(r=>{
     const c=collected.get(r.id)??zero(),d=deposited.get(r.id)??zero();
