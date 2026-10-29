@@ -1,11 +1,14 @@
 import {NextResponse} from 'next/server';
 import {db} from '@/lib/db';
+import {riderCommissionSummary} from '@/lib/rider-commission';
 import {currentUser} from '@/lib/auth';
 import {isTrustedMutation} from '@/lib/request-security';
 export async function POST(request:Request,{params}:{params:Promise<{id:string}>}){
  if(!isTrustedMutation(request))return NextResponse.json({error:'Invalid origin'},{status:403});
  const user=await currentUser();
  if(!user||user.role!=='RIDER')return NextResponse.json({error:'Rider login required'},{status:403});
+ const riderAccount=await db.rider.findUnique({where:{userId:user.id},select:{id:true}});
+ if(!riderAccount|| (await riderCommissionSummary(db,riderAccount.id)).blocked)return NextResponse.json({error:'Previous-day platform commission not cleared'},{status:423});
  const {id}=await params;
  try{
  const result=await db.$transaction(async tx=>{
