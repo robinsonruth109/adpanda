@@ -32,8 +32,18 @@ export default function App(){
  }catch(e){setError(e instanceof Error?e.message:'Connection failed. Mobile API may not be deployed yet.')}finally{setBusy(false)}};
  const logout=async()=>{if(token){try{await fetch(API+'/logout',{method:'POST',headers:{Authorization:'Bearer '+token}})}catch{}}await SecureStore.deleteItemAsync(KEY);setToken(null);setAccount('');setTab('Home');go('welcome')};
  const guest=()=>{setTab('Home');go('home')};
- const register=()=>{if(!name.trim()||!/^01[3-9]\d{8}$/.test(phone.trim())||password.length<10){setError('Name, ১১ ডিজিটের ফোন এবং কমপক্ষে ১০ অক্ষরের password দিন।');return}
- setError('Registration API is not connected to the mobile app yet. You can continue as guest.');};
+ const register=async()=>{if(busy)return;setError('');if(name.trim().length<2||!/^01[3-9]\d{8}$/.test(phone.trim())||password.length<10){setError('Name, ১১ ডিজিটের ফোন এবং কমপক্ষে ১০ অক্ষরের password দিন।');return}
+ setBusy(true);
+ try{
+  const response=await fetch(API+'/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name.trim(),phone:phone.trim(),password})});
+  const data=await response.json();
+  if(!response.ok)throw Error(data.error||'Registration failed');
+  if(!data.token||!data.user?.name)throw Error('Invalid registration response');
+  await SecureStore.setItemAsync(KEY,data.token);
+  setToken(data.token);setAccount(data.user.name);setPassword('');setTab('Home');go('home');
+ }catch(e){setError(e instanceof Error?e.message:'Registration failed. Check your connection.')}
+ finally{setBusy(false)}
+ };
  const header=<View style={styles.header}><Text style={styles.logo}>ad<Text style={styles.pink}>panda</Text> 🐼</Text><Text style={styles.headerLabel}>{screen==='home'?'ALAMDANGA, CHUADANGA':'FOOD · GROCERY · STATIONERY'}</Text></View>;
  return <SafeAreaProvider><SafeAreaView style={styles.safe} edges={['top','bottom']}><StatusBar barStyle="dark-content" backgroundColor="#FFFFFF"/>{header}
  {boot?<View style={styles.center}><ActivityIndicator color="#E91672" size="large"/></View>:
@@ -58,7 +68,7 @@ export default function App(){
    <Text style={styles.label}>Mobile number</Text><TextInput style={styles.field} keyboardType="phone-pad" placeholder="01XXXXXXXXX" maxLength={11} value={phone} onChangeText={setPhone}/>
    <Text style={styles.label}>Password</Text><TextInput style={styles.field} secureTextEntry placeholder={screen==='register'?'At least 10 characters':'Your password'} value={password} onChangeText={setPassword}/>
    {!!error&&<Text style={styles.error}>{error}</Text>}
-   <Pill label={busy?'Signing in…':screen==='login'?'Log in':'Register'} onPress={screen==='login'?()=>void login():register}/>
+   <Pill label={busy?(screen==='login'?'Signing in…':'Creating account…'):screen==='login'?'Log in':'Register'} onPress={screen==='login'?()=>void login():()=>void register()}/>
   </View>
   <Pressable onPress={()=>go(screen==='login'?'register':'login')}><Text style={styles.switch}>{screen==='login'?'New to AdPanda? Register':'Already have an account? Log in'}</Text></Pressable>
   <Pressable onPress={guest}><Text style={styles.guestText}>Continue as Guest  →</Text></Pressable>
