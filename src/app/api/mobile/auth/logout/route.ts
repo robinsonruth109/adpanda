@@ -1,0 +1,1 @@
+import {NextResponse} from 'next/server';import {revokeMobileSession} from '@/lib/mobile-session';export async function POST(request:Request){if(!await revokeMobileSession(request))return NextResponse.json({error:'Unauthorized'},{status:401});return NextResponse.json({ok:true},{headers:{'Cache-Control':'no-store'}})}
