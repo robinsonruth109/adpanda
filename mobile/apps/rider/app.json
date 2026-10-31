@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "AdPanda Rider",
+    "slug": "adpanda-rider",
+    "scheme": "adpanda-rider",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "bundleIdentifier": "food.adpanda.rider"
+    },
+    "android": {
+      "package": "food.adpanda.rider"
+    },
+    "extra": {
+      "apiBaseUrl": "https://adpanda.food"
+    }
+  }
+}
