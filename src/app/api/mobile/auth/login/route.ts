@@ -19,7 +19,7 @@ export async function POST(request:Request){
  }
  if(app==='merchant'){
   if(!['MERCHANT','CUSTOMER'].includes(user.role))return NextResponse.json({error:'Wrong account type'},{status:403});
-  const membership=await db.merchantMember.findFirst({where:{userId:user.id},select:{id:true}});
+  const membership=await db.merchantMember.findFirst({where:{userId:user.id},select:{merchantId:true}});
   if(!membership)return NextResponse.json({error:'No merchant membership'},{status:403});
  }
  const token=await issueMobileSession(user.id);
