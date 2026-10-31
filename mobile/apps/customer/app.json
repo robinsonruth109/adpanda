@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "AdPanda",
+    "slug": "adpanda-customer",
+    "scheme": "adpanda-customer",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "bundleIdentifier": "food.adpanda.customer"
+    },
+    "android": {
+      "package": "food.adpanda.customer"
+    },
+    "extra": {
+      "apiBaseUrl": "https://adpanda.food"
+    }
+  }
+}
