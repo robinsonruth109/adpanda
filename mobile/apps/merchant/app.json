@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "AdPanda Merchant",
+    "slug": "adpanda-merchant",
+    "scheme": "adpanda-merchant",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "bundleIdentifier": "food.adpanda.merchant"
+    },
+    "android": {
+      "package": "food.adpanda.merchant"
+    },
+    "extra": {
+      "apiBaseUrl": "https://adpanda.food"
+    }
+  }
+}
