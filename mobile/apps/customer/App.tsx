@@ -1,13 +1,16 @@
 import React,{useEffect,useState} from 'react';
 import * as SecureStore from 'expo-secure-store';
+import * as Location from 'expo-location';
+import * as Crypto from 'expo-crypto';
+import {WebView} from 'react-native-webview';
 import {Ionicons} from '@expo/vector-icons';
 import {ActivityIndicator,Alert,Image,Pressable,ScrollView,StatusBar,StyleSheet,Text,TextInput,View,Linking} from 'react-native';
 import {SafeAreaProvider,SafeAreaView} from 'react-native-safe-area-context';
 
-type Screen='welcome'|'login'|'register'|'home'|'shop'|'cart'|'orderDetail';
+type Screen='welcome'|'login'|'register'|'home'|'shop'|'cart'|'checkout'|'orderDetail';
 type Tab='Home'|'Explore'|'Orders'|'Account';
 type StoreType='ALL'|'FOOD'|'GROCERY'|'STATIONERY';
-type Store={id:string;name:string;slug:string;description:string|null;storeType:'FOOD'|'GROCERY'|'STATIONERY';acceptingOrders:boolean;hasBanner?:boolean;bannerVersion?:number;categories:{name:string;items:{id:string;name:string;price:string|number;available:boolean}[]}[]};
+type Store={id:string;name:string;slug:string;description:string|null;storeType:'FOOD'|'GROCERY'|'STATIONERY';acceptingOrders:boolean;latitude:number|string;longitude:number|string;hasBanner?:boolean;bannerVersion?:number;categories:{name:string;items:{id:string;name:string;price:string|number;available:boolean}[]}[]};
 const ORIGIN='https://adpanda.food';
 const API=ORIGIN+'/api/mobile/auth';
 const banner=(shop:Store)=>ORIGIN+'/api/media/kitchens/'+encodeURIComponent(shop.id)+'/banner?v='+encodeURIComponent(String(shop.bannerVersion||1));
@@ -16,6 +19,12 @@ const KEY='adpanda_customer_token';
 type CustomerOrder={id:string;code:string;status:string;placedAt:string;codTotal:number;deliveryFee:number;kitchen:{id:string;name:string;address:string;phone:string|null;latitude:number;longitude:number};address:{label:string|null;details:string;landmark:string|null;latitude:number;longitude:number};items:{id:string;itemName:string;quantity:number;lineTotal:number}[];events:{toStatus:string;createdAt:string}[];delivery:{assignedAt:string;rider:{user:{name:string;phone:string}}}|null};
 type RiderPoint={latitude:number;longitude:number;accuracyMeters:number|null;recordedAt:string};
 function ProductThumbnail({id}:{id:string}){const [failed,setFailed]=useState(false);return failed?<View style={styles.productFallback}><Text style={{fontSize:26}}>🍱</Text></View>:<Image source={{uri:ORIGIN+'/api/media/menu/'+encodeURIComponent(id)}} style={styles.productImage} onError={()=>setFailed(true)}/>}
+
+
+function PinMap({latitude,longitude,onPick}:{latitude:number;longitude:number;onPick:(lat:number,lng:number)=>void}){
+ const html=\`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/><style>html,body,#map{height:100%;margin:0} .leaflet-container{background:#edf1f2}</style></head><body><div id="map"></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>let map=L.map('map').setView([\${latitude},\${longitude}],17);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);let marker=L.marker([\${latitude},\${longitude}]).addTo(map);map.on('click',e=>{marker.setLatLng(e.latlng);window.ReactNativeWebView.postMessage(JSON.stringify({lat:e.latlng.lat,lng:e.latlng.lng}));})</script></body></html>\`;
+ return <WebView originWhitelist={['*']} source={{html}} onMessage={event=>{try{const point=JSON.parse(event.nativeEvent.data);if(Number.isFinite(point.lat)&&Number.isFinite(point.lng))onPick(point.lat,point.lng)}catch{}}} style={{height:255,borderRadius:12,overflow:'hidden'}}/>;
+}
 
 function Pill({label,onPress,outline=false}:{label:string;onPress:()=>void;outline?:boolean}){
  return <Pressable accessibilityRole="button" onPress={onPress} style={[styles.button,outline&&styles.buttonOutline]}><Text style={[styles.buttonText,outline&&styles.outlineText]}>{label}</Text></Pressable>;
@@ -28,6 +37,11 @@ export default function App(){
  const [selectedOrder,setSelectedOrder]=useState<CustomerOrder|null>(null),[riderPoint,setRiderPoint]=useState<RiderPoint|null>(null),[trackError,setTrackError]=useState('');
  const [ordersView,setOrdersView]=useState<'Active'|'History'>('Active');
  const [cart,setCart]=useState<Record<string,number>>({});
+ const [deliveryFee,setDeliveryFee]=useState<number|null>(null),[radiusKm,setRadiusKm]=useState<number|null>(null),[feeError,setFeeError]=useState('');
+ const [recipientName,setRecipientName]=useState(''),[recipientPhone,setRecipientPhone]=useState(''),[addressText,setAddressText]=useState(''),[landmark,setLandmark]=useState(''),[addressLabel,setAddressLabel]=useState<'Home'|'Office'|'Other'>('Home');
+ const [pin,setPin]=useState<{lat:number;lng:number}|null>(null),[pinConfirmed,setPinConfirmed]=useState(false),[pinMapVersion,setPinMapVersion]=useState(0);
+ const [placingOrder,setPlacingOrder]=useState(false),[checkoutError,setCheckoutError]=useState(''),[placedCode,setPlacedCode]=useState('');
+ const [checkoutRequest,setCheckoutRequest]=useState<{requestId:string;guestAccess:string}|null>(null);
  const [storeType,setStoreType]=useState<StoreType>('ALL'),[stores,setStores]=useState<Store[]>([]),[loadingStores,setLoadingStores]=useState(false),[storeError,setStoreError]=useState(''),[refreshTick,setRefreshTick]=useState(0);
  const [phone,setPhone]=useState(''),[password,setPassword]=useState(''),[name,setName]=useState('');
  const [token,setToken]=useState<string|null>(null),[account,setAccount]=useState('');
@@ -41,6 +55,27 @@ export default function App(){
  const openMap=(lat:number,long:number,label:string)=>{void Linking.openURL('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(lat+','+long)).catch(()=>Alert.alert('Map unavailable',label))};
  const statusLabel=(value:string)=>value.replace(/_/g,' ').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());
  const isDone=(value:string)=>['DELIVERED','FAILED','CANCELLED'].includes(value);
+
+ useEffect(()=>{if(screen!=='cart'&&screen!=='checkout')return;let active=true;(async()=>{try{const response=await fetch(ORIGIN+'/api/mobile/delivery/fee');const result=await apiJson(response);if(!response.ok||!Number.isFinite(result.deliveryFee))throw Error('Delivery fee not available');if(active){setDeliveryFee(result.deliveryFee);setRadiusKm(result.radiusKm);setFeeError('')}}catch{if(active){setDeliveryFee(null);setRadiusKm(null);setFeeError('Delivery charge is temporarily unavailable.')}}})();return()=>{active=false}},[screen]);
+ const useDeviceLocation=async()=>{setCheckoutError('');try{const permission=await Location.requestForegroundPermissionsAsync();if(permission.status!=='granted')throw Error('Location permission is needed to place your delivery pin.');const result=await Location.getCurrentPositionAsync({accuracy:Location.Accuracy.High});setPin({lat:result.coords.latitude,lng:result.coords.longitude});setPinConfirmed(false);setPinMapVersion(n=>n+1)}catch(e){setCheckoutError(e instanceof Error?e.message:'Unable to get GPS location')}};
+ const enterCheckout=()=>{setCheckoutError('');setPlacedCode('');setRecipientName(v=>v||account);setRecipientPhone(v=>v||phone);setScreen('checkout')};
+ const makeOrderRequest=()=>{if(checkoutRequest)return checkoutRequest;const raw=Crypto.getRandomBytes(32);const value={requestId:Crypto.randomUUID(),guestAccess:Array.from(raw).map(n=>n.toString(16).padStart(2,'0')).join('')};setCheckoutRequest(value);return value};
+ const placeOrder=async()=>{if(placingOrder||!selectedShop)return;setCheckoutError('');
+  if(cartItems.length===0||!selectedShop.acceptingOrders){setCheckoutError('Add available products from an open shop.');return}
+  if(recipientName.trim().length<2||!/^01[3-9]\d{8}$/.test(recipientPhone.trim())){setCheckoutError('Please enter your full name and a valid 11-digit mobile number.');return}
+  if(addressText.trim().length<8||!pin||!pinConfirmed){setCheckoutError('Enter the complete delivery address and confirm the exact map pin.');return}
+  if(deliveryFee===null){setCheckoutError('Delivery fee cannot be verified at the moment.');return}
+  setPlacingOrder(true);
+  try{const request=makeOrderRequest();const res=await fetch(ORIGIN+'/api/mobile/customer/checkout',{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify({
+   requestId:request.requestId,guestAccess:request.guestAccess,kitchenId:selectedShop.id,recipientName:recipientName.trim(),recipientPhone:recipientPhone.trim(),
+   items:cartItems.map(i=>({menuItemId:i.id,quantity:quantity(i.id)})),
+   address:{label:addressLabel,details:addressText.trim(),landmark:landmark.trim(),latitude:pin.lat,longitude:pin.lng,confirmed:true}
+  })});
+  const data=await apiJson(res);if(!res.ok||!data.ok)throw Error(data.error||'Unable to place order');
+  setPlacedCode(data.code);setCart({});setCheckoutRequest(null);setOrdersRefresh(n=>n+1);
+  }catch(e){setCheckoutError(e instanceof Error?e.message:'Checkout failed')}finally{setPlacingOrder(false)}
+ };
+
  const browse=(kind:StoreType='ALL')=>{setStoreType(kind);setTab('Explore')};
  const openStore=(slug:string)=>{const shop=stores.find(x=>x.slug===slug);if(!shop)return;setSelectedShop(shop);setScreen('shop')};
  const quantity=(id:string)=>cart[id]||0;
@@ -104,8 +139,31 @@ export default function App(){
  <Text style={styles.detailTitle}>Your cart</Text><Text style={styles.detailDescription}>{selectedShop.name}</Text>
  {cartItems.map(item=><View key={item.id} style={styles.cartLine}><Text style={styles.menuName}>{quantity(item.id)} × {item.name}</Text><Text style={styles.menuName}>৳{(quantity(item.id)*Number(item.price)).toFixed(2)}</Text></View>)}
  <View style={styles.cartLine}><Text style={styles.menuName}>Product subtotal</Text><Text style={styles.menuName}>৳{cartSubtotal.toFixed(2)}</Text></View>
- <Text style={styles.detailDescription}>Delivery charge and final COD total will be calculated at checkout. No order has been placed.</Text>
- <Pressable style={styles.cartPress} onPress={()=>Alert.alert('Checkout not connected','Native COD checkout and address pin require backend integration. Your cart remains in the app.')}><Text style={styles.cartBarText}>Continue to checkout</Text><Ionicons name="arrow-forward" size={20} color="#fff"/></Pressable>
+ <View style={styles.cartLine}><Text style={styles.menuName}>Delivery charge</Text><Text style={styles.menuName}>{deliveryFee===null?'Pending':'৳'+deliveryFee.toFixed(2)}</Text></View>
+ <View style={styles.cartLine}><Text style={styles.menuName}>Estimated COD total</Text><Text style={styles.statusBig}>{deliveryFee===null?'Pending':'৳'+(cartSubtotal+deliveryFee).toFixed(2)}</Text></View>
+ {!!feeError&&<Text style={styles.error}>{feeError}</Text>}
+ <Text style={styles.detailDescription}>Final delivery eligibility depends on your confirmed delivery pin.</Text>
+ <Pressable style={styles.cartPress} onPress={enterCheckout}><Text style={styles.cartBarText}>Continue to checkout</Text><Ionicons name="arrow-forward" size={20} color="#fff"/></Pressable>
+ </ScrollView>:
+
+ screen==='checkout'&&selectedShop?<ScrollView style={styles.scroll} keyboardShouldPersistTaps="handled" contentContainerStyle={{padding:18,paddingBottom:60}}>
+ <Pressable style={styles.detailBack} onPress={()=>setScreen('cart')}><Ionicons name="arrow-back" size={18} color="#E91672"/><Text style={styles.detailBackText}> Back to cart</Text></Pressable>
+ {placedCode?<View style={styles.checkoutPanel}><Ionicons name="checkmark-circle" size={52} color="#0B946C"/><Text style={styles.detailTitle}>Order placed!</Text><Text style={styles.menuName}>{placedCode}</Text><Text style={styles.detailDescription}>Your COD order was submitted. The merchant will now find a rider. You can check order status under Orders when signed in.</Text><Pill label="Back to home" onPress={()=>{setScreen('home');setTab('Home')}}/></View>:<>
+ <Text style={styles.detailTitle}>Confirm your order</Text><Text style={styles.detailDescription}>Cash on Delivery · {selectedShop.name}</Text>
+ <View style={styles.checkoutPanel}><Text style={styles.orderSectionTitle}>1. Contact details</Text><Text style={styles.label}>Full name</Text><TextInput style={styles.field} placeholder="Recipient name" value={recipientName} onChangeText={setRecipientName}/><Text style={styles.label}>Mobile number</Text><TextInput style={styles.field} placeholder="01XXXXXXXXX" keyboardType="phone-pad" maxLength={11} value={recipientPhone} onChangeText={setRecipientPhone}/></View>
+ <View style={styles.checkoutPanel}><Text style={styles.orderSectionTitle}>2. Delivery location</Text>
+ <Text style={styles.detailDescription}>Tap your exact delivery point on the map or use your current GPS location.</Text>
+ <Pressable style={styles.outlineAction} onPress={()=>void useDeviceLocation()}><Ionicons name="locate-outline" size={18} color="#E91672"/><Text style={styles.actionText}>Use my current location</Text></Pressable>
+ {pin?<><View style={{height:255,marginTop:12,overflow:'hidden',borderRadius:13}}><PinMap key={pinMapVersion} latitude={pin.lat} longitude={pin.lng} onPick={(lat,lng)=>{setPin({lat,lng});setPinConfirmed(false)}}/></View>
+ <Text style={styles.infoText}>Pin: {pin.lat.toFixed(6)}, {pin.lng.toFixed(6)}</Text>
+ <Pressable style={[styles.outlineAction,pinConfirmed&&{borderColor:'#0B946C'}]} onPress={()=>setPinConfirmed(true)}><Ionicons name={pinConfirmed?'checkmark-circle':'location-outline'} size={18} color={pinConfirmed?'#0B946C':'#E91672'}/><Text style={styles.actionText}>{pinConfirmed?'Delivery pin confirmed':'Confirm this delivery pin'}</Text></Pressable></>:<Text style={styles.infoText}>Choose Use my current location to load your area, then tap the exact building or gate.</Text>}
+ <Text style={styles.label}>Address type</Text><View style={styles.filterRow}>{(['Home','Office','Other'] as const).map(l=><Pressable key={l} onPress={()=>setAddressLabel(l)} style={[styles.filterPill,addressLabel===l&&styles.filterSelected]}><Text style={[styles.filterLabel,addressLabel===l&&styles.filterSelectedLabel]}>{l}</Text></Pressable>)}</View>
+ <Text style={styles.label}>Full address</Text><TextInput style={[styles.field,{minHeight:75,textAlignVertical:'top'}]} placeholder="Road, house, area, locality" multiline value={addressText} onChangeText={setAddressText}/><Text style={styles.label}>Landmark (optional)</Text><TextInput style={styles.field} placeholder="Nearby shop or landmark" value={landmark} onChangeText={setLandmark}/></View>
+ <View style={styles.checkoutPanel}><Text style={styles.orderSectionTitle}>3. COD summary</Text><View style={styles.cartLine}><Text style={styles.infoText}>Products</Text><Text style={styles.menuName}>৳{cartSubtotal.toFixed(2)}</Text></View><View style={styles.cartLine}><Text style={styles.infoText}>Delivery charge</Text><Text style={styles.menuName}>{deliveryFee===null?'Pending':'৳'+deliveryFee.toFixed(2)}</Text></View><View style={styles.cartLine}><Text style={styles.menuName}>Estimated total to pay rider</Text><Text style={styles.statusBig}>{deliveryFee===null?'Pending':'৳'+(cartSubtotal+deliveryFee).toFixed(2)}</Text></View><Text style={styles.infoText}>Final amount is calculated securely on the server; delivery radius {radiusKm===null?'not available yet':radiusKm+' km'}.</Text></View>
+ {!!checkoutError&&<View style={styles.checkoutErrorBox}><Text style={styles.error}>{checkoutError}</Text></View>}
+ <Pressable disabled={placingOrder||cartCount===0||deliveryFee===null||!pinConfirmed} style={[styles.cartPress,(placingOrder||cartCount===0||deliveryFee===null||!pinConfirmed)&&{opacity:.45}]} onPress={()=>void placeOrder()}><Text style={styles.cartBarText}>{placingOrder?'Submitting…':'Confirm order · Cash on Delivery'}</Text><Ionicons name="checkmark" size={20} color="#fff"/></Pressable>
+ <Text style={[styles.infoText,{textAlign:'center',marginTop:12}]}>No online payment. Pay cash to the rider on delivery.</Text>
+ </>}
  </ScrollView>:
  screen==='login'||screen==='register'?<ScrollView contentContainerStyle={styles.formScreen} keyboardShouldPersistTaps="handled">
   <Pressable onPress={()=>go('welcome')}><Text style={styles.back}>‹  Back</Text></Pressable>
@@ -145,7 +203,7 @@ export default function App(){
  {!loadingStores&&!storeError&&!stores.some(store=>storeType==='ALL'||store.storeType===storeType)&&<View style={styles.messageCard}><Text style={styles.paragraph}>No approved shops in this category yet.</Text></View>}
  <Text style={styles.smallInfo}>Tap a shop to view its native menu and add products to your cart.</Text></View>:tab==='Orders'?<View style={styles.pagePadding}><Text style={styles.pageTitle}>My orders</Text>{!token?<Pill label="Log in to view your orders" onPress={()=>go('login')}/>:<><View style={styles.filterRow}>{(['Active','History'] as const).map(v=><Pressable key={v} onPress={()=>setOrdersView(v)} style={[styles.filterPill,ordersView===v&&styles.filterSelected]}><Text style={[styles.filterLabel,ordersView===v&&styles.filterSelectedLabel]}>{v==='Active'?'Active orders':'Order history'}</Text></Pressable>)}<Pressable onPress={()=>setOrdersRefresh(v=>v+1)} style={styles.refreshButton}><Ionicons name="refresh" size={20} color="#E91672"/></Pressable></View>{ordersBusy&&<ActivityIndicator color="#E91672"/>}{!!ordersError&&<Text style={styles.error}>{ordersError}</Text>}{orders.filter(o=>ordersView==='History'?isDone(o.status):!isDone(o.status)).map(o=><Pressable key={o.id} style={styles.orderCard} onPress={()=>showOrder(o)}><View style={styles.orderCardHeader}><Text style={styles.orderCode}>{o.code}</Text><Text style={styles.orderStatus}>{statusLabel(o.status)}</Text></View><Text style={styles.orderShop}>{o.kitchen.name}</Text><Text style={styles.orderDate}>{new Date(o.placedAt).toLocaleString()}</Text><View style={styles.orderCardBottom}><Text style={styles.menuName}>৳{o.codTotal.toFixed(2)}</Text><Text style={styles.seeAll}>View details & tracking →</Text></View></Pressable>)}{!ordersBusy&&!ordersError&&!orders.some(o=>ordersView==='History'?isDone(o.status):!isDone(o.status))&&<Text style={styles.infoText}>No {ordersView.toLowerCase()} orders found.</Text>}</>}</View>:<View style={styles.pagePadding}><Text style={styles.pageTitle}>My account</Text>{token?<><View style={styles.profileCard}><View style={styles.profileAvatar}><Ionicons name="person" size={26} color="#E91672"/></View><View><Text style={styles.profileName}>{account}</Text><Text style={styles.infoText}>{phone||'Customer account'}</Text><Text style={styles.infoText}>AdPanda Customer</Text></View></View><View style={styles.accountStats}><Pressable style={styles.statTile} onPress={()=>{setOrdersView('Active');setTab('Orders')}}><Text style={styles.statValue}>{orders.filter(o=>!isDone(o.status)).length}</Text><Text style={styles.infoText}>Active orders</Text></Pressable><Pressable style={styles.statTile} onPress={()=>{setOrdersView('History');setTab('Orders')}}><Text style={styles.statValue}>{orders.filter(o=>isDone(o.status)).length}</Text><Text style={styles.infoText}>Order history</Text></Pressable></View><Pressable style={styles.accountAction} onPress={()=>setTab('Orders')}><Ionicons name="receipt-outline" size={20} color="#E91672"/><Text style={styles.menuName}>My orders & live tracking</Text><Ionicons name="chevron-forward" size={18} color="#84889A"/></Pressable><Pressable style={styles.accountAction} onPress={()=>setOrdersRefresh(n=>n+1)}><Ionicons name="refresh-outline" size={20} color="#E91672"/><Text style={styles.menuName}>Refresh account orders</Text></Pressable><Pill label="Log out" outline onPress={()=>void logout()}/></>:<><Text style={styles.infoText}>Browsing as guest. Sign in to access your account and previous orders.</Text><Pill label="Log in" onPress={()=>go('login')}/><Pill label="Create account" outline onPress={()=>go('register')}/></>}</View>}
  </ScrollView><View style={styles.bottomNav}>{(['Home','Explore','Orders','Account'] as Tab[]).map((item)=><Pressable accessibilityRole="tab" accessibilityState={{selected:tab===item}} accessibilityLabel={item} onPress={()=>setTab(item)} key={item} style={styles.navItem}><View style={[styles.navIconContainer,tab===item&&styles.navIconActive]}><Ionicons name={item==='Home'?(tab===item?'home':'home-outline'):item==='Explore'?(tab===item?'storefront':'storefront-outline'):item==='Orders'?(tab===item?'receipt':'receipt-outline'):(tab===item?'person':'person-outline')} size={22} color={tab===item?'#E91672':'#84889A'}/></View><Text style={[styles.navText,tab===item&&styles.navTextActive]}>{item}</Text></Pressable>)}</View></>}
- {['shop','cart','orderDetail'].includes(screen)&&<View style={styles.bottomNav}>{(['Home','Explore','Orders','Account'] as Tab[]).map(item=><Pressable key={item} accessibilityRole="tab" accessibilityLabel={item} onPress={()=>{setTab(item);setScreen('home')}} style={styles.navItem}><View style={[styles.navIconContainer,item==='Explore'&&screen!=='orderDetail'&&styles.navIconActive]}><Ionicons name={item==='Home'?'home-outline':item==='Explore'?'storefront-outline':item==='Orders'?'receipt-outline':'person-outline'} size={22} color={item==='Explore'&&screen!=='orderDetail'?'#E91672':'#84889A'}/></View><Text style={styles.navText}>{item}</Text></Pressable>)}</View>}
+ {['shop','cart','checkout','orderDetail'].includes(screen)&&<View style={styles.bottomNav}>{(['Home','Explore','Orders','Account'] as Tab[]).map(item=><Pressable key={item} accessibilityRole="tab" accessibilityLabel={item} onPress={()=>{setTab(item);setScreen('home')}} style={styles.navItem}><View style={[styles.navIconContainer,item==='Explore'&&screen!=='orderDetail'&&styles.navIconActive]}><Ionicons name={item==='Home'?'home-outline':item==='Explore'?'storefront-outline':item==='Orders'?'receipt-outline':'person-outline'} size={22} color={item==='Explore'&&screen!=='orderDetail'?'#E91672':'#84889A'}/></View><Text style={styles.navText}>{item}</Text></Pressable>)}</View>}
  </SafeAreaView></SafeAreaProvider>;
 }
 const styles=StyleSheet.create({
