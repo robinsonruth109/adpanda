@@ -1,6 +1,7 @@
 import React,{useEffect,useState} from 'react';
 import * as SecureStore from 'expo-secure-store';
-import {ActivityIndicator,Alert,Pressable,ScrollView,StatusBar,StyleSheet,Text,TextInput,View,Linking,RefreshControl} from 'react-native';
+import {Ionicons} from '@expo/vector-icons';
+import {ActivityIndicator,Alert,Image,Pressable,ScrollView,StatusBar,StyleSheet,Text,TextInput,View,Linking} from 'react-native';
 import {SafeAreaProvider,SafeAreaView} from 'react-native-safe-area-context';
 
 type Screen='welcome'|'login'|'register'|'home';
@@ -44,9 +45,9 @@ export default function App(){
  }catch(e){setError(e instanceof Error?e.message:'Registration failed. Check your connection.')}
  finally{setBusy(false)}
  };
- const header=<View style={styles.header}><Text style={styles.logo}>ad<Text style={styles.pink}>panda</Text> 🐼</Text><Text style={styles.headerLabel}>{screen==='home'?'ALAMDANGA, CHUADANGA':'FOOD · GROCERY · STATIONERY'}</Text></View>;
+ const header=<View style={styles.header}><View><Text style={styles.logo}>ad<Text style={styles.pink}>panda</Text><Text> 🐼</Text></Text>{screen==='home'&&<Text style={styles.headerSub}>Delivering in Alamdanga</Text>}</View>{screen==='home'?<Pressable accessibilityLabel="Open Explore" onPress={()=>browse()} style={styles.headerSearch}><Ionicons name="search-outline" size={21} color="#E91672"/></Pressable>:<Text style={styles.headerLabel}>FOOD · GROCERY · STATIONERY</Text>}</View>;
  return <SafeAreaProvider><SafeAreaView style={styles.safe} edges={['top','bottom']}><StatusBar barStyle="dark-content" backgroundColor="#FFFFFF"/>{header}
- {boot?<View style={styles.center}><ActivityIndicator color="#E91672" size="large"/></View>:
+ {boot?<View style={styles.splashScreen}><View style={styles.splashMark}><Text style={styles.splashPanda}>🐼</Text></View><Text style={styles.splashLogo}>ad<Text style={styles.pink}>panda</Text></Text><Text style={styles.splashSubtitle}>Fresh from your neighbourhood</Text><ActivityIndicator color="#E91672" style={{marginTop:35}}/></View>:
  screen==='welcome'?<ScrollView contentContainerStyle={styles.welcome}>
   <View style={styles.heroOrbs}><Text style={styles.heroEmoji}>🍔</Text><Text style={styles.heroAccent}>🥟</Text><Text style={styles.heroDrink}>🥤</Text></View>
   <Text style={styles.eyebrow}>FRESH FROM YOUR NEIGHBOURHOOD</Text><Text style={styles.bigTitle}>Everything you love, delivered to your door.</Text>
@@ -86,7 +87,7 @@ export default function App(){
  {!loadingStores&&!storeError&&stores.filter(store=>storeType==='ALL'||store.storeType===storeType).map(store=><Pressable key={store.id} style={styles.shopCard} onPress={()=>openStore(store.slug)}><View style={styles.shopIcon}><Text style={{fontSize:29}}>{store.storeType==='FOOD'?'🍔':store.storeType==='GROCERY'?'🛒':'📚'}</Text></View><View style={{flex:1}}><Text style={styles.shopTitle}>{store.name}</Text><Text numberOfLines={2} style={styles.shopDescription}>{store.description||'Local AdPanda shop'}</Text><Text style={styles.shopMeta}>{store.categories.reduce((total,c)=>total+c.items.filter(i=>i.available).length,0)} available items · {store.acceptingOrders?'🟢 Open':'🔴 Closed'}</Text></View><Text style={styles.pink}>›</Text></Pressable>)}
  {!loadingStores&&!storeError&&!stores.some(store=>storeType==='ALL'||store.storeType===storeType)&&<View style={styles.messageCard}><Text style={styles.paragraph}>No approved shops in this category yet.</Text></View>}
  <Text style={styles.smallInfo}>Shop details and checkout currently open on adpanda.food. Native cart and ordering are next.</Text></View>:tab==='Orders'?<><Text style={styles.sectionTitle}>Your orders</Text><Text style={styles.paragraph}>Order history and tracking will be connected in the next development phase.</Text>{!token&&<Pill label="Log in to view orders" onPress={()=>go('login')}/>}</>:<><Text style={styles.sectionTitle}>{token?'My account':'Guest account'}</Text><Text style={styles.paragraph}>{token?'Signed in as '+account:'You are exploring as a guest.'}</Text>{token?<Pill label="Log out" outline onPress={()=>void logout()}/>:<><Pill label="Log in" onPress={()=>go('login')}/><Pill label="Create account" outline onPress={()=>go('register')}/></>}</>}
- </ScrollView><View style={styles.bottomNav}>{(['Home','Explore','Orders','Account'] as Tab[]).map((item,index)=><Pressable onPress={()=>setTab(item)} key={item} style={[styles.navItem,tab===item&&styles.navActive]}><Text style={[styles.navIcon,tab===item&&styles.pink]}>{['⌂','▣','▢','♙'][index]}</Text><Text style={[styles.navText,tab===item&&styles.pink]}>{item}</Text></Pressable>)}</View></>}
+ </ScrollView><View style={styles.bottomNav}>{(['Home','Explore','Orders','Account'] as Tab[]).map((item)=><Pressable accessibilityRole="tab" accessibilityState={{selected:tab===item}} accessibilityLabel={item} onPress={()=>setTab(item)} key={item} style={styles.navItem}><View style={[styles.navIconContainer,tab===item&&styles.navIconActive]}><Ionicons name={item==='Home'?(tab===item?'home':'home-outline'):item==='Explore'?(tab===item?'storefront':'storefront-outline'):item==='Orders'?(tab===item?'receipt':'receipt-outline'):(tab===item?'person':'person-outline')} size={22} color={tab===item?'#E91672':'#84889A'}/></View><Text style={[styles.navText,tab===item&&styles.navTextActive]}>{item}</Text></Pressable>)}</View></>}
  </SafeAreaView></SafeAreaProvider>;
 }
 const styles=StyleSheet.create({
