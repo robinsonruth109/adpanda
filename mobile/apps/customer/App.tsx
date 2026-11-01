@@ -28,6 +28,8 @@ export default function App(){
  const [selectedOrder,setSelectedOrder]=useState<CustomerOrder|null>(null),[riderPoint,setRiderPoint]=useState<RiderPoint|null>(null),[trackError,setTrackError]=useState('');
  const [ordersView,setOrdersView]=useState<'Active'|'History'>('Active');
  const [cart,setCart]=useState<Record<string,number>>({});
+ const [deliveryFee,setDeliveryFee]=useState<number|null>(null);
+ const [feeError,setFeeError]=useState('');
  const [storeType,setStoreType]=useState<StoreType>('ALL'),[stores,setStores]=useState<Store[]>([]),[loadingStores,setLoadingStores]=useState(false),[storeError,setStoreError]=useState(''),[refreshTick,setRefreshTick]=useState(0);
  const [phone,setPhone]=useState(''),[password,setPassword]=useState(''),[name,setName]=useState('');
  const [token,setToken]=useState<string|null>(null),[account,setAccount]=useState('');
@@ -41,6 +43,7 @@ export default function App(){
  const openMap=(lat:number,long:number,label:string)=>{void Linking.openURL('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(lat+','+long)).catch(()=>Alert.alert('Map unavailable',label))};
  const statusLabel=(value:string)=>value.replace(/_/g,' ').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());
  const isDone=(value:string)=>['DELIVERED','FAILED','CANCELLED'].includes(value);
+ useEffect(()=>{if(screen!=='cart')return;let active=true;(async()=>{try{const res=await fetch(ORIGIN+'/api/mobile/delivery/fee',{headers:{Accept:'application/json'}});const data=await apiJson(res);if(!res.ok||typeof data.deliveryFee!=='number'||!Number.isFinite(data.deliveryFee))throw Error('Delivery fee unavailable');if(active){setDeliveryFee(data.deliveryFee);setFeeError('')}}catch{if(active){setDeliveryFee(null);setFeeError('Delivery fee will be shown after the backend update.')}}})();return()=>{active=false}},[screen]);
  const browse=(kind:StoreType='ALL')=>{setStoreType(kind);setTab('Explore')};
  const openStore=(slug:string)=>{const shop=stores.find(x=>x.slug===slug);if(!shop)return;setSelectedShop(shop);setScreen('shop')};
  const quantity=(id:string)=>cart[id]||0;
@@ -104,7 +107,10 @@ export default function App(){
  <Text style={styles.detailTitle}>Your cart</Text><Text style={styles.detailDescription}>{selectedShop.name}</Text>
  {cartItems.map(item=><View key={item.id} style={styles.cartLine}><Text style={styles.menuName}>{quantity(item.id)} × {item.name}</Text><Text style={styles.menuName}>৳{(quantity(item.id)*Number(item.price)).toFixed(2)}</Text></View>)}
  <View style={styles.cartLine}><Text style={styles.menuName}>Product subtotal</Text><Text style={styles.menuName}>৳{cartSubtotal.toFixed(2)}</Text></View>
- <Text style={styles.detailDescription}>Delivery charge and final COD total will be calculated at checkout. No order has been placed.</Text>
+ <View style={styles.cartLine}><Text style={styles.menuName}>Delivery charge</Text><Text style={styles.menuName}>{deliveryFee===null?'Calculating at checkout':'৳'+deliveryFee.toFixed(2)}</Text></View>
+ <View style={styles.cartLine}><Text style={styles.menuName}>Estimated COD total</Text><Text style={styles.statusBig}>{deliveryFee===null?'Pending':'৳'+(cartSubtotal+deliveryFee).toFixed(2)}</Text></View>
+ {!!feeError&&<Text style={styles.infoText}>{feeError}</Text>}
+ <Text style={styles.detailDescription}>Final amount and delivery eligibility are confirmed using the address pin at checkout. No order has been placed.</Text>
  <Pressable style={styles.cartPress} onPress={()=>Alert.alert('Checkout not connected','Native COD checkout and address pin require backend integration. Your cart remains in the app.')}><Text style={styles.cartBarText}>Continue to checkout</Text><Ionicons name="arrow-forward" size={20} color="#fff"/></Pressable>
  </ScrollView>:
  screen==='login'||screen==='register'?<ScrollView contentContainerStyle={styles.formScreen} keyboardShouldPersistTaps="handled">
