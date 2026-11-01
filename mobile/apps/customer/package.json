@@ -14,7 +14,8 @@
     "react": "19.3.0",
     "react-native": "0.88.1",
     "expo-secure-store": "~15.0.7",
-    "react-native-safe-area-context": "~5.7.0"
+    "react-native-safe-area-context": "~5.7.0",
+    "@expo/vector-icons": "^15.0.3"
   },
   "devDependencies": {
     "@types/react": "~19.2.0",
