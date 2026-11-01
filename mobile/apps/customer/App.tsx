@@ -1,7 +1,7 @@
 import React,{useEffect,useState} from 'react';
 import * as SecureStore from 'expo-secure-store';
 import {Ionicons} from '@expo/vector-icons';
-import {ActivityIndicator,Alert,Image,Pressable,ScrollView,StatusBar,StyleSheet,Text,TextInput,View,Linking} from 'react-native';
+import {ActivityIndicator,Alert,Pressable,ScrollView,StatusBar,StyleSheet,Text,TextInput,View,Linking} from 'react-native';
 import {SafeAreaProvider,SafeAreaView} from 'react-native-safe-area-context';
 
 type Screen='welcome'|'login'|'register'|'home';
