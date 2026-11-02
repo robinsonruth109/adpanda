@@ -15,10 +15,6 @@
     "extra": {
       "apiBaseUrl": "https://adpanda.food"
     },
-    "backgroundColor": "#FFF5F9",
-    "splash": {
-      "backgroundColor": "#FFF5F9",
-      "resizeMode": "contain"
-    }
+    "backgroundColor": "#FFF5F9"
   }
 }
